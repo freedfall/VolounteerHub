@@ -51,8 +51,8 @@ const MainTabs: React.FC = () => (
             break;
           case 'CreateEvent':
             icon = (
-              <View style={{ backgroundColor: '#013B14', borderRadius: 50, padding: 20, transform: [{ translateY: -30 }] }}>
-                <Image source={CreateEventIcon} style={{ width: 38, height: 38 }} />
+              <View style={{ backgroundColor: '#013B14', borderRadius: 50, padding: 15, transform: [{ translateY: -30 }] }}>
+                <Image source={CreateEventIcon} style={{ width: 48, height: 48 }} />
               </View>
             );
             break;
