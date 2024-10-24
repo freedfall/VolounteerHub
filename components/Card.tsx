@@ -1,6 +1,7 @@
 // components/Card.tsx
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import hospital from '../images/hospital.jpg';
 
 interface CardProps {
   title: string;
@@ -15,13 +16,12 @@ const Card: React.FC<CardProps> = ({ title, time, city, address, points, onPress
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.cardContainer}>
-        <Image source={{ uri: 'https://via.placeholder.com/100' }} style={styles.image} />
+        <Image source={hospital} style={styles.image} />
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.details}>Time: {time}</Text>
-          <Text style={styles.details}>City: {city}</Text>
-          <Text style={styles.details}>Address: {address}</Text>
-          <Text style={styles.points}>Points: {points}</Text>
+          <Text style={styles.details}>{time}</Text>
+          <Text style={styles.details}>{address}</Text>
+          <Text style={styles.points}>{points}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -32,19 +32,18 @@ const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 15,
     marginVertical: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    elevation: 3,
+    backgroundColor: 'rgba(200, 237, 210, 1)',
+    width: 364,
+    height: 130,
+    alignSelf: 'center',
   },
   image: {
     width: 100,
     height: 100,
-    borderRadius: 10,
+    borderRadius: 50,
     marginRight: 15,
   },
   textContainer: {
@@ -54,6 +53,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: 'black',
   },
   details: {
     fontSize: 14,
