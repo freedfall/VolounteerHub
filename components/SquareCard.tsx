@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   details: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 13,
+    color: 'rgba(131, 131, 131, 1)',
     marginBottom: 3,
   },
   points: {
-    fontSize: 12,
-    color: '#28a745',
+    fontSize: 13,
+    color: 'rgba(131, 131, 131, 1)',
     textAlign: 'center',
   },
   textContainer: {
