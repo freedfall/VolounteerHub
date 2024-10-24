@@ -149,6 +149,34 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     );
   };
 
+  const renderAllEvents = (allEvents: any[]) => {
+      return (
+        <View style={styles.allEventsContainer}>
+          <Text style={styles.allEventsTitle}>All Events</Text>
+          {allEvents.map((event, index) => (
+            <Card
+              key={index}
+              title={event.name}
+              time={handleDateTime(event.startDateTime)}
+              city={event.city}
+              address={event.address}
+              points={event.price}
+              onPress={() =>
+                navigation.navigate('EventDetails', {
+                  title: event.name,
+                  time: handleDateTime(event.startDateTime),
+                  city: event.city,
+                  address: event.address,
+                  points: event.price,
+                  description: event.description,
+                })
+              }
+            />
+          ))}
+        </View>
+      );
+    };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -168,10 +196,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadEvents} />}
       >
-        {renderCategory('All events', events)}
-        {renderCategory('With good reviews', events.filter(event => event.reviews >= 4))}
+        {renderCategory('With good reviews', events)}
         {renderCategory('Closest to you', events.filter(event => event.distance < 10))}
         {renderCategory('Many points', events.filter(event => event.price >= 50))}
+
+        {renderAllEvents(events)}
       </ScrollView>
       <Modal
         animationType="slide"
@@ -317,6 +346,16 @@ const styles = StyleSheet.create({
     historyText: {
         fontSize: 18,
         color: 'black',
+    },
+    allEventsContainer: {
+        marginBottom: 20,
+    },
+    allEventsTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'black',
+        marginBottom: 10,
+        alignSelf: 'center',
     },
 });
 

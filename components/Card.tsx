@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 15,
     marginVertical: 10,
-    backgroundColor: 'rgba(200, 237, 210, .5)',
+//     backgroundColor: 'rgba(200, 237, 210, .5)',
     width: 364,
     height: 130,
     alignSelf: 'center',
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   image: {
     width: 100,
     height: 100,
-    borderRadius: 50,
+    borderRadius: 15,
     marginRight: 15,
   },
   textContainer: {

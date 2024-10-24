@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
       borderColor: 'rgba(1, 59, 20, 1)',
       backgroundColor: 'rgba(1, 59, 20, 0.15)',
       fontSize: 20,
+      color: 'white',
     },
   button: {
       backgroundColor: '#013B14',

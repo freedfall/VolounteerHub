@@ -29,15 +29,14 @@ const CreateEventScreen: React.FC = () => {
   const [cityLocation, setCityLocation] = useState<{ lat: number, lng: number } | null>(null);
 
   const formatLocalTime = (time: Date): string => {
-    // Преобразуем объект времени в строку формата 'yyyy-MM-ddTHH:mm:ss'
     const year = time.getFullYear();
-    const month = String(time.getMonth() + 1).padStart(2, '0'); // Месяцы в JavaScript считаются с 0
+    const month = String(time.getMonth() + 1).padStart(2, '0');
     const day = String(time.getDate()).padStart(2, '0');
     const hours = String(time.getHours()).padStart(2, '0');
     const minutes = String(time.getMinutes()).padStart(2, '0');
     const seconds = String(time.getSeconds()).padStart(2, '0');
 
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`; // Формат LocalDateTime
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   };
 
   const handleCreateEvent = async () => {
@@ -62,7 +61,6 @@ const CreateEventScreen: React.FC = () => {
 
       const points = calculateEventPoints(formattedStartTime);
 
-      // Создаем объект события для отправки на сервер
       const newEvent = {
         name: title,
         description,
@@ -175,12 +173,11 @@ const CreateEventScreen: React.FC = () => {
             }}
             styles={{
               textInput: styles.input,
-              listView: styles.listView, // Стили для выпадающего списка
-              container: styles.autoCompleteContainer, // Контейнер для автодополнения
+              listView: styles.listView,
+              container: styles.autoCompleteContainer,
             }}
           />
 
-          {/* Поле с адресом, скрыто до выбора города */}
           {isCitySelected && cityLocation && (
                   <Animated.View style={{ opacity: addressFieldHeight }}>
                     <Text style={styles.label}>Address</Text>
@@ -196,9 +193,9 @@ const CreateEventScreen: React.FC = () => {
                         locationbias: `circle:20000@${cityLocation.lat},${cityLocation.lng}`,
                       }}
                       GooglePlacesSearchQuery={{
-                        strictbounds: true, // Включаем строгие границы для поиска
+                        strictbounds: true,
                       }}
-                      bounds={cityBounds} // Ограничиваем область поиска
+                      bounds={cityBounds}
                       styles={{
                         textInput: styles.input,
                         listView: styles.listView,
