@@ -67,7 +67,7 @@ const MainTabs: React.FC = () => (
       },
       tabBarShowLabel: false,
       tabBarStyle: {
-        position: 'relative',
+        position: 'absolute',
         backgroundColor: '#69B67E',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
