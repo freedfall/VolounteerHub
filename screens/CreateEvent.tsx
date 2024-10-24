@@ -13,6 +13,7 @@ const CreateEventScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [city, setCity] = useState('');
+  const [cityBounds, setCityBounds] = useState(null);
   const [address, setAddress] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -114,18 +115,39 @@ const CreateEventScreen: React.FC = () => {
   const showEndTimepicker = () => setShowEndTimePicker(true);
 
   const handleCitySelect = (data: any, details: any) => {
-    setCity(data.description);
-    if (details && details.geometry) {
-      setCityLocation(details.geometry.location);
-    }
-    setIsCitySelected(true);
+      const cityName = data.terms[0].value;
+      setCity(cityName);
+      if (details && details.geometry) {
+        const { lat, lng } = details.geometry.location;
+        setCityLocation({ lat, lng });
 
-    Animated.timing(addressFieldHeight, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
+        const defaultBounds = {
+            north: lat + 0.1,
+            south: lat - 0.1,
+            west: lng + 0.1,
+            east: lng - 0.1,
+        };
+
+        setCityBounds(defaultBounds);
+      }
+      setIsCitySelected(true);
+      console.log('City selected:', cityName);
+      console.log('City location:', cityLocation);
+      console.log('City bounds:', cityBounds);
+
+      Animated.timing(addressFieldHeight, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    };
+
+     const handleAddressSelect = (data: any, details: any) => {
+       const fullAddress = data.description;
+       const addressBeforeComma = fullAddress.split(',')[0];
+       setAddress(addressBeforeComma);
+       console.log('Address selected:', addressBeforeComma);
+     };
 
   return (
     <View style={styles.container}>
@@ -159,33 +181,32 @@ const CreateEventScreen: React.FC = () => {
           />
 
           {/* Поле с адресом, скрыто до выбора города */}
-          <Animated.View style={{ opacity: addressFieldHeight }}>
-            {cityLocation && (
-              <>
-                <Text style={styles.label}>Address</Text>
-                <GooglePlacesAutocomplete
-                  placeholder="Enter address"
-                  fetchDetails={true}
-                  onPress={(data, details = null) => {
-                    setAddress(data.description);
-                  }}
-                  query={{
-                    key: GOOGLE_PLACES_API_KEY,
-                    language: 'en',
-                    types: 'address',
-                    location: cityLocation,
-                    radius: 50000,
-                    components: 'country:CZ',
-                  }}
-                  styles={{
-                    textInput: styles.input,
-                    listView: styles.listView, // Стили для выпадающего списка
-                    container: styles.autoCompleteContainer, // Контейнер для автодополнения
-                  }}
-                />
-              </>
-            )}
-          </Animated.View>
+          {isCitySelected && cityLocation && (
+                  <Animated.View style={{ opacity: addressFieldHeight }}>
+                    <Text style={styles.label}>Address</Text>
+                    <GooglePlacesAutocomplete
+                      placeholder="Enter address"
+                      fetchDetails={true}
+                      onPress={handleAddressSelect}
+                      query={{
+                        key: GOOGLE_PLACES_API_KEY,
+                        language: 'en',
+                        types: 'address',
+                        components: 'country:CZ',
+                        locationbias: `circle:20000@${cityLocation.lat},${cityLocation.lng}`,
+                      }}
+                      GooglePlacesSearchQuery={{
+                        strictbounds: true, // Включаем строгие границы для поиска
+                      }}
+                      bounds={cityBounds} // Ограничиваем область поиска
+                      styles={{
+                        textInput: styles.input,
+                        listView: styles.listView,
+                        container: styles.autoCompleteContainer,
+                      }}
+                    />
+                  </Animated.View>
+                )}
 
           <Text style={styles.label}>Date</Text>
           <TouchableOpacity onPress={showDatepicker} style={styles.input}>
@@ -322,13 +343,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   listView: {
-    minHeight: 200, // Ограничиваем высоту выпадающего списка
+    minHeight: 200,
     borderWidth: 1,
     borderColor: '#ccc',
   },
   autoCompleteContainer: {
     flex: 1,
-    zIndex: 1, // Поднятие контейнера для выпадающего списка над другими элементами
+    zIndex: 1,
     marginBottom: 40,
     backgroundColor: 'black',
   },

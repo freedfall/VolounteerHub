@@ -55,7 +55,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // Обработчик обновления при скролле вверх (обновляем события)
   const handleScroll = (event: any) => {
     const yOffset = event.nativeEvent.contentOffset.y;
-    if (yOffset <= 0 && !refreshing) {
+    if (yOffset <= -10 && !refreshing) {
       loadEvents(); // Обновляем события только если скролл достиг верха и не идет обновление
     }
   };
