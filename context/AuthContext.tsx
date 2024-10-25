@@ -16,7 +16,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   register: (name: string, surname: string, email: string, password: string) => Promise<void>;
-  loadUserData: () => Promise<void>; // Новая функция для загрузки данных пользователя
+  loadUserData: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,7 +41,18 @@ export const AuthProvider: React.FC = ({ children }) => {
         console.error('Ошибка проверки токена:', error);
       }
     };
+    const checkUserData = async () => {
+        try {
+            const userData = await AsyncStorage.getItem('userData');
+            if (userData) {
+                setUser(JSON.parse(userData));
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки данных пользователя:', error);
+        }
+    }
     checkToken();
+    checkUserData();
   }, []);
 
   const loadUserData = async () => {
@@ -58,6 +69,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       if (response.ok) {
         setUser(data);
         await AsyncStorage.setItem('userData', JSON.stringify(data));
+        console.log('Данные пользователя загружены:', data);
       } else {
         console.error('Ошибка получения данных пользователя:', data.message);
       }

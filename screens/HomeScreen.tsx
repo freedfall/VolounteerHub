@@ -26,7 +26,6 @@ const fetchEvents = async () => {
         'Content-Type': 'application/json',
       },
     });
-    console.log("Uletel");
     const data = await response.json();
     console.log('Events:', data);
     return data;

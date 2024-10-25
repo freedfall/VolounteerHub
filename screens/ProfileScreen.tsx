@@ -13,8 +13,10 @@ const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    loadUserData(); // Загружаем данные пользователя при монтированииmmmmmm
-  }, []);
+    if (!user) {
+      loadUserData();
+    }
+  }, [user]);
 
   const userEvents = events.filter(event => event.creator?.email === user.email);
 
