@@ -163,6 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6347',
     borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 100,
   },
   signOutButtonText: {
     color: '#fff',

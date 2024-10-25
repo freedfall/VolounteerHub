@@ -18,6 +18,7 @@
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
+    "axios": "^1.7.7",
     "date-fns": "^4.1.0",
     "glob": "^11.0.0",
     "inflight": "^1.0.6",
