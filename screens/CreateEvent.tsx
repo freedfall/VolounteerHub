@@ -5,6 +5,7 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { useEventContext } from '../context/EventContext';
 import { calculateEventPoints } from '../utils/calculateEventPoints';
 import 'react-native-get-random-values';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GOOGLE_PLACES_API_KEY = 'AIzaSyDAjiDOE8glvLdp12DuWoDI82wH_AXfBSI';
 
@@ -72,10 +73,13 @@ const CreateEventScreen: React.FC = () => {
       };
 
       try {
+        const token = await AsyncStorage.getItem('userToken');
+
         const response = await fetch('https://fitexamprep.site/itu/api/event', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(newEvent),
         });
@@ -301,6 +305,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 5,
+    color: 'black',
   },
   input: {
     height: 40,
@@ -311,8 +316,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 15,
     maxWidth: 400,
-    alignSelf: 'center',
     width: '100%',
+    color: 'black',
   },
   textArea: {
     borderColor: '#ccc',
@@ -322,8 +327,8 @@ const styles = StyleSheet.create({
     height: 100,
     marginBottom: 15,
     maxWidth: 400,
-    alignSelf: 'center',
     width: '100%',
+    color: 'black',
   },
   button: {
     backgroundColor: '#007BFF',

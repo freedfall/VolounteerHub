@@ -2,17 +2,28 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type User = {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  points: number;
+  avatarUrl?: string;
+};
+
 type AuthContextType = {
   isSignedIn: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   register: (name: string, surname: string, email: string, password: string) => Promise<void>;
+  loadUserData: () => Promise<void>; // Новая функция для загрузки данных пользователя
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const checkToken = async () => {
@@ -22,6 +33,7 @@ export const AuthProvider: React.FC = ({ children }) => {
         if (token) {
           console.log('Токен найден:', token);
           setIsSignedIn(true);
+          loadUserData();
         } else {
           console.log('Токен не найден');
         }
@@ -31,6 +43,28 @@ export const AuthProvider: React.FC = ({ children }) => {
     };
     checkToken();
   }, []);
+
+  const loadUserData = async () => {
+    try {
+      const response = await fetch('https://fitexamprep.site/itu/api/user/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data);
+        await AsyncStorage.setItem('userData', JSON.stringify(data));
+      } else {
+        console.error('Ошибка получения данных пользователя:', data.message);
+      }
+    } catch (error) {
+      console.error('Ошибка сети при получении данных пользователя:', error);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -49,6 +83,8 @@ export const AuthProvider: React.FC = ({ children }) => {
       if (response.ok) {
         console.log('Авторизация успешна');
         await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('userData', JSON.stringify(data));
+        setUser(data); // Сохранить данные пользователя в состоянии
         setIsSignedIn(true);
       } else {
         console.error('Ошибка авторизации:', data.message);
@@ -92,7 +128,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isSignedIn, signIn, signOut, register }}>
+    <AuthContext.Provider value={{ isSignedIn, user, signIn, signOut, register, loadUserData }}>
       {children}
     </AuthContext.Provider>
   );

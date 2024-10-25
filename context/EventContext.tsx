@@ -9,6 +9,7 @@ type Event = {
   address: string;
   points: number;
   description: string;
+  creator: string;
 };
 
 type EventContextType = {
