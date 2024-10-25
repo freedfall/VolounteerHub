@@ -164,11 +164,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               onPress={() =>
                 navigation.navigate('EventDetails', {
                   title: event.name,
-                  time: handleDateTime(event.startDateTime),
+                  startTime: event.startDateTime,
+                  endTime: event.endDateTime,
                   city: event.city,
                   address: event.address,
                   points: event.price,
                   description: event.description,
+                  capacity: event.capacity,
+                  creator: event.creator || {},
+                  participants: event.participants || [],
                 })
               }
             />
@@ -241,7 +245,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               <Card
                 key={index}
                 title={event.name}
-                time={handleDateTime(event.startDateTime)}
+                time={new Date(event.startDateTime).toDateString()}
                 city={event.city}
                 address={event.address}
                 points={event.price}
@@ -249,12 +253,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   setModalVisible(false);
                   setSearchText('');
                   navigation.navigate('EventDetails', {
-                    title: event.name,
-                    time: handleDateTime(event.startDateTime),
-                    city: event.city,
-                    address: event.address,
-                    points: event.price,
-                    description: event.description,
+                          title: event.name,
+                          startTime: event.startDateTime,
+                          endTime: event.endDateTime,
+                          city: event.city,
+                          address: event.address,
+                          points: event.price,
+                          description: event.description,
+                          capacity: event.capacity,
+                          creator: event.creator, // Передача данных создателя
+                          participants: event.participants // Передача списка участников
                   });
                 }}
               />

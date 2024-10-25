@@ -32,7 +32,7 @@ export const AuthProvider: React.FC = ({ children }) => {
         const token = await AsyncStorage.getItem('userToken');
         if (token) {
           console.log('Токен найден:', token);
-          //setIsSignedIn(true);
+          setIsSignedIn(true);
           loadUserData();
         } else {
           console.log('Токен не найден');
