@@ -135,11 +135,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               onPress={() =>
                 navigation.navigate('EventDetails', {
                   title: event.name,
-                  time: handleDateTime(event.startDateTime),
+                  startTime: event.startDateTime,
+                  endTime: event.endDateTime,
                   city: event.city,
                   address: event.address,
                   points: event.price,
                   description: event.description,
+                  capacity: event.capacity,
+                  creator: event.creator || {},
+                  participants: event.participants || [],
                 })
               }
             />
