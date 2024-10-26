@@ -26,11 +26,13 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const StartScreenStack = createStackNavigator();
 
-const HomeStackScreen: React.FC = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-    <Stack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
-  </Stack.Navigator>
+const RootStack = createStackNavigator();
+
+const RootStackScreen: React.FC = () => (
+  <RootStack.Navigator>
+    <RootStack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+    <RootStack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
+  </RootStack.Navigator>
 );
 
 const MainTabs: React.FC = () => (
@@ -72,7 +74,7 @@ const MainTabs: React.FC = () => (
       },
     })}
   >
-    <Tab.Screen name="HomeStack" component={HomeStackScreen} options={{ headerShown: false }} />
+    <Tab.Screen name="HomeStack" component={HomeScreen} options={{ headerShown: false }} />
     <Tab.Screen name="Leaderboard" component={LeaderBoardScreen} />
     <Tab.Screen name="CreateEvent" component={CreateEvent} />
     <Tab.Screen name="Map" component={MapScreen}/>
@@ -94,7 +96,7 @@ const App: React.FC = () => (
       <NavigationContainer>
         <AuthContext.Consumer>
           {({ isSignedIn, user }) => (
-            isSignedIn ? <MainTabs /> : <StartScreenStackScreen />
+            isSignedIn ? <RootStackScreen /> : <StartScreenStackScreen />
           )}
         </AuthContext.Consumer>
       </NavigationContainer>
