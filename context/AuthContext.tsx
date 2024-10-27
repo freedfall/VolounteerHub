@@ -33,7 +33,6 @@ export const AuthProvider: React.FC = ({ children }) => {
         if (token) {
           console.log('Токен найден:', token);
           setIsSignedIn(true);
-          loadUserData();
         } else {
           console.log('Токен не найден');
         }
@@ -46,7 +45,10 @@ export const AuthProvider: React.FC = ({ children }) => {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
                 setUser(JSON.parse(userData));
+            } else {
+                loadUserData();
             }
+
         } catch (error) {
             console.error('Ошибка загрузки данных пользователя:', error);
         }
