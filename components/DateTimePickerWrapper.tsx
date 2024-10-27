@@ -15,8 +15,8 @@ const formatDisplayValue = (value, mode) => {
 const DateTimePickerWrapper = ({ label, value, showPicker, setShowPicker, onChange, mode }) => {
   return (
     <View>
-      <Text>{label}</Text>
-      <TouchableOpacity onPress={() => setShowPicker(true)} style={{ padding: 10, borderColor: '#ccc', borderWidth: 1, marginBottom: 15}}>
+      <Text style={styles.title}>{label}</Text>
+      <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
         <Text>{formatDisplayValue(value, mode)}</Text>
       </TouchableOpacity>
       {showPicker && (
@@ -34,6 +34,24 @@ const DateTimePickerWrapper = ({ label, value, showPicker, setShowPicker, onChan
       )}
     </View>
   );
+};
+
+const styles = {
+    title: {
+        marginBottom: 5,
+        alignSelf: 'center',
+        color: '#000',
+        fontSize: 18,
+    },
+  input: {
+    height: 50,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 25,
+    marginBottom: 10,
+  },
 };
 
 export default DateTimePickerWrapper;

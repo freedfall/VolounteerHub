@@ -100,20 +100,23 @@ const EventForm = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 15,
+    padding: 30,
+    gap: 5,
   },
   titleText: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 5,
     color: '#000',
+    alignSelf: 'center',
   },
   input: {
-    height: 40,
+    height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
+    paddingHorizontal: 20,
     marginBottom: 15,
     color: '#000',
+    borderRadius: 25,
   },
   inputError: {
     borderColor: 'red',
@@ -122,7 +125,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
+    borderRadius: 25,
+    paddingHorizontal: 20,
     marginBottom: 15,
   },
   button: {

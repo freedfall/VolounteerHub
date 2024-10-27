@@ -9,6 +9,8 @@ import { useEventContext } from '../context/EventContext';
 import rightArrow from '../images/components/rightArrow.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clockIcon from '../images/components/clock.png';
+import searchIcon from '../images/components/searchIcon.png';
+import filterIcon from '../images/components/filterIcon.png';
 
 type RootStackParamList = {
   Home: undefined;
@@ -66,8 +68,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       setRefreshing(false);
     }
   };
-
-
 
    const saveSearchHistory = async (history: string[]) => {
       try {
@@ -179,20 +179,28 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        ref={searchInputRef}
-        style={styles.searchInput}
-        placeholder="Search..."
-        value={searchText}
-        onPress={() => {
-          setModalVisible(true);
-        }}
-        onFocus={() => {
-            searchInputRef.current?.blur();
-        }}
-        onChangeText={handleSearchTextChange}
-        onBlur={handleSearchBlur}
-      />
+      <View style={styles.searchContainer}>
+          <Image source={searchIcon} style={styles.searchIcon} />
+
+          <TextInput
+            ref={searchInputRef}
+            style={styles.searchInput}
+            placeholder="Search..."
+            value={searchText}
+            onPress={() => {
+              setModalVisible(true);
+            }}
+            onFocus={() => {
+              searchInputRef.current?.blur();
+            }}
+            onChangeText={handleSearchTextChange}
+            onBlur={handleSearchBlur}
+          />
+
+          <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Open filters")}>
+            <Image source={filterIcon} style={styles.filterIcon} />
+          </TouchableOpacity>
+      </View>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadEvents} />}
       >
@@ -213,15 +221,25 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TextInput
-              ref={modalSearchInputRef}
-              style={styles.searchInputModal}
-              placeholder="Search..."
-              value={searchText}
-              onChangeText={handleSearchTextChange}
-              autoFocus={true}
-              onBlur={handleSearchBlur}
-            />
+            <View style={styles.searchContainerModal}>
+                <Image source={searchIcon} style={styles.searchIcon} />
+
+                <TextInput
+                  ref={modalSearchInputRef}
+                  style={styles.searchInputModal}
+                  style={styles.searchInput}
+                  placeholder="Search..."
+                  value={searchText}
+                  onChangeText={handleSearchTextChange}
+                  autoFocus={true}
+                  onBlur={handleSearchBlur}
+                />
+
+                <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Open filters")}>
+                  <Image source={filterIcon} style={styles.filterIcon} />
+                </TouchableOpacity>
+            </View>
+
             <TouchableOpacity onPress={() => {
               setModalVisible(false);
               setSearchText('');
@@ -273,15 +291,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     paddingHorizontal: 20,
     marginBottom: 80,
-  },
-  searchInput: {
-    height: 48,
-    paddingHorizontal: 10,
-    borderRadius: 40,
-    fontSize: 16,
-    borderColor: 'rgba(1, 59, 20, 1)',
-    borderWidth: 2,
-    marginBottom: 20,
   },
   categoryContainer: {
     marginBottom: 20,
@@ -357,6 +366,50 @@ const styles = StyleSheet.create({
         color: 'black',
         marginBottom: 10,
         alignSelf: 'center',
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 40,
+        borderColor: 'rgba(1, 59, 20, 1)',
+        borderWidth: 2,
+        paddingHorizontal: 15,
+        height: 48,
+        marginBottom: 20,
+        width: '100%',
+      },
+      searchContainerModal: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+          borderRadius: 40,
+          borderColor: 'rgba(1, 59, 20, 1)',
+          borderWidth: 2,
+          paddingHorizontal: 15,
+          height: 48,
+          marginBottom: 20,
+          width: '85%',
+        },
+      searchIcon: {
+        width: 22,
+        height: 23,
+        tintColor: '#888',
+        marginRight: 5,
+      },
+      searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: 'rgba(131, 131, 131, 1)',
+        width: '100%',
+      },
+      filterButton: {
+        padding: 8,
+      },
+      filterIcon: {
+        width: 24,
+        height: 24,
+        tintColor: '#888',
     },
 });
 

@@ -72,15 +72,17 @@ const LocationPicker = ({ onCitySelect, onAddressSelect, addressFieldHeight, cit
 
 const styles = {
     title: {
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 18,
         marginBottom: 5,
         color: '#000',
+        alignSelf: 'center',
     },
     input: {
+        height: 50,
         borderColor: '#ccc',
         borderWidth: 1,
-        padding: 10,
+        borderRadius: 25,
+        paddingHorizontal: 20,
         marginBottom: 15,
     },
     listView: {

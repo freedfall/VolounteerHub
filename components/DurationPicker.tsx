@@ -3,8 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Button } f
 
 const DurationPicker = ({ hours, minutes, onChange }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const hourValues = Array.from({ length: 13 }, (_, i) => i); // массив от 0 до 12 часов
-  const minuteValues = Array.from({ length: 12 }, (_, i) => i * 5); // массив от 0 до 59 минут
+  const hourValues = Array.from({ length: 13 }, (_, i) => i);
+  const minuteValues = Array.from({ length: 12 }, (_, i) => i * 5);
 
   const handleConfirm = () => {
     setModalVisible(false);
@@ -12,26 +12,22 @@ const DurationPicker = ({ hours, minutes, onChange }) => {
 
   return (
     <View>
-      {/* Кнопка для открытия модального окна */}
       <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.selectButton}>
         <Text style={styles.selectButtonText}>
           {`Duration: ${hours}h ${minutes < 10 ? `0${minutes}` : minutes}m`}
         </Text>
       </TouchableOpacity>
 
-      {/* Модальное окно */}
-      <Modal visible={isModalVisible} transparent={true} animationType="slide">
+      <Modal visible={isModalVisible} transparent={true} animationType="slide" style={styles.modalContainer}>
         <View style={styles.modalContainer}>
           <View style={styles.pickerContainer}>
             <View style={styles.pickers}>
-              {/* Скролл для часов */}
+
               <View style={styles.picker}>
                 <Text style={styles.pickerLabel}>Hours</Text>
                 <ScrollView
                   showsVerticalScrollIndicator={false}
-//                   snapToAlignment="center"
-                  snapToInterval={50} // Высота элемента
-//                   decelerationRate="fast"
+                  snapToInterval={50}
                   contentContainerStyle={styles.scrollContainer}
                 >
                   {hourValues.map((hour) => (
@@ -59,8 +55,7 @@ const DurationPicker = ({ hours, minutes, onChange }) => {
                 <Text style={styles.pickerLabel}>Minutes</Text>
                 <ScrollView
                   showsVerticalScrollIndicator={false}
-//                   snapToAlignment="center"
-                  snapToInterval={50} // Высота элемента
+                  snapToInterval={50}
                   decelerationRate="fast"
                   contentContainerStyle={styles.scrollContainer}
                 >
@@ -85,8 +80,7 @@ const DurationPicker = ({ hours, minutes, onChange }) => {
               </View>
             </View>
 
-            {/* Кнопка подтверждения */}
-            <Button title="Confirm" onPress={handleConfirm} />
+            <Button title="Confirm" onPress={handleConfirm} style={styles.confirmButton}/>
           </View>
         </View>
       </Modal>
@@ -95,10 +89,16 @@ const DurationPicker = ({ hours, minutes, onChange }) => {
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+
   selectButton: {
     backgroundColor: '#ddd',
-    padding: 10,
-    borderRadius: 5,
+    height: 50,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    borderRadius: 25,
     marginBottom: 10,
   },
   selectButtonText: {
@@ -132,12 +132,14 @@ const styles = StyleSheet.create({
   picker: {
     flex: 1,
     alignItems: 'center',
-    height: 300, // Высота контейнера скролла для отображения 6 элементов (6 * 50)
+    height: 300,
+    marginBottom: 20,
   },
   pickerLabel: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
+    color: '#000',
   },
   scrollContainer: {
     alignItems: 'center',
@@ -151,13 +153,16 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 18,
-    color: '#888',
+    color: '#000',
   },
   selectedItem: {
     backgroundColor: '#007BFF',
   },
   selectedItemText: {
     color: '#FFF',
+  },
+  confirmButton: {
+    width: 100,
   },
 });
 
