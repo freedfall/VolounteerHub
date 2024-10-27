@@ -1,11 +1,13 @@
-// ProfileScreen.tsx
 import React, { useContext, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useEventContext } from '../context/EventContext';
-import userProfileIcon from '../images/userProfileIcon.jpeg'; // Подключаем иконку профиля по умолчанию
-import Card from '../components/Card'; // Импорт компонента Card для отображения событий
 import { useNavigation } from '@react-navigation/native';
+
+import Card from '../components/Card';
+import QRCodeGenerator from '../components/QRCodeGenerator';
+
+import userProfileIcon from '../images/userProfileIcon.jpeg';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
@@ -22,7 +24,6 @@ const ProfileScreen: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Шапка профиля с аватаром и именем */}
       <View style={styles.profileHeader}>
         <Image
           source={user?.avatarUrl ? { uri: user.avatarUrl } : userProfileIcon}
@@ -34,23 +35,27 @@ const ProfileScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Информация о пользователе */}
       <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>Email:</Text>
-        <Text style={styles.infoText}>{user?.email}</Text>
+        <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={styles.infoTitle}>Email: </Text>
+                <Text style={styles.infoText}>{user?.email}</Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={styles.infoTitle}>Points: </Text>
+                <Text style={styles.infoText}>{user?.points}</Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={styles.infoTitle}>As creator: </Text>
+                <Text style={styles.infoText}>{user?.pointsAsCreator}</Text>
+            </View>
+        </View>
+
+        <QRCodeGenerator email={user?.email} />
       </View>
 
-      <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>Phone:</Text>
-        <Text style={styles.infoText}>{user?.phone}</Text>
-      </View>
-
-      <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>Points:</Text>
-        <Text style={styles.infoText}>{user?.points}</Text>
-      </View>
-
-      {/* История событий */}
       <View style={styles.eventHistory}>
               <Text style={styles.historyTitle}>Your Events</Text>
               {userEvents.length > 0 ? (
@@ -83,7 +88,6 @@ const ProfileScreen: React.FC = () => {
               )}
             </View>
 
-      {/* Кнопка выхода */}
       <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
         <Text style={styles.signOutButtonText}>Sign Out</Text>
       </TouchableOpacity>
@@ -125,6 +129,8 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   infoTitle: {
     fontSize: 16,

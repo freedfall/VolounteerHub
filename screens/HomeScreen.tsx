@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  View, ScrollView, StyleSheet, TextInput, Text, RefreshControl, Image, Modal, TouchableOpacity
-} from 'react-native';
+import { View, ScrollView, StyleSheet, TextInput, Text, RefreshControl, Image, Modal, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import SquareCard from '../components/SquareCard';
-import Card from '../components/Card';
-import { useEventContext } from '../context/EventContext';
-import rightArrow from '../images/components/rightArrow.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import Card from '../components/Card';
+import SquareCard from '../components/SquareCard';
+
+import { useEventContext } from '../context/EventContext';
+
+import rightArrow from '../images/components/rightArrow.png';
 import clockIcon from '../images/components/clock.png';
 import searchIcon from '../images/components/searchIcon.png';
 import filterIcon from '../images/components/filterIcon.png';
@@ -60,6 +61,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const data = await fetchEvents();
       if (data) {
+        const currentDate = new Date();
+        const futureEvents = data.filter(event => {
+          return new Date(event.startDateTime) > currentDate;
+        });
+
+        futureEvents.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
         setEvents(data);
       }
     } catch (error) {
@@ -108,6 +115,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     };
 
   const filteredEvents = searchText.trim() === '' ? [] : events.filter((event) =>
+    event.endDateTime > new Date().toISOString() &&
     event.name.toLowerCase().includes(searchText.toLowerCase()) ||
     event.city.toLowerCase().includes(searchText.toLowerCase()) ||
     event.address.toLowerCase().includes(searchText.toLowerCase())
