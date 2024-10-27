@@ -133,15 +133,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               address={event.address}
               points={event.price}
               onPress={() =>
-                navigation.navigate('EventDetails', {
-                  title: event.name,
-                  time: handleDateTime(event.startDateTime),
-                  city: event.city,
-                  address: event.address,
-                  points: event.price,
-                  description: event.description,
-                })
-              }
+                  navigation.navigate('EventDetails', {
+                    title: event.name,
+                    startTime: event.startDateTime,
+                    endTime: event.endDateTime,
+                    city: event.city,
+                    address: event.address,
+                    points: event.price,
+                    description: event.description,
+                    capacity: event.capacity,
+                    creator: event.creator || {},
+                    participants: event.participants || [],
+                  })
+                }
             />
           ))}
         </ScrollView>
@@ -162,15 +166,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               address={event.address}
               points={event.price}
               onPress={() =>
-                navigation.navigate('EventDetails', {
-                  title: event.name,
-                  time: handleDateTime(event.startDateTime),
-                  city: event.city,
-                  address: event.address,
-                  points: event.price,
-                  description: event.description,
-                })
-              }
+                  navigation.navigate('EventDetails', {
+                    title: event.name,
+                    startTime: event.startDateTime,
+                    endTime: event.endDateTime,
+                    city: event.city,
+                    address: event.address,
+                    points: event.price,
+                    description: event.description,
+                    capacity: event.capacity,
+                    creator: event.creator || {},
+                    participants: event.participants || [],
+                  })
+                }
             />
           ))}
         </View>
@@ -267,12 +275,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   setModalVisible(false);
                   setSearchText('');
                   navigation.navigate('EventDetails', {
-                    title: event.name,
-                    time: handleDateTime(event.startDateTime),
-                    city: event.city,
-                    address: event.address,
-                    points: event.price,
-                    description: event.description,
+                          title: event.name,
+                          startTime: event.startDateTime,
+                          endTime: event.endDateTime,
+                          city: event.city,
+                          address: event.address,
+                          points: event.price,
+                          description: event.description,
+                          capacity: event.capacity,
+                          creator: event.creator, // Передача данных создателя
+                          participants: event.participants // Передача списка участников
                   });
                 }}
               />
