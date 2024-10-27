@@ -27,11 +27,13 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const StartScreenStack = createStackNavigator();
 
-const HomeStackScreen: React.FC = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-    <Stack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
-  </Stack.Navigator>
+const RootStack = createStackNavigator();
+
+const RootStackScreen: React.FC = () => (
+  <RootStack.Navigator>
+    <RootStack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+    <RootStack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
+  </RootStack.Navigator>
 );
 
 const MainTabs: React.FC = () => {
@@ -113,7 +115,7 @@ const App: React.FC = () => (
       <NavigationContainer>
         <AuthContext.Consumer>
           {({ isSignedIn, user }) => (
-            isSignedIn ? <MainTabs /> : <StartScreenStackScreen />
+            isSignedIn ? <RootStackScreen /> : <StartScreenStackScreen />
           )}
         </AuthContext.Consumer>
       </NavigationContainer>
