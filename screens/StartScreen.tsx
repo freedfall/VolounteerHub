@@ -18,7 +18,7 @@ const StartScreen: React.FC = ( {navigation} ) => {
   return (
       <View style={styles.container}>
         <ImageBackground source={StartScreenBackground} style={styles.background}>
-          {/* Кнопки для открытия модальных окон */}
+          <Text style={styles.title}>volounteerhub</Text>
           <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
                 <Text style={styles.buttonText}>Log in</Text>
@@ -40,20 +40,30 @@ const styles = StyleSheet.create({
   background: {
     width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 46,
+    color: '#fff',
+    textTransform: 'uppercase',
+    fontStyle: 'italic',
+    fontFamily: 'Gilroy-Regular',
   },
   button: {
     backgroundColor: '#013B14',
-    paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 50,
     marginBottom: 20,
     width: '70%',
+    height: 60,
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
+    fontFamily: 'Gilroy-Regular',
   },
-
   buttonContainer: {
     height: '50%',
     position: 'absolute',
@@ -65,7 +75,6 @@ const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: 'background: rgba(1, 59, 20, 0.38)',
   },
 });
 

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text, Image, View, Modal } from 'react-native';
+import { Text, TextInput, TextProps, Image, View, Modal } from 'react-native';
 import CreateEventModal from './screens/CreateEventModal';
 import HomeScreen from './screens/HomeScreen';
 import EventDetails from './screens/EventDetails';
@@ -23,11 +23,21 @@ import MapIcon from './images/icons/MapIcon.png';
 import ProfileIcon from './images/icons/ProfileIcon.png';
 import CreateEventIcon from './images/icons/CreateEventIcon.png';
 
+import { setCustomText } from 'react-native-global-props';
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const StartScreenStack = createStackNavigator();
 
 const RootStack = createStackNavigator();
+
+const customTextProps = {
+  style: {
+    fontFamily: 'Gilroy-Regular',
+  },
+};
+
+setCustomText(customTextProps);
 
 const RootStackScreen: React.FC = () => (
   <RootStack.Navigator>
