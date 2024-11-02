@@ -1,17 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, ScrollView, StyleSheet, TextInput, Text, RefreshControl, Image, Modal, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import Card from '../components/Card';
-import SquareCard from '../components/SquareCard';
-
+import { fetchEvents } from '../utils/api';
+import CategorySection from '../components/CategorySection';
+import AllEventsSection from '../components/AllEventsSection';
+import SearchBar from '../components/SearchBar';
+import SearchModal from '../components/SearchModal';
 import { useEventContext } from '../context/EventContext';
-
-import rightArrow from '../images/components/rightArrow.png';
-import clockIcon from '../images/components/clock.png';
-import searchIcon from '../images/components/searchIcon.png';
-import filterIcon from '../images/components/filterIcon.png';
 
 type RootStackParamList = {
   Home: undefined;
@@ -21,31 +18,6 @@ type RootStackParamList = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-const fetchEvents = async () => {
-  try {
-    const response = await fetch('https://fitexamprep.site/itu/api/event', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    const data = await response.json();
-    console.log('Events:', data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching events:', error);
-  }
-};
-
-const handleDateTime = (dateTime: string) => {
-  const date = new Date(dateTime);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${day}.${month} - ${hours}:${minutes}`;
-};
-
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { setEvents, events } = useEventContext();
   const [refreshing, setRefreshing] = useState(false);
@@ -53,384 +25,71 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
-  const searchInputRef = useRef<TextInput>(null);
-  const modalSearchInputRef = useRef<TextInput>(null);
-
   const loadEvents = async () => {
     setRefreshing(true);
     try {
       const data = await fetchEvents();
-      if (data) {
-        const currentDate = new Date();
-        const futureEvents = data.filter(event => {
-          return new Date(event.startDateTime) > currentDate;
-        });
-
-        futureEvents.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
-        setEvents(data);
-      }
-    } catch (error) {
-      console.error('Error fetching events:', error);
+      if (data) setEvents(data);
     } finally {
       setRefreshing(false);
     }
   };
 
-   const saveSearchHistory = async (history: string[]) => {
-      try {
-        await AsyncStorage.setItem('searchHistory', JSON.stringify(history));
-      } catch (error) {
-        console.error('Error saving search history:', error);
-      }
-    };
+  const saveSearchHistory = async (history: string[]) => {
+    try {
+      await AsyncStorage.setItem('searchHistory', JSON.stringify(history));
+    } catch (error) {
+      console.error('Error saving search history:', error);
+    }
+  };
 
-    const loadSearchHistory = async () => {
-      try {
-        const history = await AsyncStorage.getItem('searchHistory');
-        if (history) {
-          setSearchHistory(JSON.parse(history));
-        }
-      } catch (error) {
-        console.error('Error loading search history:', error);
-      }
-    };
+  const loadSearchHistory = async () => {
+    try {
+      const history = await AsyncStorage.getItem('searchHistory');
+      if (history) setSearchHistory(JSON.parse(history));
+    } catch (error) {
+      console.error('Error loading search history:', error);
+    }
+  };
 
   useEffect(() => {
     loadEvents();
     loadSearchHistory();
   }, []);
 
-  const handleSearchBlur = () => {
-      if (searchText.trim() !== '') {
-        setSearchHistory((prevHistory) => {
-          const updatedHistory = [searchText, ...prevHistory.filter((item) => item !== searchText)];
-          saveSearchHistory(updatedHistory.slice(0, 3));
-          return updatedHistory.slice(0, 3);
-        });
-      }
-    };
-
-    const handleSearchTextChange = (text: string) => {
-      setSearchText(text);
-    };
-
-  const filteredEvents = searchText.trim() === '' ? [] : events.filter((event) =>
-    event.endDateTime > new Date().toISOString() &&
-    event.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    event.city.toLowerCase().includes(searchText.toLowerCase()) ||
-    event.address.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  const renderCategory = (title: string, filteredEvents: any[]) => {
-    if (filteredEvents.length < 5) return null;
-
-    return (
-      <View style={styles.categoryContainer}>
-        <View style={styles.categoryHeader}>
-          <Text style={styles.categoryTitle}>{title}</Text>
-          <Image source={rightArrow} style={styles.viewAllText} onPress={() => navigation.navigate('CategoryDetails', { category: title, events: filteredEvents })}>
-          </Image>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {filteredEvents.slice(0, 5).map((event, index) => (
-            <SquareCard
-              key={index}
-              title={event.name}
-              time={handleDateTime(event.startDateTime)}
-              city={event.city}
-              address={event.address}
-              points={event.price}
-              onPress={() =>
-                  navigation.navigate('EventDetails', {
-                    title: event.name,
-                    startTime: event.startDateTime,
-                    endTime: event.endDateTime,
-                    city: event.city,
-                    address: event.address,
-                    points: event.price,
-                    description: event.description,
-                    capacity: event.capacity,
-                    creator: event.creator || {},
-                    participants: event.participants || [],
-                  })
-                }
-            />
-          ))}
-        </ScrollView>
-      </View>
-    );
-  };
-
-  const renderAllEvents = (allEvents: any[]) => {
-      return (
-        <View style={styles.allEventsContainer}>
-          <Text style={styles.allEventsTitle}>All Events</Text>
-          {allEvents.map((event, index) => (
-            <Card
-              key={index}
-              title={event.name}
-              time={handleDateTime(event.startDateTime)}
-              city={event.city}
-              address={event.address}
-              points={event.price}
-              onPress={() =>
-                  navigation.navigate('EventDetails', {
-                    title: event.name,
-                    startTime: event.startDateTime,
-                    endTime: event.endDateTime,
-                    city: event.city,
-                    address: event.address,
-                    points: event.price,
-                    description: event.description,
-                    capacity: event.capacity,
-                    creator: event.creator || {},
-                    participants: event.participants || [],
-                  })
-                }
-            />
-          ))}
-        </View>
-      );
-    };
+  const filteredEvents = events.filter(event => event.name.toLowerCase().includes(searchText.toLowerCase()));
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-          <Image source={searchIcon} style={styles.searchIcon} />
-
-          <TextInput
-            ref={searchInputRef}
-            style={styles.searchInput}
-            placeholder="Search..."
-            value={searchText}
-            onPress={() => {
-              setModalVisible(true);
-            }}
-            onFocus={() => {
-              searchInputRef.current?.blur();
-            }}
-            onChangeText={handleSearchTextChange}
-            onBlur={handleSearchBlur}
-          />
-
-          <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Open filters")}>
-            <Image source={filterIcon} style={styles.filterIcon} />
-          </TouchableOpacity>
-      </View>
-      <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadEvents} />}
-      >
-        {renderCategory('With good reviews', events)}
-        {renderCategory('Closest to you', events.filter(event => event.distance < 10))}
-        {renderCategory('Many points', events.filter(event => event.price >= 50))}
-
-        {renderAllEvents(events)}
-      </ScrollView>
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={isModalVisible}
-        onRequestClose={() => {
+      <SearchBar searchText={searchText} setSearchText={setSearchText} openModal={() => setModalVisible(true)} />
+      <SearchModal
+        isVisible={isModalVisible}
+        closeModal={() => setModalVisible(false)}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        searchHistory={searchHistory}
+        filteredEvents={filteredEvents}
+        onSelectEvent={(event) => {
           setModalVisible(false);
-          searchInputRef.current?.blur();
+          navigation.navigate('EventDetails', { ...event });
         }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <View style={styles.searchContainerModal}>
-                <Image source={searchIcon} style={styles.searchIcon} />
-
-                <TextInput
-                  ref={modalSearchInputRef}
-                  style={styles.searchInputModal}
-                  style={styles.searchInput}
-                  placeholder="Search..."
-                  value={searchText}
-                  onChangeText={handleSearchTextChange}
-                  autoFocus={true}
-                  onBlur={handleSearchBlur}
-                />
-
-                <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Open filters")}>
-                  <Image source={filterIcon} style={styles.filterIcon} />
-                </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity onPress={() => {
-              setModalVisible(false);
-              setSearchText('');
-            }}>
-              <Text style={styles.closeButton}>Close</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView>
-            {searchText.trim() === '' &&
-                searchHistory.map((query, index) => (
-                <TouchableOpacity key={index} onPress={() => setSearchText(query)} style={styles.historyItem}>
-                  <Image source={clockIcon} style={styles.historyIcon} />
-                  <Text style={styles.historyText}>{query}</Text>
-                </TouchableOpacity>
-            ))}
-            {filteredEvents.map((event, index) => (
-              <Card
-                key={index}
-                title={event.name}
-                time={handleDateTime(event.startDateTime)}
-                city={event.city}
-                address={event.address}
-                points={event.price}
-                onPress={() => {
-                  setModalVisible(false);
-                  setSearchText('');
-                  navigation.navigate('EventDetails', {
-                          title: event.name,
-                          startTime: event.startDateTime,
-                          endTime: event.endDateTime,
-                          city: event.city,
-                          address: event.address,
-                          points: event.price,
-                          description: event.description,
-                          capacity: event.capacity,
-                          creator: event.creator, // Передача данных создателя
-                          participants: event.participants // Передача списка участников
-                  });
-                }}
-              />
-            ))}
-          </ScrollView>
-        </View>
-      </Modal>
+      />
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadEvents} />} showsVerticalScrollIndicator={false}>
+        <CategorySection title="Popular Events" events={events} />
+        <CategorySection title="Many Points" events={events.filter(event => event.price > 60)} />
+        <AllEventsSection events={events} onPressEvent={(event) => navigation.navigate('EventDetails', { ...event })} />
+      </ScrollView>
     </View>
   );
 };
 
+export default HomeScreen;
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 20,
-    marginBottom: 80,
+      flex: 1,
+      padding: 10,
+      backgroundColor: '#f5f5f5',
+      marginBottom: 80,
   },
-  categoryContainer: {
-    marginBottom: 20,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  categoryTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  viewAllText: {
-    width: 14,
-    height: 16,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 1)',
-    justifyContent: 'center',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    backgroundColor: '#fff',
-    paddingBottom: 10,
-  },
-  searchInputModal: {
-    flex: 1,
-    height: 48,
-    paddingHorizontal: 10,
-    borderRadius: 40,
-    fontSize: 16,
-    borderColor: 'rgba(1, 59, 20, 1)',
-    borderWidth: 2,
-    marginRight: 10,
-  },
-  closeButton: {
-    fontSize: 18,
-    paddingVertical: 10,
-  },
-  historyItem: {
-    padding: 10,
-    marginLeft: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    alignSelf: 'start',
-    width: '75%',
-    alignItems: 'center',
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 10,
-  },
-    historyIcon: {
-        width: 20,
-        height: 20,
-    },
-    historyText: {
-        fontSize: 18,
-        color: 'black',
-    },
-    allEventsContainer: {
-        marginBottom: 20,
-    },
-    allEventsTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: 'black',
-        marginBottom: 10,
-        alignSelf: 'center',
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        borderRadius: 40,
-        borderColor: 'rgba(1, 59, 20, 1)',
-        borderWidth: 2,
-        paddingHorizontal: 15,
-        height: 48,
-        marginBottom: 20,
-        width: '100%',
-      },
-      searchContainerModal: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: '#fff',
-          borderRadius: 40,
-          borderColor: 'rgba(1, 59, 20, 1)',
-          borderWidth: 2,
-          paddingHorizontal: 15,
-          height: 48,
-          marginBottom: 20,
-          width: '85%',
-        },
-      searchIcon: {
-        width: 22,
-        height: 23,
-        tintColor: '#888',
-        marginRight: 5,
-      },
-      searchInput: {
-        flex: 1,
-        fontSize: 16,
-        color: 'rgba(131, 131, 131, 1)',
-        width: '100%',
-      },
-      filterButton: {
-        padding: 8,
-      },
-      filterIcon: {
-        width: 24,
-        height: 24,
-        tintColor: '#888',
-    },
 });
-
-export default HomeScreen;

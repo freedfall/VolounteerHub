@@ -16,7 +16,7 @@ import { EventProvider } from './context/EventContext';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import StartScreen from './screens/StartScreen';
 import ProfileScreen from './screens/ProfileScreen';
-
+import CategoryDetailsScreen from './screens/CategoryDetailsScreen';
 import HomeScreenIcon from './images/icons/HomeScreenIcon.png';
 import LeaderBoardIcon from './images/icons/LeaderBoardIcon.png';
 import MapIcon from './images/icons/MapIcon.png';
@@ -43,6 +43,7 @@ const RootStackScreen: React.FC = () => (
   <RootStack.Navigator>
     <RootStack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
     <RootStack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
+    <RootStack.Screen name="CategoryDetails" component={CategoryDetailsScreen} options={{ headerShown: false }} />
   </RootStack.Navigator>
 );
 

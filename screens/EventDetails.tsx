@@ -18,18 +18,16 @@ const EventDetails: React.FC = ({ route }) => {
       participants,
     } = route.params;
 
-  // Получаем текущего пользователя из контекста
   const { user } = useContext(AuthContext);
 
-    // Проверка, является ли текущий пользователь создателем события
   const isCreator = creator.email === user.email;
 
   return (
        <View style={styles.container}>
        <Image source={hospital} style={styles.image} />
          <Text style={styles.title}>{title}</Text>
-         <Text style={styles.details}>Start Time: {new Date(startTime).toLocaleString()}</Text>
-         <Text style={styles.details}>End Time: {new Date(endTime).toLocaleString()}</Text>
+         <Text style={styles.details}>Start Time: {startTime}</Text>
+         <Text style={styles.details}>End Time: {endTime}</Text>
          <Text style={styles.details}>City: {city}</Text>
          <Text style={styles.details}>Address: {address}</Text>
          <Text style={styles.details}>Points: {points}</Text>
