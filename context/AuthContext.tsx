@@ -44,6 +44,7 @@ export const AuthProvider: React.FC = ({ children }) => {
         try {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
+                console.log('Данные пользователя найдены:', userData);
                 setUser(JSON.parse(userData));
             } else {
                 loadUserData();
@@ -97,8 +98,6 @@ export const AuthProvider: React.FC = ({ children }) => {
       if (response.ok) {
         console.log('Авторизация успешна');
         await AsyncStorage.setItem('userToken', data.token);
-        await AsyncStorage.setItem('userData', JSON.stringify(data));
-        setUser(data); // Сохранить данные пользователя в состоянии
         setIsSignedIn(true);
       } else {
         console.error('Ошибка авторизации:', data.message);
@@ -138,6 +137,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   const signOut = async () => {
     await AsyncStorage.removeItem('userToken');
+    await AsyncStorage.removeItem('userData');
     setIsSignedIn(false);
   };
 

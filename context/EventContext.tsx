@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Определяем типы данных
 type Event = {
+  id: string;
   title: string;
   time: string;
   city: string;
