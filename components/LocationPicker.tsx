@@ -1,28 +1,29 @@
-// ../components/LocationPicker.js
-
 import React, { useState } from 'react';
-import { View, Text, Animated } from 'react-native';
+import { View, Text } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import 'react-native-get-random-values';
 
 const GOOGLE_PLACES_API_KEY = 'AIzaSyDAjiDOE8glvLdp12DuWoDI82wH_AXfBSI';
 
-const LocationPicker = ({ onCitySelect, onAddressSelect, addressFieldHeight, cityLocation, cityBounds }) => {
+const LocationPicker = ({ onCitySelect, onAddressSelect }) => {
   const [isCitySelected, setIsCitySelected] = useState(false);
+  const [cityLocation, setCityLocation] = useState(null);
+  const [selectedCity, setSelectedCity] = useState('');
 
   const handleCitySelect = (data, details) => {
     const cityName = data.terms[0].value;
     setIsCitySelected(true);
+    setSelectedCity(cityName);
+
     if (details && details.geometry) {
       const { lat, lng } = details.geometry.location;
+      setCityLocation({ lat, lng });
       onCitySelect(cityName, { lat, lng });
     }
+  };
 
-    Animated.timing(addressFieldHeight, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+  const filterAddresses = (data) => {
+    return data.filter((item) => item.description.includes(selectedCity));
   };
 
   return (
@@ -45,8 +46,8 @@ const LocationPicker = ({ onCitySelect, onAddressSelect, addressFieldHeight, cit
         }}
       />
 
-      {isCitySelected && (
-        <Animated.View style={{ opacity: addressFieldHeight }}>
+      {isCitySelected && cityLocation && (
+        <View>
           <Text style={styles.title}>Address</Text>
           <GooglePlacesAutocomplete
             placeholder="Enter address"
@@ -56,48 +57,63 @@ const LocationPicker = ({ onCitySelect, onAddressSelect, addressFieldHeight, cit
               key: GOOGLE_PLACES_API_KEY,
               language: 'en',
               types: 'address',
-//               locationbias: `circle:20000@${cityLocation.lat},${cityLocation.lng}`,
+              location: `${cityLocation.lat},${cityLocation.lng}`, // Координаты выбранного города
+              radius: 20000, // Радиус поиска в метрах (например, 20 км)
+              components: 'country:CZ',
             }}
             styles={{
               textInput: styles.input,
               listView: styles.listView,
               container: styles.autoCompleteContainer,
             }}
+            onFail={(error) => console.error(error)}
+            predefinedPlacesAlwaysVisible={false}
+            filterReverseGeocodingByTypes={['street_address']}
+            renderRow={(data) => {
+              const filteredData = filterAddresses([data])[0];
+              return filteredData ? (
+                <Text style={styles.listItem}>{filteredData.description}</Text>
+              ) : null;
+            }}
           />
-        </Animated.View>
+        </View>
       )}
     </View>
   );
 };
 
 const styles = {
-    title: {
-        fontSize: 18,
-        marginBottom: 5,
-        color: '#000',
-        alignSelf: 'center',
-    },
-    input: {
-        height: 50,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 25,
-        paddingHorizontal: 20,
-        marginBottom: 15,
-    },
-    listView: {
-        marginTop: 40,
-        minHeight: 200,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        zIndex: 1000,
-    },
-    autoCompleteContainer: {
-        backgroundColor: '#fff',
-        flex: 1,
-        zIndex: 1,
-        marginBottom: 60,
-    },
+  title: {
+    fontSize: 18,
+    marginBottom: 5,
+    color: '#000',
+    alignSelf: 'center',
+  },
+  input: {
+    height: 50,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    marginBottom: 15,
+  },
+  listView: {
+    minHeight: 200,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    zIndex: 1000,
+  },
+  listItem: {
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  autoCompleteContainer: {
+    backgroundColor: '#fff',
+    flex: 1,
+    zIndex: 1,
+    marginBottom: 0,
+  },
 };
 
 export default LocationPicker;
