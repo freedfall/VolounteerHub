@@ -46,7 +46,7 @@ const ProfileScreen: React.FC = () => {
   const onRefresh = async () => {
     setRefreshing(true);
     setIsLoaded({ created: false, participation: false });
-    await loadEvents(selectedCategory); // Обновляем текущую категорию
+    await loadEvents(selectedCategory);
     setRefreshing(false);
   };
 

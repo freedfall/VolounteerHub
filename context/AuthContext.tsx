@@ -98,6 +98,7 @@ export const AuthProvider: React.FC = ({ children }) => {
       if (response.ok) {
         console.log('Авторизация успешна');
         await AsyncStorage.setItem('userToken', data.token);
+        await loadUserData();
         setIsSignedIn(true);
       } else {
         console.error('Ошибка авторизации:', data.message);
@@ -129,6 +130,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
       console.log('Регистрация успешна');
       await AsyncStorage.setItem('userToken', data.token);
+      await loadUserData();
       setIsSignedIn(true);
     } catch (error) {
       console.error('Ошибка сети при регистрации:', error);

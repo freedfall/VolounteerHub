@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
 import { fetchParticipants } from '../utils/api';
+import UserCard from '../components/UserCard';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -24,15 +25,17 @@ const EventDetails: React.FC = ({ route }) => {
   const { user } = useContext(AuthContext);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [participants, setParticipants] = useState([]);
 
-  const isCreator = creator.email === user.email;
+  const isCreator = creator.id === user.id;
 
   useEffect(() => {
     const loadParticipants = async () => {
       try {
-        const participants = await fetchParticipants(id);
-        const participant = participants.find((participant) => participant.id === user.id);
+        const participantsData = await fetchParticipants(id);
+        setParticipants(participantsData);
 
+        const participant = participantsData.find((p) => p.id === user.id);
         if (participant) {
           setIsRegistered(true);
           setIsConfirmed(participant.status === 'confirmed');
@@ -48,7 +51,7 @@ const EventDetails: React.FC = ({ route }) => {
   }, [id, user.id]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={hospital} style={styles.image} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.details}>Start Time: {handleDateTimeWithoutDate(startDateTime)}</Text>
@@ -57,10 +60,33 @@ const EventDetails: React.FC = ({ route }) => {
       <Text style={styles.details}>Address: {address}</Text>
       <Text style={styles.details}>Points: {price}</Text>
       <Text style={styles.details}>Capacity: {occupiedQuantity}/{capacity}</Text>
-      <Text style={styles.details}>Creator: {`${creator.name} ${creator.surname}`}</Text>
       <Text style={styles.description}>{description}</Text>
-
-      {!isCreator ? (
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+          <UserCard
+            name={creator.name}
+            points={creator.points}
+            avatarUrl={creator.avatarUrl}
+            email={creator.email}
+          />
+      </View>
+      {isCreator ? (
+        <View style={styles.participantsContainer}>
+          <Text style={styles.participantsTitle}>Participants</Text>
+          {participants.map((participant) => (
+            <UserCard
+              key={participant.id}
+              name={participant.name}
+              points={participant.points}
+              avatarUrl={participant.avatarUrl}
+              email={participant.email}
+              showActions={isCreator}
+            />
+          ))}
+          <TouchableOpacity style={styles.deleteButton}>
+              <Text style={styles.deleteButtonText}>Delete Event</Text>
+            </TouchableOpacity>
+        </View>
+      ) : (
         <EventRegistrationStatus
           eventId={id}
           isRegistered={isRegistered}
@@ -70,17 +96,8 @@ const EventDetails: React.FC = ({ route }) => {
             setIsConfirmed(confirmation);
           }}
         />
-      ) : (
-        <>
-          <TouchableOpacity style={styles.viewParticipantsButton}>
-            <Text style={styles.viewParticipantsButtonText}>View Participants</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton}>
-            <Text style={styles.deleteButtonText}>Delete Event</Text>
-          </TouchableOpacity>
-        </>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -112,22 +129,14 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 10,
   },
-  viewParticipantsButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 25,
+  participantsContainer: {
     marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  viewParticipantsButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
+  participantsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
   },
   deleteButton: {
     backgroundColor: '#FF6347',

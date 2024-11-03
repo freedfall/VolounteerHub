@@ -53,13 +53,12 @@ export const fetchParticipants = async (eventId) => {
  */
 export const registerUserForEvent = async (eventId) => {
   try {
-    const response = await fetch(`${BASE_URL}/event/register`, {
+    const response = await fetch(`${BASE_URL}/event/register/` + eventId, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
       },
-      body: JSON.stringify({ eventId }),
     });
     if (!response.ok) throw new Error('Failed to register for event');
 
@@ -79,7 +78,7 @@ export const registerUserForEvent = async (eventId) => {
 export const cancelUserRegistration = async (eventId, userId) => {
   try {
     const response = await fetch(`${BASE_URL}/event/delete-user`, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
