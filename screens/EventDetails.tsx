@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
+import { fetchParticipants } from '../utils/api';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -15,6 +16,7 @@ const EventDetails: React.FC = ({ route }) => {
     price,
     description,
     capacity,
+    occupiedQuantity,
     creator,
     id,
   } = route.params;
@@ -26,37 +28,24 @@ const EventDetails: React.FC = ({ route }) => {
   const isCreator = creator.email === user.email;
 
   useEffect(() => {
-    // Получаем список зарегистрированных пользователей и обновляем статус
-    const fetchParticipants = async () => {
+    const loadParticipants = async () => {
       try {
-        const response = await fetch('https://fitexamprep.site/itu/api/event/users-registered/' + id, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          const participants = await response.json();
+        const participants = await fetchParticipants(id);
+        const participant = participants.find((participant) => participant.id === user.id);
 
-          const participant = participants.find(participant => participant.id === user.id);
-          console.log('Participant:', participants);
-
-          if (participant) {
-            setIsRegistered(true);
-            setIsConfirmed(participant.status === 'confirmed');
-          } else {
-            setIsRegistered(false);
-          }
+        if (participant) {
+          setIsRegistered(true);
+          setIsConfirmed(participant.status === 'confirmed');
         } else {
-          Alert.alert('Error', 'Failed to load participants.');
+          setIsRegistered(false);
         }
       } catch (error) {
-        console.error('Error fetching participants:', error);
+        Alert.alert('Error', 'Failed to load participants.');
       }
     };
 
-    fetchParticipants();
-  }, [id, user.email]);
+    loadParticipants();
+  }, [id, user.id]);
 
   return (
     <View style={styles.container}>
@@ -67,7 +56,7 @@ const EventDetails: React.FC = ({ route }) => {
       <Text style={styles.details}>City: {city}</Text>
       <Text style={styles.details}>Address: {address}</Text>
       <Text style={styles.details}>Points: {price}</Text>
-      <Text style={styles.details}>Capacity: {capacity}</Text>
+      <Text style={styles.details}>Capacity: {occupiedQuantity}/{capacity}</Text>
       <Text style={styles.details}>Creator: {`${creator.name} ${creator.surname}`}</Text>
       <Text style={styles.description}>{description}</Text>
 

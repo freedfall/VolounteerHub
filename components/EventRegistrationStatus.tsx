@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { registerUserForEvent, cancelUserRegistration } from '../utils/api';
 
 type EventRegistrationStatusProps = {
   eventId: string;
@@ -9,16 +10,15 @@ type EventRegistrationStatusProps = {
   onStatusChange: (newStatus: boolean, confirmation: boolean) => void;
 };
 
-const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({ eventId, isRegistered, isConfirmed, onStatusChange }) => {
+const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
+  eventId,
+  isRegistered,
+  isConfirmed,
+  onStatusChange,
+}) => {
   const registerForEvent = async () => {
     try {
-      const response = await fetch('https://fitexamprep.site/itu/api/event/register/' + eventId, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
-        },
-      });
+      const response = await registerUserForEvent(eventId);
       if (response.ok) {
         onStatusChange(true, false);
         Alert.alert('Success', 'Registration pending confirmation.');
@@ -35,15 +35,7 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({ event
       const userData = await AsyncStorage.getItem('userData');
       const { id: userId } = JSON.parse(userData);
 
-      const response = await fetch('https://fitexamprep.site/itu/api/event/delete-user', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
-        },
-        body: JSON.stringify({ eventId, userId }),
-      });
-
+      const response = await cancelUserRegistration(eventId, userId);
       if (response.ok) {
         onStatusChange(false, false);
         Alert.alert('Success', 'You have successfully canceled your registration.');

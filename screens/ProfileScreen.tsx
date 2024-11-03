@@ -1,29 +1,64 @@
-import React, { useContext, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
-import { useEventContext } from '../context/EventContext';
 import { useNavigation } from '@react-navigation/native';
 
+import { fetchUserCreatedEvents, fetchUserParticipationEvents } from '../utils/api';
+import { handleDateTime } from '../utils/dateUtils';
 import Card from '../components/Card';
 import QRCodeGenerator from '../components/QRCodeGenerator';
-
 import userProfileIcon from '../images/userProfileIcon.jpeg';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
-  const { events } = useEventContext();
   const navigation = useNavigation();
+
+  const [selectedCategory, setSelectedCategory] = useState<'createdEvents' | 'participationEvents'>('createdEvents');
+  const [createdEvents, setCreatedEvents] = useState([]);
+  const [participationEvents, setParticipationEvents] = useState([]);
+  const [isLoaded, setIsLoaded] = useState({ created: false, participation: false });
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!user) {
       loadUserData();
+    } else {
+      loadEvents(selectedCategory);
     }
-  }, [user]);
+  }, [user, selectedCategory]);
 
-  const userEvents = events.filter(event => event.creator?.email === user.email);
+  const loadEvents = async (category: 'createdEvents' | 'participationEvents') => {
+    try {
+      if (category === 'createdEvents' && !isLoaded.created) {
+        const eventsData = await fetchUserCreatedEvents();
+        setCreatedEvents(eventsData || []);
+        setIsLoaded((prev) => ({ ...prev, created: true }));
+      } else if (category === 'participationEvents' && !isLoaded.participation) {
+        const eventsData = await fetchUserParticipationEvents();
+        setParticipationEvents(eventsData || []);
+        setIsLoaded((prev) => ({ ...prev, participation: true }));
+      }
+    } catch (error) {
+      Alert.alert('Error', `Failed to load ${category === 'createdEvents' ? 'created' : 'participated'} events.`);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    setIsLoaded({ created: false, participation: false });
+    await loadEvents(selectedCategory); // Обновляем текущую категорию
+    setRefreshing(false);
+  };
+
+  const currentEvents = selectedCategory === 'createdEvents' ? createdEvents : participationEvents;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.profileHeader}>
         <Image
           source={user?.avatarUrl ? { uri: user.avatarUrl } : userProfileIcon}
@@ -37,56 +72,63 @@ const ProfileScreen: React.FC = () => {
 
       <View style={styles.infoSection}>
         <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={styles.infoTitle}>Email: </Text>
-                <Text style={styles.infoText}>{user?.email}</Text>
-            </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={styles.infoTitle}>Points: </Text>
-                <Text style={styles.infoText}>{user?.points}</Text>
-            </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={styles.infoTitle}>As creator: </Text>
-                <Text style={styles.infoText}>{user?.pointsAsCreator}</Text>
-            </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.infoTitle}>Email: </Text>
+            <Text style={styles.infoText}>{user?.email}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.infoTitle}>Points: </Text>
+            <Text style={styles.infoText}>{user?.points}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.infoTitle}>As creator: </Text>
+            <Text style={styles.infoText}>{user?.pointsAsCreator}</Text>
+          </View>
         </View>
-
         <QRCodeGenerator email={user?.email} />
       </View>
 
+      <View style={styles.switchContainer}>
+        <TouchableOpacity
+          style={[
+            styles.switchButton,
+            selectedCategory === 'createdEvents' && styles.selectedSwitchButton,
+          ]}
+          onPress={() => setSelectedCategory('createdEvents')}
+        >
+          <Text style={styles.switchButtonText}>Created Events</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.switchButton,
+            selectedCategory === 'participationEvents' && styles.selectedSwitchButton,
+          ]}
+          onPress={() => setSelectedCategory('participationEvents')}
+        >
+          <Text style={styles.switchButtonText}>Participation Events</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.eventHistory}>
-              <Text style={styles.historyTitle}>Your Events</Text>
-              {userEvents.length > 0 ? (
-                userEvents.map((event, index) => (
-                  <Card
-                    key={index}
-                    title={event.name}
-                    time={new Date(event.startDateTime).toDateString()}
-                    city={event.city}
-                    address={event.address}
-                    points={event.price}
-                    onPress={() =>
-                      navigation.navigate('EventDetails', {
-                        title: event.name,
-                        startTime: event.startDateTime,
-                        endTime: event.endDateTime,
-                        city: event.city,
-                        address: event.address,
-                        points: event.price,
-                        description: event.description,
-                        capacity: event.capacity,
-                        creator: event.creator,
-                        participants: event.participants,
-                      })
-                    }
-                  />
-                ))
-              ) : (
-                <Text style={styles.noEventsText}>You haven't created or joined any events yet.</Text>
-              )}
-            </View>
+        <Text style={styles.historyTitle}>
+          {selectedCategory === 'createdEvents' ? 'Your Created Events' : 'Your Participation Events'}
+        </Text>
+        {currentEvents.length > 0 ? (
+          currentEvents.map((event, index) => (
+            <Card
+              key={index}
+              title={event.name}
+              time={handleDateTime(event.startDateTime)}
+              city={event.city}
+              address={event.address}
+              points={event.price}
+              onPress={() => navigation.navigate('EventDetails', { ...event })}
+            />
+          ))
+        ) : (
+          <Text style={styles.noEventsText}>No events found in this category.</Text>
+        )}
+      </View>
 
       <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
         <Text style={styles.signOutButtonText}>Sign Out</Text>
@@ -141,6 +183,24 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+  },
+  switchButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: '#ddd',
+  },
+  selectedSwitchButton: {
+    backgroundColor: '#4CAF50',
+  },
+  switchButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   eventHistory: {
     marginVertical: 20,
   },
@@ -149,21 +209,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
-  },
-  eventItem: {
-    padding: 10,
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  eventName: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#333',
-  },
-  eventDetails: {
-    fontSize: 16,
-    color: '#555',
   },
   noEventsText: {
     fontSize: 16,

@@ -1,7 +1,6 @@
 // context/EventContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Определяем типы данных
 type Event = {
   id: string;
   title: string;
@@ -18,10 +17,8 @@ type EventContextType = {
   setEvents: (events: Event[]) => void;
 };
 
-// Создаем контекст с типизацией
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
-// Хук для использования контекста
 export const useEventContext = () => {
   const context = useContext(EventContext);
   if (!context) {
@@ -30,7 +27,6 @@ export const useEventContext = () => {
   return context;
 };
 
-// Провайдер контекста событий
 export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [events, setEvents] = useState<Event[]>([]);
 
