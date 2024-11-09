@@ -1,8 +1,6 @@
-// screens/RegistrationScreen.tsx
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
-import background from '../images/authorizationBackground.png';
 
 const RegistrationScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [name, setName] = useState('');
@@ -11,95 +9,76 @@ const RegistrationScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [password, setPassword] = useState('');
   const authContext = useContext(AuthContext);
 
-  if (!authContext) {
-    return <Text>AuthContext not found</Text>;
-  }
-
   const { register } = authContext;
 
   return (
     <View style={styles.container}>
-        <ImageBackground source={background} style={styles.background}>
-
-        <View style={styles.overlay} />
-
-        <View style={styles.content}>
-          <Text style={styles.header}>Create account</Text>
-          <View style={styles.inputContainer}>
-          <TextInput style={styles.input} placeholderTextColor="white" placeholder="Name" value={name} onChangeText={setName} />
-          <TextInput style={styles.input} placeholderTextColor="white" placeholder="Surname" value={surname} onChangeText={setSurname} />
-          <TextInput style={styles.input} placeholderTextColor="white" placeholder="Email" value={email} onChangeText={setEmail} />
-          <TextInput style={styles.input} placeholderTextColor="white" placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
-          <TouchableOpacity style={styles.button} onPress={() => register(name, surname, email, password)}>
-            <Text style={styles.buttonText}>Sign up</Text>
-          </TouchableOpacity>
-          </View>
+      <Text style={styles.header}>Create account</Text>
+      <View style={styles.modalContainer}>
+        <View style={styles.inputContainer}>
+          <TextInput style={styles.input} placeholder="Name" placeholderTextColor="rgba(1, 59, 20, 0.7)" value={name} onChangeText={setName} />
+          <TextInput style={styles.input} placeholder="Surname" placeholderTextColor="rgba(1, 59, 20, 0.7)" value={surname} onChangeText={setSurname} />
+          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="rgba(1, 59, 20, 0.7)" value={email} onChangeText={setEmail} />
+          <TextInput style={styles.input} placeholder="Password" placeholderTextColor="rgba(1, 59, 20, 0.7)" value={password} onChangeText={setPassword} secureTextEntry />
         </View>
-
-        </ImageBackground>
+        <TouchableOpacity style={styles.button} onPress={() => register(name, surname, email, password)}>
+          <Text style={styles.buttonText}>Sign up</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeButtonText}>Already have an account?</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-      backgroundColor: '#69B67E',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-  },
-  background: {
-    width: '100%',
-    height: '100%',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(105, 182, 126, .4);',
-  },
-  content: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    padding: 20,
+    bottom: 0,
   },
   header: {
     fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'white',
+    color: '#013B14',
+    marginBottom: 20,
+  },
+  modalContainer: {
+    width: '100%',
+    alignItems: 'center',
   },
   inputContainer: {
-    width: '80%',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 40,
-    padding: 20,
+    width: '100%',
+    marginBottom: 20,
   },
   input: {
-    width: '90%',
-    height: 60,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 50,
+    width: '100%',
+    height: 50,
+    borderWidth: 0,
+    borderRadius: 40,
     marginBottom: 15,
     paddingHorizontal: 20,
-    borderColor: 'rgba(1, 59, 20, 1)',
-    backgroundColor: 'rgba(1, 59, 20, 0.15)',
-    fontSize: 20,
-    color: 'white',
+    backgroundColor: 'rgba(105, 182, 126, 0.4)',
+    color: 'rgba(1, 59, 20, 0.7)',
+    fontSize: 18,
   },
   button: {
     backgroundColor: '#013B14',
     paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 50,
-    width: '70%',
-    marginTop: 70,
+    borderRadius: 40,
+    width: '63%',
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
+  },
+  closeButton: {
+    marginTop: 20,
+  },
+  closeButtonText: {
+    color: 'rgba(1, 59, 20, 1)',
+    fontSize: 18,
   },
 });
 

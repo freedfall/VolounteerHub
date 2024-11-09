@@ -1,122 +1,80 @@
-// screens/LoginScreen.tsx
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
-import background from '../images/authorizationBackground.png';
 
 const LoginScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const authContext = useContext(AuthContext);
 
-  if (!authContext) {
-    return <Text>AuthContext not found</Text>;
-  }
-
   const { signIn } = authContext;
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={background} style={styles.background}>
-        {/* Наложение прозрачности на фон */}
-        <View style={styles.overlay} />
-
-        {/* Контент экрана */}
-        <View style={styles.content}>
-          <Text style={styles.header}>Welcome back</Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholderTextColor='white'
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <TextInput
-              style={styles.input}
-              placeholderTextColor='white'
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            <TouchableOpacity style={styles.button} onPress={() => signIn(email, password)}>
-              <Text style={styles.buttonText}>Log in</Text>
-            </TouchableOpacity>
-          </View>
+      <Text style={styles.header}>Welcome back</Text>
+      <View style={styles.modalContainer}>
+        <View style={styles.inputContainer}>
+          <TextInput style={styles.input} placeholder="Email" placeholderTextColor="rgba(1, 59, 20, 0.7)" value={email} onChangeText={setEmail} />
+          <TextInput style={styles.input} placeholder="Password" placeholderTextColor="rgba(1, 59, 20, 0.7)" value={password} onChangeText={setPassword} secureTextEntry />
         </View>
-      </ImageBackground>
+        <TouchableOpacity style={styles.button} onPress={() => signIn(email, password)}>
+          <Text style={styles.buttonText}>Log in</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeButtonText}>Need to register?</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#69B67E',
-  },
-  background: {
-    width: '100%',
-    height: '100%',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(105, 182, 126, .4);',
-  },
-  content: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    padding: 20,
+    bottom: 0,
   },
   header: {
     fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'white',
+    color: '#013B14',
+    marginBottom: 20,
+  },
+  modalContainer: {
+    width: '100%',
+    alignItems: 'center',
   },
   inputContainer: {
-    width: '80%',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 40,
-    padding: 20,
+    width: '100%',
+    marginBottom: 20,
   },
   input: {
     width: '100%',
-    height: 60,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 50,
+    height: 50,
+    borderWidth: 0,
+    borderRadius: 40,
     marginBottom: 15,
     paddingHorizontal: 20,
-    borderColor: 'rgba(1, 59, 20, 1)',
-    backgroundColor: 'rgba(1, 59, 20, 0.15)',
-    fontSize: 20,
-    color: 'white',
+    backgroundColor: 'rgba(105, 182, 126, 0.4)',
+    color: 'rgba(1, 59, 20, 0.7)',
+    fontSize: 18,
   },
   button: {
-    backgroundColor: 'rgba(1, 59, 20, 1)',
+    backgroundColor: '#013B14',
     paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 50,
-    width: '70%',
-    marginTop: 50,
+    borderRadius: 40,
+    width: '63%',
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
   },
   closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'transparent',
+    marginTop: 20,
   },
   closeButtonText: {
-    fontSize: 24,
-    color: '#000',
+    color: 'rgba(1, 59, 20, 1)',
+    fontSize: 18,
   },
 });
 
