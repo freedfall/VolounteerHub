@@ -95,7 +95,10 @@ const LeaderBoardScreen = () => {
       {/* Search Modal */}
       <SearchModal
         isVisible={isModalVisible}
-        closeModal={() => setModalSearchVisible(false)}
+        closeModal={() => {
+            setModalSearchVisible(false);
+            setSearchText('');
+          }}
         searchText={searchText}
         setSearchText={setSearchText}
         searchHistory={searchHistory}

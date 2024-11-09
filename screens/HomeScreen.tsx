@@ -67,7 +67,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <SearchBar searchText={searchText} setSearchText={setSearchText} openModal={() => setModalVisible(true)} />
       <SearchModal
         isVisible={isModalVisible}
-        closeModal={() => setModalVisible(false)}
+        closeModal={() => {
+            setModalVisible(false);
+            setSearchText('');
+          }}
         searchText={searchText}
         setSearchText={setSearchText}
         searchHistory={searchHistory}
