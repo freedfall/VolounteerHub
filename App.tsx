@@ -91,7 +91,7 @@ const MainTabs: React.FC = () => {
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Tab.Screen name="Leaderboard" component={LeaderBoardScreen} />
+        <Tab.Screen name="Leaderboard" component={LeaderBoardScreen} options={{ headerShown: false }} />
         <Tab.Screen
           name="CreateEvent"
           component={HomeScreen}

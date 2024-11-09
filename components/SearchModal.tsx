@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { View, TextInput, Image, TouchableOpacity, Modal, ScrollView, Text, StyleSheet } from 'react-native';
-import Card from './Card';
 import clockIcon from '../images/components/clock.png';
 import searchIcon from '../images/components/searchIcon.png';
 import filterIcon from '../images/components/filterIcon.png';
@@ -12,11 +11,11 @@ type Props = {
   searchText: string;
   setSearchText: (text: string) => void;
   searchHistory: string[];
-  filteredEvents: any[];
-  onSelectEvent: (event: any) => void;
+  filteredItems: any[];
+  renderItem: (item: any, index: number) => React.ReactNode;
 };
 
-const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSearchText, searchHistory, filteredEvents, onSelectEvent }) => {
+const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSearchText, searchHistory, filteredItems, renderItem }) => {
   const modalSearchInputRef = useRef<TextInput>(null);
 
   return (
@@ -48,16 +47,10 @@ const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSe
               <Text style={styles.historyText}>{query}</Text>
             </TouchableOpacity>
           ))}
-          {filteredEvents.map((event, index) => (
-            <Card
-              key={index}
-              title={event.name}
-              time={handleDateTime(event.startDateTime)}
-              city={event.city}
-              address={event.address}
-              points={event.price}
-              onPress={() => onSelectEvent(event)}
-            />
+          {filteredItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {renderItem(item, index)}
+            </React.Fragment>
           ))}
         </ScrollView>
       </View>
