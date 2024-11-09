@@ -2,13 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from './Card';
 import { handleDateTime } from '../utils/dateUtils';
-
-type Props = {
-  events: any[];
-  onPressEvent: (event: any) => void;
-};
+import { useNavigation } from '@react-navigation/native';
 
 const AllEventsSection: React.FC<Props> = ({ events, onPressEvent }) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.allEventsContainer}>
       <Text style={styles.allEventsTitle}>All Events</Text>
@@ -20,7 +17,7 @@ const AllEventsSection: React.FC<Props> = ({ events, onPressEvent }) => {
           city={event.city}
           address={event.address}
           points={event.price}
-          onPress={() => onPressEvent(event)}
+          onPress={() => navigation.navigate('EventDetails', { ...event })}
         />
       ))}
     </View>

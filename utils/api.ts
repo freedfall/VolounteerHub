@@ -16,7 +16,6 @@ export const fetchEvents = async () => {
       },
     });
     const data = await response.json();
-    console.log('Events:', data);
     return data;
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -108,7 +107,6 @@ export const fetchUserCreatedEvents = async () => {
         },
         });
         const data = await response.json();
-        console.log('User created events:', data);
         return data;
     } catch (error) {
         console.error('Error fetching user created events:', error);
@@ -129,9 +127,83 @@ export const fetchUserParticipationEvents = async () => {
         },
         });
         const data = await response.json();
-        console.log('User created events:', data);
         return data;
     } catch (error) {
         console.error('Error fetching user participation events:', error);
+    }
+};
+
+/**
+ * Confirm user registration for an event
+ * @returns {Promise<Object>} - User data
+ */
+ export const confirmUserRegistration = async (eventId, userId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/event/status-confirm/` + eventId + '/' + userId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        });
+
+
+    } catch (error) {
+        console.error('Error confirming registration:', error);
+    }
+};
+
+/**
+ * Reject user registration for an event
+ * @returns {Promise<Object>} - User data
+ */
+export const rejectUserRegistration = async (eventId, userId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/event/status-reject/` + eventId + '/' + userId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        });
+    }
+    catch (error) {
+        console.error('Error rejecting registration:', error);
+    }
+};
+
+/**
+ * Confirm user attendance for an event
+ */
+export const confirmUserAttendance = async (eventId, userId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/event/attendance-confirm/` + eventId + '/' + userId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        });
+    }
+    catch (error) {
+        console.error('Error confirming attendance:', error);
+    }
+}
+
+/**
+ * Delete event
+ */
+export const deleteEvent = async (eventId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/event` + eventId, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        });
+    }
+    catch (error) {
+        console.error('Error deleting event:', error);
     }
 };

@@ -110,9 +110,6 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       <View style={styles.eventHistory}>
-        <Text style={styles.historyTitle}>
-          {selectedCategory === 'createdEvents' ? 'Your Created Events' : 'Your Participation Events'}
-        </Text>
         {currentEvents.length > 0 ? (
           currentEvents.map((event, index) => (
             <Card

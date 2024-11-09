@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import userProfileIcon from '../images/userProfileIcon.jpeg';
+import { confirmUserRegistration } from '../utils/api';
 
 type UserCardProps = {
   name: string;
@@ -8,10 +9,15 @@ type UserCardProps = {
   avatarUrl?: string;
   email?: string;
   showActions?: boolean;
+  id: string;
+  eventId?: string;
+  status?: string;
 };
 
-const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, showActions }) => {
+const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, showActions, id, eventId, status }) => {
   const [modalVisible, setModalVisible] = useState(false);
+
+  const isRegistered = status === 'CONFIRMED';
 
   return (
     <View>
@@ -32,8 +38,21 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalContent}
+            activeOpacity={1} // Отключаем закрытие по нажатию на содержимое модального окна
+          >
+            <TouchableOpacity
+              style={styles.closeIcon}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeIconText}>×</Text>
+            </TouchableOpacity>
             <Image
               source={avatarUrl ? { uri: avatarUrl } : userProfileIcon}
               style={styles.modalAvatar}
@@ -44,20 +63,29 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
 
             {showActions && (
               <View style={styles.actionsContainer}>
-                <TouchableOpacity style={styles.confirmButton}>
-                  <Text style={styles.confirmButtonText}>Confirm Registration</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.rejectButton}>
-                  <Text style={styles.rejectButtonText}>Reject Registration</Text>
-                </TouchableOpacity>
+                {isRegistered ? (
+                  <>
+                    <TouchableOpacity style={styles.confirmButton}>
+                      <Text style={styles.confirmButtonText}>Contact</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.rejectButton}>
+                      <Text style={styles.rejectButtonText}>Delete</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <TouchableOpacity style={styles.confirmButton} onPress={() => confirmUserRegistration(eventId, id)}>
+                      <Text style={styles.confirmButtonText}>Confirm Registration</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.rejectButton}>
+                      <Text style={styles.rejectButtonText}>Reject Registration</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
             )}
-
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -75,20 +103,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 3,
-    width: 300,
+    width: 380,
+    height: 100,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 72,
+    height: 72,
+    borderRadius: 50,
     marginRight: 15,
   },
   info: {
     flex: 1,
   },
   name: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -103,20 +131,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    width: 300,
+    width: 355,
     padding: 20,
     backgroundColor: '#FFF',
     borderRadius: 10,
     alignItems: 'center',
+    position: 'relative',
+  },
+  closeIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeIconText: {
+    fontSize: 24,
+    color: '#333',
+    fontWeight: 'bold',
   },
   modalAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 109,
+    height: 109,
+    borderRadius: 50,
     marginBottom: 10,
   },
   modalName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
@@ -132,38 +175,30 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   actionsContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginTop: 10,
+    gap: 10,
   },
   confirmButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    marginRight: 10,
+    backgroundColor: '#69B67E',
+    padding: 7,
+    paddingHorizontal: 30,
+    borderRadius: 40,
+    textAlign: 'center',
   },
   confirmButtonText: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 20,
   },
   rejectButton: {
-    backgroundColor: '#FF6347',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: '#FF6A6A',
+    padding: 7,
+    borderRadius: 40,
+    alignItems: 'center',
   },
   rejectButtonText: {
     color: '#FFF',
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#FF6347',
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: '#FFF',
-    fontSize: 16,
+    fontSize: 20,
   },
 });
 

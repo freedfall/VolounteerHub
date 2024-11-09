@@ -9,7 +9,7 @@ import UserCard from '../components/UserCard';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
-    title,
+    name,
     startDateTime,
     endDateTime,
     city,
@@ -53,25 +53,44 @@ const EventDetails: React.FC = ({ route }) => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={hospital} style={styles.image} />
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.details}>Start Time: {handleDateTimeWithoutDate(startDateTime)}</Text>
-      <Text style={styles.details}>End Time: {handleDateTimeWithoutDate(endDateTime)}</Text>
-      <Text style={styles.details}>City: {city}</Text>
-      <Text style={styles.details}>Address: {address}</Text>
-      <Text style={styles.details}>Points: {price}</Text>
-      <Text style={styles.details}>Capacity: {occupiedQuantity}/{capacity}</Text>
-      <Text style={styles.description}>{description}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-          <UserCard
-            name={creator.name}
-            points={creator.points}
-            avatarUrl={creator.avatarUrl}
-            email={creator.email}
-          />
+      <View style={styles.detailsContainer}>
+          <Text style={styles.title}>{name}</Text>
+          <View style={styles.timeContainer}>
+            <View style={styles.dataContainer}>
+              <Text style={styles.details}>Start Time</Text>
+              <Text style={styles.dataBlock}>{handleDateTimeWithoutDate(startDateTime)}</Text>
+            </View>
+            <View style={styles.dataContainer}>
+              <Text style={styles.details}>End Time</Text>
+              <Text style={styles.dataBlock}>{handleDateTimeWithoutDate(endDateTime)}</Text>
+            </View>
+            <View style={styles.dataContainer}>
+              <Text style={styles.details}>City</Text>
+              <Text style={styles.dataBlock}>{city}</Text>
+            </View>
+          </View>
+          <Text style={styles.details}>Address: {address}</Text>
+          <Text style={styles.details}>Points: {price}</Text>
+          <Text style={styles.details}>Capacity: {occupiedQuantity}/{capacity}</Text>
+          <Text style={styles.description}>{description}</Text>
+      </View>
+      <View style={styles.userList}>
+          <Text style={styles.participantsTitle}>Event creator</Text>
+          <View style={styles.participantsContainer}>
+              <UserCard
+                name={creator.name}
+                points={creator.points}
+                avatarUrl={creator.avatarUrl}
+                email={creator.email}
+                id={creator.id}
+                eventId={id}
+              />
+          </View>
       </View>
       {isCreator ? (
-        <View style={styles.participantsContainer}>
+        <View style={styles.userList}>
           <Text style={styles.participantsTitle}>Participants</Text>
+          <View style={styles.participantsContainer}>
           {participants.map((participant) => (
             <UserCard
               key={participant.id}
@@ -80,8 +99,12 @@ const EventDetails: React.FC = ({ route }) => {
               avatarUrl={participant.avatarUrl}
               email={participant.email}
               showActions={isCreator}
+              id={participant.id}
+              eventId={id}
+              status={participant.status} // Передаем статус
             />
           ))}
+          </View>
           <TouchableOpacity style={styles.deleteButton}>
               <Text style={styles.deleteButtonText}>Delete Event</Text>
             </TouchableOpacity>
@@ -104,39 +127,70 @@ const EventDetails: React.FC = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
+  },
+  detailsContainer: {
+    paddingHorizontal: 24,
+  },
+  dataContainer: {
+      alignItems: 'center',
+  },
+  timeContainer: {
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   image: {
     width: '100%',
     height: 200,
-    borderRadius: 10,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     marginBottom: 20,
   },
+    dataBlock: {
+        width: 115,
+        fontSize: 20,
+        color: '#333',
+        borderRadius: 40,
+        borderColor: '013B14',
+        borderWidth: 1,
+        textAlign: 'center',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#ffffff',
+    },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '500',
     marginBottom: 10,
     color: 'black',
   },
   details: {
-    fontSize: 16,
-    color: '#555',
+    fontSize: 20,
+    color: 'black',
     marginBottom: 5,
   },
   description: {
     fontSize: 16,
     color: '#333',
     marginTop: 10,
+    marginBottom: 40,
   },
   participantsContainer: {
     marginTop: 20,
   },
   participantsTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
+  },
+  userList:{
+      paddingHorizontal: 24,
+  },
+  participantsContainer: {
+    alignItems: 'center',
   },
   deleteButton: {
     backgroundColor: '#FF6347',
@@ -149,6 +203,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3.84,
     elevation: 5,
+    marginBottom: 40,
   },
   deleteButtonText: {
     color: '#fff',

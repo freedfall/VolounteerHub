@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import hospital from '../images/hospital.jpg';
+import { useNavigation } from '@react-navigation/native';
 
 interface CardProps {
   title: string;
