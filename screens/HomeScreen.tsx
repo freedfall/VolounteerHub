@@ -9,6 +9,9 @@ import AllEventsSection from '../components/AllEventsSection';
 import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
 import { useEventContext } from '../context/EventContext';
+import Card from '../components/Card';
+import { handleDateTime } from '../utils/dateUtils';
+
 
 type RootStackParamList = {
   Home: undefined;
@@ -64,16 +67,30 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <SearchBar searchText={searchText} setSearchText={setSearchText} openModal={() => setModalVisible(true)} />
       <SearchModal
         isVisible={isModalVisible}
-        closeModal={() => setModalVisible(false)}
+        closeModal={() => {
+            setModalVisible(false);
+            setSearchText('');
+          }}
         searchText={searchText}
         setSearchText={setSearchText}
         searchHistory={searchHistory}
-        filteredEvents={filteredEvents}
-        onSelectEvent={(event) => {
-          setModalVisible(false);
-          navigation.navigate('EventDetails', { ...event });
-        }}
+        filteredItems={filteredEvents}
+        renderItem={(event, index) => (
+          <Card
+            key={index}
+            title={event.name}
+            time={handleDateTime(event.startDateTime)}
+            city={event.city}
+            address={event.address}
+            points={event.price}
+            onPress={() => {
+              setModalVisible(false);
+              navigation.navigate('EventDetails', { ...event });
+            }}
+          />
+        )}
       />
+
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadEvents} />} showsVerticalScrollIndicator={false}>
         <CategorySection title="Popular Events" events={events} />
         <CategorySection title="Many Points" events={events.filter(event => event.price > 60)} />
