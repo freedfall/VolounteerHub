@@ -7,7 +7,7 @@ import { fetchUserCreatedEvents, fetchUserParticipationEvents } from '../utils/a
 import { handleDateTime } from '../utils/dateUtils';
 import Card from '../components/Card';
 import QRCodeGenerator from '../components/QRCodeGenerator';
-import userProfileIcon from '../images/userProfileIcon.jpeg';
+import userProfileIcon from '../images/userProfileIcon.jpg';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
@@ -31,6 +31,7 @@ const ProfileScreen: React.FC = () => {
     try {
       if (category === 'createdEvents' && !isLoaded.created) {
         const eventsData = await fetchUserCreatedEvents();
+        console.log(eventsData);
         setCreatedEvents(eventsData || []);
         setIsLoaded((prev) => ({ ...prev, created: true }));
       } else if (category === 'participationEvents' && !isLoaded.participation) {
@@ -50,7 +51,9 @@ const ProfileScreen: React.FC = () => {
     setRefreshing(false);
   };
 
-  const currentEvents = selectedCategory === 'createdEvents' ? createdEvents : participationEvents;
+  const currentEvents = (selectedCategory === 'createdEvents' ? createdEvents : participationEvents)
+    .slice()
+    .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
 
   return (
     <ScrollView
@@ -118,6 +121,7 @@ const ProfileScreen: React.FC = () => {
               time={handleDateTime(event.startDateTime)}
               city={event.city}
               address={event.address}
+              occupiedQuantity={event.occupiedQuantity}
               points={event.price}
               onPress={() => navigation.navigate('EventDetails', { ...event })}
             />

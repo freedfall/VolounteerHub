@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://fitexamprep.site/itu/api';
+const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
 /**
  * Fetch all events
@@ -107,6 +107,7 @@ export const fetchUserCreatedEvents = async () => {
         },
         });
         const data = await response.json();
+        console.log(data);
         return data;
     } catch (error) {
         console.error('Error fetching user created events:', error);
@@ -195,7 +196,7 @@ export const confirmUserAttendance = async (eventId, userId) => {
  */
 export const deleteEvent = async (eventId) => {
     try {
-        const response = await fetch(`${BASE_URL}/event` + eventId, {
+        const response = await fetch(`${BASE_URL}/event/` + eventId, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',

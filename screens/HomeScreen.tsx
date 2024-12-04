@@ -32,7 +32,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setRefreshing(true);
     try {
       const data = await fetchEvents();
-      if (data) setEvents(data);
+      if (data) {
+        const sortedEvents = data.sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+        setEvents(sortedEvents);
+      }
     } finally {
       setRefreshing(false);
     }

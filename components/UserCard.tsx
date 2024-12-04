@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import userProfileIcon from '../images/userProfileIcon.jpeg';
+import userProfileIcon from '../images/userProfileIcon.jpg';
 import { confirmUserRegistration } from '../utils/api';
 
 type UserCardProps = {

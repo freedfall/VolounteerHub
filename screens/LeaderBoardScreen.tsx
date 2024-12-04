@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import userIcon from '../images/userProfileIcon.jpeg'; // Placeholder icon
+import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
 import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
 
-const BASE_URL = 'https://fitexamprep.site/itu/api';
+const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
 const LeaderBoardScreen = () => {
   const [users, setUsers] = useState([]);

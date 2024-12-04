@@ -47,6 +47,14 @@ const RootStackScreen: React.FC = () => (
   </RootStack.Navigator>
 );
 
+const StartScreenStackScreen: React.FC = () => (
+  <StartScreenStack.Navigator>
+    <StartScreenStack.Screen name="StartScreen" component={StartScreen} options={{ headerShown: false }} />
+    <StartScreenStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+    <StartScreenStack.Screen name="SignUp" component={RegistrationScreen} options={{ headerShown: false }} />
+  </StartScreenStack.Navigator>
+);
+
 const MainTabs: React.FC = () => {
   const [isCreateEventModalVisible, setCreateEventModalVisible] = useState(false);
 
@@ -112,13 +120,6 @@ const MainTabs: React.FC = () => {
     </>
   );
 };
-const StartScreenStackScreen: React.FC = () => (
-  <StartScreenStack.Navigator>
-    <StartScreenStack.Screen name="StartScreen" component={StartScreen} options={{ headerShown: false }} />
-    <StartScreenStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-    <StartScreenStack.Screen name="SignUp" component={RegistrationScreen} options={{ headerShown: false }} />
-  </StartScreenStack.Navigator>
-);
 
 const App: React.FC = () => (
   <AuthProvider>

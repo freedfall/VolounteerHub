@@ -60,7 +60,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   const loadUserData = async () => {
     try {
-      const response = await fetch('https://fitexamprep.site/itu/api/user/me', {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/user/me', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Отправка запроса на авторизацию...');
-      const response = await fetch('https://fitexamprep.site/itu/auth/authenticate', {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/auth/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   const register = async (name: string, surname: string, email: string, password: string) => {
     try {
       console.log('Отправка запроса на регистрацию...');
-      const response = await fetch('https://fitexamprep.site/itu/auth/register', {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

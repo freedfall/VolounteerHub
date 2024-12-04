@@ -4,7 +4,7 @@ import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
-import { fetchParticipants } from '../utils/api';
+import { fetchParticipants, deleteEvent } from '../utils/api';
 import UserCard from '../components/UserCard';
 
 const EventDetails: React.FC = ({ route }) => {
@@ -101,11 +101,11 @@ const EventDetails: React.FC = ({ route }) => {
               showActions={isCreator}
               id={participant.id}
               eventId={id}
-              status={participant.status} // Передаем статус
+              status={participant.status}
             />
           ))}
           </View>
-          <TouchableOpacity style={styles.deleteButton}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => deleteEvent(id)}>
               <Text style={styles.deleteButtonText}>Delete Event</Text>
             </TouchableOpacity>
         </View>

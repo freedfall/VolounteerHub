@@ -47,7 +47,7 @@ const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSe
               <Text style={styles.historyText}>{query}</Text>
             </TouchableOpacity>
           ))}
-          {filteredItems.map((item, index) => (
+          {(filteredItems || []).map((item, index) => (
             <React.Fragment key={index}>
               {renderItem(item, index)}
             </React.Fragment>

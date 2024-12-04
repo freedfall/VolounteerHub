@@ -16,6 +16,7 @@ const AllEventsSection: React.FC<Props> = ({ events, onPressEvent }) => {
           time={handleDateTime(event.startDateTime)}
           city={event.city}
           address={event.address}
+          occupiedQuantity={event.occupiedQuantity}
           points={event.price}
           onPress={() => navigation.navigate('EventDetails', { ...event })}
         />

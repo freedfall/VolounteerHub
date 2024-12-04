@@ -91,7 +91,7 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       console.log("New event", newEvent);
       console.log("Json stringify event: ", JSON.stringify(newEvent));
 
-      const response = await fetch('https://fitexamprep.site/itu/api/event', {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,6 +105,7 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       if (response.ok) {
         const data = await response.json();
         Alert.alert('Success', 'Event created successfully');
+        onClose();
       } else {
         const errorText = await response.text();
         console.error('Error creating event:', errorText);
