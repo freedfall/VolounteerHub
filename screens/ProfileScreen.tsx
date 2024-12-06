@@ -2,58 +2,102 @@ import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 
-import { fetchUserCreatedEvents, fetchUserParticipationEvents } from '../utils/api';
+import { fetchUserCreatedEvents, fetchUserParticipationEvents, fetchEvents, fetchAllUsers, fetchAllEvents } from '../utils/api';
 import { handleDateTime } from '../utils/dateUtils';
 import Card from '../components/Card';
 import QRCodeGenerator from '../components/QRCodeGenerator';
 import userProfileIcon from '../images/userProfileIcon.jpg';
+import AdminUserModal from '../components/AdminUserModal';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
-  const [selectedCategory, setSelectedCategory] = useState<'createdEvents' | 'participationEvents'>('createdEvents');
+  const [isAdmin, setIsAdmin] = useState(user?.role === 'ADMIN');
+  const [selectedCategory, setSelectedCategory] = useState<'createdEvents' | 'participationEvents' | 'allEvents' | 'allUsers'>('createdEvents');
   const [createdEvents, setCreatedEvents] = useState([]);
   const [participationEvents, setParticipationEvents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [isLoaded, setIsLoaded] = useState({ created: false, participation: false });
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (!user) {
       loadUserData();
     } else {
       loadEvents(selectedCategory);
+      if (isAdmin) {
+          loadAdminData();
+      }
     }
-  }, [user, selectedCategory]);
+  }, [user, selectedCategory, isAdmin]);
 
-  const loadEvents = async (category: 'createdEvents' | 'participationEvents') => {
+useEffect(() => {
+  if (isFocused) {
+    console.log('ProfileScreen is focused, reloading data');
+    setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
+    loadEvents(selectedCategory);
+    if (isAdmin) {
+      loadAdminData();
+    }
+  }
+}, [isFocused, selectedCategory, isAdmin]);
+
+  const loadEvents = async (category: 'createdEvents' | 'participationEvents' | 'allEvents' | 'allUsers') => {
     try {
-      if (category === 'createdEvents' && !isLoaded.created) {
+      if (category === 'createdEvents' && !isLoaded.created && !isAdmin) {
         const eventsData = await fetchUserCreatedEvents();
         console.log(eventsData);
         setCreatedEvents(eventsData || []);
         setIsLoaded((prev) => ({ ...prev, created: true }));
-      } else if (category === 'participationEvents' && !isLoaded.participation) {
+      } else if (category === 'participationEvents' && !isLoaded.participation && !isAdmin) {
         const eventsData = await fetchUserParticipationEvents();
         setParticipationEvents(eventsData || []);
         setIsLoaded((prev) => ({ ...prev, participation: true }));
+      } else if (category === 'allEvents' && !isLoaded.allEvents && isAdmin) {
+        const eventsData = await fetchAllEvents();
+        setAllEvents(eventsData || []);
+        setIsLoaded((prev) => ({ ...prev, allEvents: true }));
+      } else if (category === 'allUsers' && !isLoaded.allUsers && isAdmin) {
+        const usersData = await fetchAllUsers();
+        setAllUsers(usersData || []);
+        setIsLoaded((prev) => ({ ...prev, allUsers: true }));
       }
     } catch (error) {
       Alert.alert('Error', `Failed to load ${category === 'createdEvents' ? 'created' : 'participated'} events.`);
     }
   };
 
+  const loadAdminData = async () => {
+    await loadEvents('allEvents');
+    await loadEvents('allUsers');
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    setIsLoaded({ created: false, participation: false });
+    setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
     await loadEvents(selectedCategory);
     setRefreshing(false);
   };
 
-  const currentEvents = (selectedCategory === 'createdEvents' ? createdEvents : participationEvents)
+  const currentEvents = (selectedCategory === 'createdEvents' ? createdEvents :
+                         selectedCategory === 'participationEvents' ? participationEvents :
+                         selectedCategory === 'allEvents' ? allEvents : [])
     .slice()
     .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+
+  const currentUsers = selectedCategory === 'allUsers' ? allUsers : [];
+
+  const openUserModal = (user) => {
+      setSelectedUser(user);
+      setModalVisible(true);
+    };
 
   return (
     <ScrollView
@@ -91,49 +135,125 @@ const ProfileScreen: React.FC = () => {
         <QRCodeGenerator email={user?.email} />
       </View>
 
-      <View style={styles.switchContainer}>
-        <TouchableOpacity
-          style={[
-            styles.switchButton,
-            selectedCategory === 'createdEvents' && styles.selectedSwitchButton,
-          ]}
-          onPress={() => setSelectedCategory('createdEvents')}
-        >
-          <Text style={styles.switchButtonText}>Created Events</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.switchButton,
-            selectedCategory === 'participationEvents' && styles.selectedSwitchButton,
-          ]}
-          onPress={() => setSelectedCategory('participationEvents')}
-        >
-          <Text style={styles.switchButtonText}>Participation Events</Text>
-        </TouchableOpacity>
-      </View>
+      {!isAdmin && (
+        <View style={styles.switchContainer}>
+          <TouchableOpacity
+            style={[
+              styles.switchButton,
+              selectedCategory === 'createdEvents' && styles.selectedSwitchButton,
+            ]}
+            onPress={() => setSelectedCategory('createdEvents')}
+          >
+            <Text style={styles.switchButtonText}>Created Events</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.switchButton,
+              selectedCategory === 'participationEvents' && styles.selectedSwitchButton,
+            ]}
+            onPress={() => setSelectedCategory('participationEvents')}
+          >
+            <Text style={styles.switchButtonText}>Participation Events</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
-      <View style={styles.eventHistory}>
-        {currentEvents.length > 0 ? (
-          currentEvents.map((event, index) => (
-            <Card
-              key={index}
-              title={event.name}
-              time={handleDateTime(event.startDateTime)}
-              city={event.city}
-              address={event.address}
-              occupiedQuantity={event.occupiedQuantity}
-              points={event.price}
-              onPress={() => navigation.navigate('EventDetails', { ...event })}
-            />
-          ))
-        ) : (
-          <Text style={styles.noEventsText}>No events found in this category.</Text>
-        )}
-      </View>
+      {isAdmin && (
+        <View style={styles.switchContainer}>
+          <TouchableOpacity
+            style={[
+              styles.switchButton,
+              selectedCategory === 'allEvents' && styles.selectedSwitchButton,
+            ]}
+            onPress={() => setSelectedCategory('allEvents')}
+          >
+            <Text style={styles.switchButtonText}>All Events</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.switchButton,
+              selectedCategory === 'allUsers' && styles.selectedSwitchButton,
+            ]}
+            onPress={() => setSelectedCategory('allUsers')}
+          >
+            <Text style={styles.switchButtonText}>All Users</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {!isAdmin && (
+        <View style={styles.eventHistory}>
+          {currentEvents.length > 0 ? (
+            currentEvents.map((event, index) => (
+              <Card
+                key={index}
+                title={event.name}
+                time={handleDateTime(event.startDateTime)}
+                city={event.city}
+                address={event.address}
+                occupiedQuantity={event.occupiedQuantity}
+                points={event.price}
+                onPress={() => navigation.navigate('EventDetails', { ...event })}
+              />
+            ))
+          ) : (
+            <Text style={styles.noEventsText}>No events found in this category.</Text>
+          )}
+        </View>
+      )}
+
+      {isAdmin && (
+        <View style={styles.eventHistory}>
+          {selectedCategory === 'allUsers' ? (
+            currentUsers.length > 0 ? (
+              currentUsers.map((user, index) => (
+                <TouchableOpacity key={index} onPress={() => openUserModal(user)}>
+                  <View style={styles.userCard}>
+                    <Image
+                      source={user.imageURL ? { uri: user.imageURL } : userProfileIcon}
+                      style={styles.userAvatar}
+                    />
+                    <View style={styles.userInfo}>
+                      <Text style={styles.userNameText}>{user.name} {user.surname}</Text>
+                      <Text style={styles.userEmail}>{user.email}</Text>
+                      <Text style={styles.userPoints}>Points: {user.points}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.noEventsText}>No users found.</Text>
+            )
+          ) : currentEvents.length > 0 ? (
+            currentEvents.map((event, index) => (
+              <Card
+                key={index}
+                title={event.name}
+                time={handleDateTime(event.startDateTime)}
+                city={event.city}
+                address={event.address}
+                occupiedQuantity={event.occupiedQuantity}
+                points={event.price}
+                onPress={() => navigation.navigate('EventDetails', { ...event })}
+              />
+            ))
+          ) : (
+            <Text style={styles.noEventsText}>No events found in this category.</Text>
+          )}
+        </View>
+      )}
 
       <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
         <Text style={styles.signOutButtonText}>Sign Out</Text>
       </TouchableOpacity>
+      {isAdmin && selectedUser && (
+              <AdminUserModal
+                visible={modalVisible}
+                user={selectedUser}
+                onClose={() => setModalVisible(false)}
+                navigation={navigation}
+              />
+            )}
     </ScrollView>
   );
 };
@@ -227,6 +347,43 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
+  // Внутри StyleSheet.create({...})
+  userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    marginVertical: 5,
+    borderRadius: 10,
+    backgroundColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+  },
+  userAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userNameText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#555',
+  },
+  userPoints: {
+    fontSize: 14,
+    color: '#555',
+  },
+
 });
 
 export default ProfileScreen;
