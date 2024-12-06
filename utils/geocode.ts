@@ -1,3 +1,4 @@
+
 export async function geocodeAddress(fullAddress) {
   const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=AIzaSyDAjiDOE8glvLdp12DuWoDI82wH_AXfBSI`);
   const data = await response.json();
@@ -8,3 +9,9 @@ export async function geocodeAddress(fullAddress) {
     throw new Error('Unable to find coordinates for the given address');
   }
 }
+
+export const parseCoordinates = (coordinates: string) => {
+    if (!coordinates) return null;
+  const [latitude, longitude] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+  return { latitude, longitude };
+};

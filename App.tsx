@@ -42,6 +42,7 @@ setCustomText(customTextProps);
 const RootStackScreen: React.FC = () => (
   <RootStack.Navigator>
     <RootStack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+    <RootStack.Screen name="MapScreen" component={MapScreen} options={{ headerShown: false }} />
     <RootStack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
     <RootStack.Screen name="CategoryDetails" component={CategoryDetailsScreen} options={{ headerShown: false }} />
   </RootStack.Navigator>

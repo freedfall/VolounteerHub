@@ -1,11 +1,50 @@
-import React, { useEffect, useState } from 'react';
-import { View, PermissionsAndroid, Platform, Alert, Text } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+// screens/MapScreen.tsx
+
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  View,
+  PermissionsAndroid,
+  Platform,
+  Alert,
+  Text,
+  StyleSheet,
+  ActivityIndicator
+} from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker, Callout, Region } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
+import { useEventContext } from '../context/EventContext';
+import { parseCoordinates } from '../utils/geocode';
+import haversine from 'haversine';
 import LoadingBar from '../components/LoadingBar';
+import Card from '../components/Card';
+import { useNavigation } from '@react-navigation/native';
+import { handleDateTime } from '../utils/dateUtils';
+
+type Event = {
+  id: string;
+  title: string;
+  time: string;
+  city: string;
+  address: string;
+  points: number;
+  description: string;
+  creator: string;
+  imageURL?: string;
+  coordinates: string; // "latitude, longitude"
+};
+
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+};
 
 const MapScreen = () => {
-  const [location, setLocation] = useState(null);
+  const { events } = useEventContext();
+  const [location, setLocation] = useState<Region | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [nearestEvent, setNearestEvent] = useState<Event | null>(null);
+  const mapRef = useRef<MapView>(null);
+  const navigation = useNavigation();
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -36,6 +75,7 @@ const MapScreen = () => {
 
       if (!hasPermission) {
         Alert.alert('Permission denied', 'Unable to get geolocation.');
+        setLoading(false);
         return;
       }
 
@@ -45,13 +85,15 @@ const MapScreen = () => {
           setLocation({
             latitude,
             longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
           });
+          setLoading(false);
         },
         (error) => {
           console.log(error);
           Alert.alert(`Error parsing geolocation: ${error.message}`);
+          setLoading(false);
         },
         {
           enableHighAccuracy: true,
@@ -66,20 +108,104 @@ const MapScreen = () => {
     getLocation();
   }, []);
 
+  useEffect(() => {
+    if (location && events.length > 0) {
+      let minDistance = Infinity;
+      let closestEvent: Event | null = null;
+
+      events.forEach(event => {
+        const eventCoords = parseCoordinates(event.coordinates);
+        const distance = haversine(
+          { latitude: location.latitude, longitude: location.longitude },
+          { latitude: eventCoords.latitude, longitude: eventCoords.longitude },
+          { unit: 'meter' }
+        ) || Infinity;
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestEvent = event;
+        }
+      });
+
+      setNearestEvent(closestEvent);
+    }
+  }, [location, events]);
+
+  useEffect(() => {
+    if (nearestEvent && mapRef.current) {
+      const coords = parseCoordinates(nearestEvent.coordinates);
+      mapRef.current.animateToRegion({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }, 1000);
+    }
+  }, [nearestEvent]);
+
+  if (loading || !location) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#4caf50" />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
-      {location ? (
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={{ flex: 1 }}
-          initialRegion={location}
-          showsUserLocation={true}
-        />
-      ) : (
-        <LoadingBar />
-      )}
+      <MapView
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        initialRegion={location}
+        showsUserLocation={true}
+      >
+        {events.map(event => {
+          const coords = parseCoordinates(event.coordinates);
+          return (
+            <Marker
+              key={event.id}
+              coordinate={{ latitude: coords.latitude, longitude: coords.longitude }}
+              title={event.title}
+              description={event.description}
+              pinColor="#69B67E"
+            >
+              <Callout tooltip onPress={() => { navigation.navigate('EventDetails', { ...event }) }}>
+                <View style={styles.calloutContainer}>
+                  <Card
+                      key={event.id}
+                      title={event.name}
+                      time={handleDateTime(event.startDateTime)}
+                      city={event.city}
+                      address={event.address}
+                      points={event.price}
+                      imageURL={event.imageURL}
+                      onPress={() => navigation.navigate('EventDetails', { ...event })}
+                    />
+                </View>
+              </Callout>
+            </Marker>
+          );
+        })}
+      </MapView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  map: {
+    flex: 1,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calloutContainer: {
+    marginBottom: 10,
+    backgroundColor: 'white',
+    borderRadius: 15,
+  },
+});
 
 export default MapScreen;

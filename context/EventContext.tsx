@@ -10,6 +10,8 @@ type Event = {
   points: number;
   description: string;
   creator: string;
+  imageURL?: string;
+  coordinates: string;
 };
 
 type EventContextType = {

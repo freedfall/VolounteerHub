@@ -21,6 +21,7 @@
     "axios": "^1.7.7",
     "date-fns": "^4.1.0",
     "glob": "^11.0.0",
+    "haversine": "^1.1.1",
     "inflight": "^1.0.6",
     "react": "18.3.1",
     "react-native": "0.75.3",
@@ -40,6 +41,7 @@
     "react-native-screens": "^3.34.0",
     "react-native-svg": "^15.8.0",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-webview": "^13.12.5",
     "react-native-wheel-picker-expo": "^0.5.4",
     "rimraf": "^6.0.1",
     "uuid": "^10.0.0"

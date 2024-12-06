@@ -1,6 +1,7 @@
 // components/Card.tsx
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { WebView } from 'react-native-webview';
 import hospital from '../images/hospital.jpg';
 import { useNavigation } from '@react-navigation/native';
 
@@ -18,7 +19,9 @@ const Card: React.FC<CardProps> = ({ title, time, city, address, points, onPress
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.cardContainer}>
-        <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} />
+        <Text style={styles.imageContainer}>
+            <Image source={imageURL ? { uri: imageURL } : hospital}  style={styles.image} resizeMode="cover" />
+        </Text>
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.details}>{time}</Text>
@@ -37,16 +40,19 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 15,
     marginVertical: 10,
-//     backgroundColor: 'rgba(200, 237, 210, .5)',
-    width: 364,
+    width: '100%',
     height: 130,
     alignSelf: 'center',
+  },
+  imageContainer: {
+    marginRight: 15,
+    marginTop: -45,
+    borderRadius: 15,
   },
   image: {
     width: 100,
     height: 100,
     borderRadius: 15,
-    marginRight: 15,
   },
   textContainer: {
     flex: 1,
