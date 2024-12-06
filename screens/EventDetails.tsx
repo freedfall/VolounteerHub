@@ -4,7 +4,7 @@ import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
-import { fetchParticipants, deleteEvent, updateEventDetails, fetchOccupiedQuantity } from '../utils/api';
+import { fetchParticipants, deleteEvent, updateEventDetails } from '../utils/api';
 import UserCard from '../components/UserCard';
 
 const EventDetails: React.FC = ({ route }) => {

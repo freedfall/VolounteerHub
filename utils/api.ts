@@ -268,23 +268,5 @@ export const updateEventDetails = async (eventId, data) => {
         console.error('Error updating event:', error);
     }
 };
-/**
- * Retrieves the number of registered users for a specific event.
- */
-export const fetchOccupiedQuantity = async (eventId) => {
-    try {
-        const response = await fetch(`${BASE_URL}/users-registered/` + eventId, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
-                'Content-Type': 'application/json',
-            },
-        });
-        const data = await response.json();
-        console.log('Fetched occupiedQuantity:', data);
-        return data;
-    } catch (error) {
-        console.error('Error fetching occupied quantity:', error);
-    }
-};
+
 
