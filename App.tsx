@@ -110,7 +110,7 @@ const MainTabs: React.FC = () => {
             },
           }}
         />
-        <Tab.Screen name="Map" component={MapScreen} />
+        <Tab.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
         <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
       </Tab.Navigator>
 

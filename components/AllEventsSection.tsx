@@ -8,19 +8,24 @@ const AllEventsSection: React.FC<Props> = ({ events, onPressEvent }) => {
   const navigation = useNavigation();
   return (
     <View style={styles.allEventsContainer}>
-      <Text style={styles.allEventsTitle}>All Events</Text>
-      {events.map((event, index) => (
-        <Card
-          key={index}
-          title={event.name}
-          time={handleDateTime(event.startDateTime)}
-          city={event.city}
-          address={event.address}
-          occupiedQuantity={event.occupiedQuantity}
-          points={event.price}
-          onPress={() => navigation.navigate('EventDetails', { ...event })}
-        />
-      ))}
+      {events.length > 0 && (
+          <>
+            <Text style={styles.allEventsTitle}>All Events</Text>
+            {events.map((event, index) => (
+              <Card
+                key={index}
+                title={event.name}
+                time={handleDateTime(event.startDateTime)}
+                city={event.city}
+                address={event.address}
+                points={event.price}
+                imageURL={event.imageURL}
+                onPress={() => onPressEvent(event)}
+              />
+            ))}
+            </>
+     )}
+     {events.length === 0 && <Text style={styles.allEventsTitle}>There are no events :(</Text>}
     </View>
   );
 };

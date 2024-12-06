@@ -86,6 +86,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             city={event.city}
             address={event.address}
             points={event.price}
+            imageURL={event.imageURL}
             onPress={() => {
               setModalVisible(false);
               navigation.navigate('EventDetails', { ...event });

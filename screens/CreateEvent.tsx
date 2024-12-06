@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Modal, StyleSheet, TouchableOpacity, Text, Animated, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert, Animated, Platform } from 'react-native';
 import { useEventContext } from '../context/EventContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventForm from '../components/EventForm';
+import ImagePicker from '../components/ImagePicker';
+import { geocodeAddress } from '../utils/geocode';
 
 const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { addEvent } = useEventContext();
@@ -19,7 +21,8 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [hasError, setHasError] = useState(false);
   const [addressFieldHeight] = useState(new Animated.Value(0));
   const [cityLocation, setCityLocation] = useState<{ lat: number, lng: number } | null>(null);
-  const [cityBounds, setCityBounds] = useState(null);
+  const [cityBounds, setCityBounds] = useState<any>(null);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
     validateForm();
@@ -45,6 +48,13 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const seconds = String(time.getSeconds()).padStart(2, '0');
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  };
+
+  const getImageUri = (uri: string) => {
+    if (Platform.OS === 'android' && !uri.startsWith('file://')) {
+      return `file://${uri}`;
+    }
+    return uri;
   };
 
   const handleCreateEvent = async () => {
@@ -75,6 +85,16 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const formattedStartTime = formatLocalTime(startDateTime);
     const formattedEndTime = formatLocalTime(eventEndTime);
 
+    const fullAddress = `${city}, ${address}`;
+    const coords = await geocodeAddress(fullAddress);
+
+    if (!coords) {
+      Alert.alert('Invalid Location', 'The provided address could not be geocoded.');
+      return;
+    }
+
+    console.log('coords:', coords);
+
     const newEvent = {
       name: title,
       description,
@@ -83,13 +103,11 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       startDateTime: formattedStartTime,
       endDateTime: formattedEndTime,
       capacity: parseInt(maxPeople),
+      coordinates: `${coords.latitude},${coords.longitude}`,
     };
 
     try {
       const token = await AsyncStorage.getItem('userToken');
-
-      console.log("New event", newEvent);
-      console.log("Json stringify event: ", JSON.stringify(newEvent));
 
       const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/event', {
         method: 'POST',
@@ -100,74 +118,110 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         body: JSON.stringify(newEvent),
       });
 
-      console.log("Response: ", response);
+      console.log("First Response Status:", response.status);
+      const firstResponseBody = await response.text();
+      console.log("First Response Body:", firstResponseBody);
 
       if (response.ok) {
-        const data = await response.json();
+        const eventId = firstResponseBody;
+
         Alert.alert('Success', 'Event created successfully');
+
+        if (imageUri) {
+          const formData = new FormData();
+          const uriParts = imageUri.split('.');
+          const fileType = uriParts[uriParts.length - 1].toLowerCase();
+
+          formData.append('image', {
+            uri: getImageUri(imageUri),
+            name: `image.${fileType}`,
+            type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
+          });
+
+          const uploadResponse = await fetch(`https://itu-215076752298.europe-central2.run.app/api/event/${eventId}/upload-image`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          console.log("Image Upload Response Status:", uploadResponse.status);
+          const uploadResponseBody = await uploadResponse.text();
+          console.log("Image Upload Response Body:", uploadResponseBody);
+
+          if (uploadResponse.ok) {
+            console.log('Image uploaded successfully');
+          } else {
+            console.error('Error uploading image:', uploadResponseBody);
+          }
+        }
+
         onClose();
       } else {
-        const errorText = await response.text();
-        console.error('Error creating event:', errorText);
-        Alert.alert('Error', 'Failed to create event');
+        console.error('Error creating event:', firstResponseBody);
+        Alert.alert('Error', `Failed to create event: ${firstResponseBody}`);
       }
     } catch (error) {
       console.error('Network error:', error);
       Alert.alert('Error', 'Network error occurred');
     }
 
-    setModalVisible(false);
     setTitle('');
     setCity('');
     setAddress('');
     setDate(new Date());
     setStartTime(new Date());
-    setEndTime(new Date());
+    setDuration({ hours: 0, minutes: 30 });
     setMaxPeople('');
     setDescription('');
+    setImageUri(null);
   };
 
   return (
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeButtonText}>×</Text>
-        </TouchableOpacity>
-        <EventForm
-          title={title}
-          setTitle={setTitle}
-          city={city}
-          setCity={setCity}
-          address={address}
-          setAddress={setAddress}
-          date={date}
-          setDate={setDate}
-          startTime={startTime}
-          setStartTime={setStartTime}
-          duration={duration}
-          handleDurationChange={(value, type) => {
-            setDuration((prevState) => ({ ...prevState, [type]: value }));
-          }}
-          maxPeople={maxPeople}
-          setMaxPeople={setMaxPeople}
-          description={description}
-          setDescription={setDescription}
-          addressFieldHeight={addressFieldHeight}
-          cityLocation={cityLocation}
-          cityBounds={cityBounds}
-          handleCreateEvent={handleCreateEvent}
-          hasError={hasError}
-          setShowDatePicker={setShowDatePicker}
-          setShowStartTimePicker={setShowStartTimePicker}
-          showDatePicker={showDatePicker}
-          showStartTimePicker={showStartTimePicker}
-        />
-      </View>
-    );
-  };
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <Text style={styles.closeButtonText}>×</Text>
+      </TouchableOpacity>
+
+      <ImagePicker imageUri={imageUri} setImageUri={setImageUri} />
+      <EventForm
+        title={title}
+        setTitle={setTitle}
+        city={city}
+        setCity={setCity}
+        address={address}
+        setAddress={setAddress}
+        date={date}
+        setDate={setDate}
+        startTime={startTime}
+        setStartTime={setStartTime}
+        duration={duration}
+        handleDurationChange={(value, type) => {
+          setDuration((prevState) => ({ ...prevState, [type]: value }));
+        }}
+        maxPeople={maxPeople}
+        setMaxPeople={setMaxPeople}
+        description={description}
+        setDescription={setDescription}
+        addressFieldHeight={addressFieldHeight}
+        cityLocation={cityLocation}
+        cityBounds={cityBounds}
+        handleCreateEvent={handleCreateEvent}
+        hasError={hasError}
+        setShowDatePicker={setShowDatePicker}
+        setShowStartTimePicker={setShowStartTimePicker}
+        showDatePicker={showDatePicker}
+        showStartTimePicker={showStartTimePicker}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   closeButton: {
     position: 'absolute',
@@ -181,13 +235,6 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 24,
-    color: '#000',
-  },
-  headerButton: {
-    marginRight: 15,
-  },
-  headerButtonText: {
-    fontSize: 16,
     color: '#000',
   },
 });

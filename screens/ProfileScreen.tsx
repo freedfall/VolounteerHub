@@ -123,6 +123,7 @@ const ProfileScreen: React.FC = () => {
               address={event.address}
               occupiedQuantity={event.occupiedQuantity}
               points={event.price}
+              imageURL={event.imageURL}
               onPress={() => navigation.navigate('EventDetails', { ...event })}
             />
           ))

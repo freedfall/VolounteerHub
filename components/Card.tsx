@@ -10,14 +10,15 @@ interface CardProps {
   city: string;
   address: string;
   points: number;
+  imageURL?: string;
   onPress: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ title, time, city, address, points, onPress }) => {
+const Card: React.FC<CardProps> = ({ title, time, city, address, points, onPress, imageURL }) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.cardContainer}>
-        <Image source={hospital} style={styles.image} />
+        <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} />
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.details}>{time}</Text>

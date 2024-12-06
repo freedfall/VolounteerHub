@@ -33,6 +33,7 @@ const CategorySection: React.FC<Props> = ({ title, events }) => {
             city={event.city}
             address={event.address}
             points={event.price}
+            imageURL={event.imageURL}
             onPress={() => navigation.navigate('EventDetails', { ...event })}
           />
         ))}

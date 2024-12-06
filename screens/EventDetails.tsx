@@ -6,6 +6,7 @@ import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
 import { fetchParticipants, deleteEvent } from '../utils/api';
 import UserCard from '../components/UserCard';
+import { useNavigation } from '@react-navigation/native';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -19,6 +20,7 @@ const EventDetails: React.FC = ({ route }) => {
     capacity,
     occupiedQuantity,
     creator,
+    imageURL,
     id,
   } = route.params;
 
@@ -28,6 +30,8 @@ const EventDetails: React.FC = ({ route }) => {
   const [participants, setParticipants] = useState([]);
 
   const isCreator = creator.id === user.id;
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadParticipants = async () => {
@@ -50,9 +54,19 @@ const EventDetails: React.FC = ({ route }) => {
     loadParticipants();
   }, [id, user.id]);
 
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      await deleteEvent(eventId);
+      navigation.goBack();
+      Alert.alert('Success', 'Event deleted successfully.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete event.');
+    }
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Image source={hospital} style={styles.image} />
+      <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} />
       <View style={styles.detailsContainer}>
           <Text style={styles.title}>{name}</Text>
           <View style={styles.timeContainer}>
@@ -105,7 +119,7 @@ const EventDetails: React.FC = ({ route }) => {
             />
           ))}
           </View>
-          <TouchableOpacity style={styles.deleteButton} onPress={() => deleteEvent(id)}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
               <Text style={styles.deleteButtonText}>Delete Event</Text>
             </TouchableOpacity>
         </View>

@@ -16,6 +16,7 @@ export const fetchEvents = async () => {
       },
     });
     const data = await response.json();
+    console.log(data);
     return data;
   } catch (error) {
     console.error('Error fetching events:', error);
