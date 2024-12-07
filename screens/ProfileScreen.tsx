@@ -99,6 +99,13 @@ useEffect(() => {
       setModalVisible(true);
     };
 
+  const handleUserUpdated = () => {
+      // Перезагружаем список пользователей после обновления одного из них
+      if (isAdmin && selectedCategory === 'allUsers') {
+        loadEvents('allUsers');
+      }
+    };
+
   return (
     <ScrollView
       contentContainerStyle={styles.container}

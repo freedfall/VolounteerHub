@@ -1,20 +1,19 @@
 // AdminUserModal.tsx
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert, ActivityIndicator, TextInput } from 'react-native';
 import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userProfileIcon from '../images/userProfileIcon.jpg';
 import { handleDateTime } from '../utils/dateUtils';
-
-const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
+import { fetchAdminUserCreatedEvents, fetchUserAttendedEvents, adminUpdateUserDetails } from '../utils/api';
 
 type UserType = {
   id: number;
   name: string;
   surname: string;
-  email: string;
   points: number;
-  imageURL?: string;
+  pointsAsCreator: number;
 };
 
 type EventType = {
@@ -35,50 +34,38 @@ interface AdminUserModalProps {
 }
 
 const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose, navigation }) => {
-  const [selectedCategory, setSelectedCategory] = useState<'createdEvents' | 'participationEvents'>('createdEvents');
+  const [selectedCategory, setSelectedCategory] = useState<'createdEvents' | 'attendedEvents'>('createdEvents');
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<EventType[]>([]);
 
   // Локальные стейты для редактирования данных пользователя
   const [userName, setUserName] = useState(user.name);
   const [userSurname, setUserSurname] = useState(user.surname);
-  const [userEmail, setUserEmail] = useState(user.email);
-  const [userPoints, setUserPoints] = useState(user.points.toString());
+  const [userPoints, setUserPoints] = useState<number>(user.points);
   const [isEditable, setIsEditable] = useState(false);
 
   useEffect(() => {
     if (visible && user) {
       loadUserEvents();
+      setUserName(user.name);
+      setUserSurname(user.surname);
+      setUserPoints(user.points);
+      setIsEditable(false);
     }
   }, [visible, user, selectedCategory]);
 
   const loadUserEvents = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      let url;
+      let fetchedEvents = [];
       if (selectedCategory === 'createdEvents') {
-        url = `${BASE_URL}/event/my-as-creator`;
+        fetchedEvents = await fetchAdminUserCreatedEvents(user.id);
       } else {
-        url = `${BASE_URL}/event/my-as-participant`;
+        fetchedEvents = await fetchUserAttendedEvents(user.id);
       }
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-
-      const data = await response.json();
-      setEvents(data || []);
+      setEvents(fetchedEvents || []);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', error.message || 'Failed to fetch events');
     } finally {
       setLoading(false);
     }
@@ -86,37 +73,23 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
 
   const handleSaveChanges = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
       const updatedData = {
         name: userName,
         surname: userSurname,
+        points: userPoints
       };
       console.log('Updated Data:', updatedData);
-      const response = await fetch(`${BASE_URL}/user/${user.id}/update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(updatedData),
-      });
-
-      if (!response.ok) {
-        const respData = await response.json();
-        console.log('Error response:', errorData);
-        throw new Error(respData.message || 'Failed to update user data');
-      }
-
-      Alert.alert('Success', 'User data updated successfully');
-      setIsEditing(false);
+      await adminUpdateUserDetails(user.id, updatedData);
+      setIsEditable(false);
+      onClose();
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+        Alert.alert('Error', error.message || 'Failed to update user data');
     }
   };
 
   const handleEditClick = () => {
-      setIsEditable(true);
-    };
+    setIsEditable(true);
+  };
 
   const renderEvent = ({ item }: { item: EventType }) => (
     <TouchableOpacity style={styles.eventItem} onPress={() => navigation.navigate('EventDetails', { ...item })}>
@@ -124,6 +97,7 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
       <Text style={styles.eventDetails}>{handleDateTime(item.startDateTime)}</Text>
       <Text style={styles.eventDetails}>{item.city}, {item.address}</Text>
       <Text style={styles.eventDetails}>Points: {item.price}</Text>
+      <Text style={styles.eventDetails}>Occupied: {item.occupiedQuantity}</Text>
     </TouchableOpacity>
   );
 
@@ -155,7 +129,21 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
           onChangeText={setUserSurname}
           editable={isEditable}
         />
-
+        <TextInput
+          style={styles.input}
+          placeholder="Points"
+          value={userPoints?.toString()}
+          onChangeText={(text) => {
+            const parsed = parseInt(text);
+            if (!isNaN(parsed)) {
+              setUserPoints(parsed);
+            } else {
+              Alert.alert('Invalid Input', 'Please enter a valid number for points.');
+            }
+          }}
+          editable={isEditable}
+          keyboardType="numeric"
+        />
 
         {/* Edit Button */}
         {!isEditable && (
@@ -185,11 +173,11 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
           <TouchableOpacity
             style={[
               styles.modalSwitchButton,
-              selectedCategory === 'participationEvents' && styles.selectedModalSwitchButton,
+              selectedCategory === 'attendedEvents' && styles.selectedModalSwitchButton,
             ]}
-            onPress={() => setSelectedCategory('participationEvents')}
+            onPress={() => setSelectedCategory('attendedEvents')}
           >
-            <Text style={styles.modalSwitchButtonText}>Participation Events</Text>
+            <Text style={styles.modalSwitchButtonText}>Attended Events</Text>
           </TouchableOpacity>
         </View>
 
@@ -282,47 +270,42 @@ const styles = StyleSheet.create({
   noEventsText: {
     color: '#333',
     marginVertical: 10,
+    textAlign: 'center',
   },
   input: {
-      width: '100%',
-      padding: 10,
-      marginBottom: 15,
-      borderColor: '#ccc',
-      borderWidth: 1,
-      borderRadius: 5,
-      fontSize: 16,
-      color: '#333',
-    },
-    editButton: {
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      backgroundColor: '#007BFF',
-      borderRadius: 5,
-      marginBottom: 15,
-    },
-    editButtonText: {
-      color: '#fff',
-      fontSize: 16,
-      textAlign: 'center',
-    },
-    saveButton: {
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      backgroundColor: '#28a745',
-      borderRadius: 5,
-      marginBottom: 15,
-    },
-    saveButtonText: {
-      color: '#fff',
-      fontSize: 16,
-      textAlign: 'center',
-    },
-    noEventsText: {
-      fontSize: 16,
-      color: '#777',
-      textAlign: 'center',
-      marginTop: 20,
-    },
-  });
+    width: '100%',
+    padding: 10,
+    marginBottom: 15,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    fontSize: 16,
+    color: '#333',
+  },
+  editButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  saveButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#28a745',
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+});
 
-  export default AdminUserModal;
+export default AdminUserModal;

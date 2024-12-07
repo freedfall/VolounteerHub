@@ -4,7 +4,7 @@ import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
-import { fetchParticipants, deleteEvent, updateEventDetails } from '../utils/api';
+import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails } from '../utils/api';
 import UserCard from '../components/UserCard';
 
 const EventDetails: React.FC = ({ route }) => {
@@ -78,10 +78,29 @@ const EventDetails: React.FC = ({ route }) => {
     loadParticipants();
   }, [id, user.id]);
 
+  const handleDeleteEvent = async (eventId) => {
+      try {
+        if(!isAdmin){
+            await adminDeleteEvent(eventId);
+        } else {
+            await deleteEvent(eventId);
+        }
+        navigation.goBack();
+        Alert.alert('Success', 'Event deleted successfully.');
+      } catch (error) {
+        Alert.alert('Error', 'Failed to delete event.');
+      }
+    }
+
   const handleUpdateEventDetails = async () => {
       try {
         const newEventDetails = { ...editedEventDetails };
 
+        if(!isAdmin){
+            await adminUpdateEventDetails(id, newEventDetails);
+        } else {
+            await updateEventDetails(id, newEventDetails);
+        }
         await updateEventDetails(id, newEventDetails);
 
         setEventDetails({...eventDetails, ...newEventDetails });
@@ -148,7 +167,7 @@ const EventDetails: React.FC = ({ route }) => {
             />
           ))}
           </View>
-          <TouchableOpacity style={styles.deleteButton} onPress={() => deleteEvent(id)}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
               <Text style={styles.deleteButtonText}>Delete Event</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.updateButton} onPress={() => setIsModalVisible(true)}>
