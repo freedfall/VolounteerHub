@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, ScrollView, Text, StyleSheet, Image, Modal, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
 import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails } from '../utils/api';
 import UserCard from '../components/UserCard';
+import { useNavigation } from '@react-navigation/native';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -27,9 +28,9 @@ const EventDetails: React.FC = ({ route }) => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [participants, setParticipants] = useState([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [eventDetails, setEventDetails] = useState({
+    id,
     name,
     startDateTime,
     endDateTime,
@@ -42,20 +43,9 @@ const EventDetails: React.FC = ({ route }) => {
     coordinates,
   });
 
-  const [editedEventDetails, setEditedEventDetails] = useState({
-    name: name,
-    startDateTime: startDateTime,
-    endDateTime: endDateTime,
-    city: city,
-    address: address,
-    price: price,
-    description: description,
-    capacity: capacity,
-    coordinates: coordinates,
-  });
-
   const isCreator = creator.id === user.id;
   const isAdmin = user.role === 'ADMIN';
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadParticipants = async () => {
@@ -91,25 +81,6 @@ const EventDetails: React.FC = ({ route }) => {
         Alert.alert('Error', 'Failed to delete event.');
       }
     }
-
-  const handleUpdateEventDetails = async () => {
-      try {
-        const newEventDetails = { ...editedEventDetails };
-
-        if(isAdmin){
-            await adminUpdateEventDetails(id, newEventDetails);
-        } else {
-            await updateEventDetails(id, newEventDetails);
-        }
-
-        setEventDetails({...eventDetails, ...newEventDetails });
-
-        setIsModalVisible(false);
-        Alert.alert('Success', 'Event details updated successfully');
-      } catch (error) {
-        console.error('Error updating event details:', error);
-      }
-    };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -169,7 +140,7 @@ const EventDetails: React.FC = ({ route }) => {
           <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
               <Text style={styles.deleteButtonText}>Delete Event</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.updateButton} onPress={() => setIsModalVisible(true)}>
+          <TouchableOpacity style={styles.updateButton} onPress={() => navigation.navigate('CreateEvent', { event: eventDetails })}>
               <Text style={styles.updateButtonText}>Update Event Details</Text>
           </TouchableOpacity>
         </View>
@@ -185,65 +156,6 @@ const EventDetails: React.FC = ({ route }) => {
         />
       )}
 
-      {/* Modal for Editing Event */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Edit Event Details</Text>
-            <TextInput
-              style={styles.input}
-              value={editedEventDetails.name}
-              onChangeText={(text) => setEditedEventDetails({ ...editedEventDetails, name: text })}
-              placeholder="Event Name"
-              placeholderTextColor="#999"
-            />
-
-            <TextInput
-              style={styles.input}
-              value={String(editedEventDetails.capacity)}
-              onChangeText={(text) => setEditedEventDetails({ ...editedEventDetails, capacity: parseInt(text) })}
-              placeholder="Event Capacity"
-              keyboardType="numeric"
-              placeholderTextColor="#999"
-            />
-
-            <TextInput
-              style={styles.input}
-              value={editedEventDetails.description}
-              onChangeText={(text) => setEditedEventDetails({ ...editedEventDetails, description: text })}
-              placeholder="Event Description"
-              placeholderTextColor="#999"
-            />
-
-            <TextInput
-              style={styles.input}
-              value={editedEventDetails.city}
-              onChangeText={(text) => setEditedEventDetails({ ...editedEventDetails, city: text })}
-              placeholder="City"
-              placeholderTextColor="#999"
-            />
-
-            <TextInput
-              style={styles.input}
-              value={editedEventDetails.address}
-              onChangeText={(text) => setEditedEventDetails({ ...editedEventDetails, address: text })}
-              placeholder="Address"
-              placeholderTextColor="#999"
-            />
-            <TouchableOpacity style={styles.saveButton} onPress={handleUpdateEventDetails}>
-              <Text style={styles.saveButtonText}>Save Changes</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -353,52 +265,6 @@ const styles = StyleSheet.create({
       fontSize: 16,
       textAlign: 'center',
     },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  modalTitle: {
-    fontSize: 22,
-    marginBottom: 15,
-    textAlign: 'center',
-    color: '#000000',
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingLeft: 10,
-    color: '#000000',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  saveButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
-  cancelButton: {
-    backgroundColor: 'gray',
-    padding: 10,
-    borderRadius: 5,
-  },
-  cancelButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
 });
 
 export default EventDetails;

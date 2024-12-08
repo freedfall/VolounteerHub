@@ -44,6 +44,7 @@ const RootStackScreen: React.FC = () => (
     <RootStack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
     <RootStack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
     <RootStack.Screen name="CategoryDetails" component={CategoryDetailsScreen} options={{ headerShown: false }} />
+    <RootStack.Screen name="CreateEvent" component={CreateEvent} options={{ headerShown: false }} />
   </RootStack.Navigator>
 );
 

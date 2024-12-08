@@ -30,6 +30,7 @@ const EventForm = ({
   setShowStartTimePicker,
   showDatePicker,
   showStartTimePicker,
+  buttonText,
 }) => {
   const formFields = [
     {
@@ -122,18 +123,18 @@ const EventForm = ({
     },
     {
       key: 'createButton',
-      label: '',
-      component: (
-        <TouchableOpacity
-          style={[styles.button, hasError && styles.buttonDisabled]}
-          onPress={handleCreateEvent}
-          disabled={hasError}
-        >
-          <Text style={styles.buttonText}>Create</Text>
-        </TouchableOpacity>
-      ),
-    },
-  ];
+        label: '',
+        component: (
+          <TouchableOpacity
+            style={[styles.button, hasError && styles.buttonDisabled]}
+            onPress={handleCreateEvent}
+            disabled={hasError}
+          >
+            <Text style={styles.buttonText}>{buttonText}</Text>
+          </TouchableOpacity>
+        ),
+      },
+    ];
 
   return (
     <FlatList

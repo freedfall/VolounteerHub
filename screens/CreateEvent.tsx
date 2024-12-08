@@ -3,8 +3,16 @@ import { View, Modal, StyleSheet, TouchableOpacity, Text, Animated, Alert } from
 import { useEventContext } from '../context/EventContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventForm from '../components/EventForm';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { adminUpdateEventDetails } from '../utils/api';
 
 const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const route = useRoute();
+  const navigation = useNavigation();
+
+  const event = route.params?.event; // если undefined, значит создаем новый
+  const isUpdateMode = !!event;
+
   const { addEvent } = useEventContext();
   const [title, setTitle] = useState('');
   const [city, setCity] = useState('');
@@ -20,6 +28,27 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [addressFieldHeight] = useState(new Animated.Value(0));
   const [cityLocation, setCityLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [cityBounds, setCityBounds] = useState(null);
+
+  useEffect(() => {
+    if (isUpdateMode && event) {
+      setTitle(event.name);
+      setCity(event.city);
+      setAddress(event.address);
+      setMaxPeople(String(event.capacity));
+      setDescription(event.description);
+
+      const start = new Date(event.startDateTime);
+      const end = new Date(event.endDateTime);
+      setDate(start);
+      setStartTime(start);
+
+      const diffMs = end - start;
+      const diffMins = diffMs / 60000;
+      const hours = Math.floor(diffMins / 60);
+      const minutes = diffMins % 60;
+      setDuration({ hours, minutes });
+    }
+  }, [isUpdateMode, event]);
 
   useEffect(() => {
     validateForm();
@@ -45,6 +74,33 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const seconds = String(time.getSeconds()).padStart(2, '0');
 
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  };
+
+  const prepareEventData = () => {
+    const startDateTime = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      startTime.getHours(),
+      startTime.getMinutes()
+    );
+
+    const totalDuration = duration.hours * 60 + duration.minutes;
+    const eventEndTime = new Date(startDateTime);
+    eventEndTime.setMinutes(eventEndTime.getMinutes() + totalDuration);
+
+    const formattedStartTime = formatLocalTime(startDateTime);
+    const formattedEndTime = formatLocalTime(eventEndTime);
+
+    return {
+      name: title,
+      description: description,
+      city: city,
+      address: address,
+      startDateTime: formattedStartTime,
+      endDateTime: formattedEndTime,
+      capacity: parseInt(maxPeople, 10),
+    };
   };
 
   const handleCreateEvent = async () => {
@@ -127,6 +183,20 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setDescription('');
   };
 
+  const handleUpdateEvent = async () => {
+
+    const updatedEventData = prepareEventData();
+
+    try {
+      await adminUpdateEventDetails(event.id, updatedEventData);
+
+      Alert.alert('Success', 'Event details updated successfully');
+    } catch (error) {
+      console.error('Network error:', error);
+      Alert.alert('Error', 'Network error occurred');
+    }
+  };
+
   return (
       <View style={styles.container}>
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -160,6 +230,8 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           setShowStartTimePicker={setShowStartTimePicker}
           showDatePicker={showDatePicker}
           showStartTimePicker={showStartTimePicker}
+          handleCreateEvent={isUpdateMode ? handleUpdateEvent : handleCreateEvent} // выбираем нужный обработчик
+          buttonText={isUpdateMode ? 'Update' : 'Create'}
         />
       </View>
     );
