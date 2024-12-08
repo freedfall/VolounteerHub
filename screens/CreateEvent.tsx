@@ -1,8 +1,8 @@
+// screens/CreateEventScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert, Animated, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert, Platform, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventForm from '../components/EventForm';
-import ImagePicker from '../components/ImagePicker';
 import { geocodeAddress } from '../utils/geocode';
 
 const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -20,7 +20,7 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [addressFieldHeight] = useState(new Animated.Value(0));
   const [cityLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [cityBounds] = useState<any>(null);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageUri, setImageUri] = useState<string | null>(null); // Сохраняем imageUri здесь
 
   useEffect(() => {
     validateForm();
@@ -165,6 +165,7 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       Alert.alert('Error', 'Network error occurred');
     }
 
+    // Очистка полей формы после создания ивента
     setTitle('');
     setCity('');
     setAddress('');
@@ -182,7 +183,6 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <Text style={styles.closeButtonText}>×</Text>
       </TouchableOpacity>
 
-      <ImagePicker imageUri={imageUri} setImageUri={setImageUri} />
       <EventForm
         title={title}
         setTitle={setTitle}
@@ -211,6 +211,8 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setShowStartTimePicker={setShowStartTimePicker}
         showDatePicker={showDatePicker}
         showStartTimePicker={showStartTimePicker}
+        imageUri={imageUri} // Передаём imageUri
+        setImageUri={setImageUri} // Передаём setImageUri
       />
     </View>
   );

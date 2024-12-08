@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Button } from 'react-native';
 
-const DurationPicker = ({ hours, minutes, onChange }) => {
+const DurationPicker = ({ label, hours, minutes, onChange }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const hourValues = Array.from({ length: 13 }, (_, i) => i);
   const minuteValues = Array.from({ length: 12 }, (_, i) => i * 5);
@@ -12,9 +12,10 @@ const DurationPicker = ({ hours, minutes, onChange }) => {
 
   return (
     <View>
+        <Text style={styles.label}>{label}</Text>
       <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.selectButton}>
         <Text style={styles.selectButtonText}>
-          {`Duration: ${hours}h ${minutes < 10 ? `0${minutes}` : minutes}m`}
+          {`${hours}h ${minutes < 10 ? `0${minutes}` : minutes}m`}
         </Text>
       </TouchableOpacity>
 
@@ -92,18 +93,18 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-
   selectButton: {
-    backgroundColor: '#ddd',
+    borderColor: '#013B14',
+    borderWidth: 1,
     height: 50,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    borderRadius: 25,
+    borderRadius: 40,
     marginBottom: 10,
   },
   selectButtonText: {
     fontSize: 16,
-    color: '#000',
+    color: '#838383',
   },
   modalContainer: {
     flex: 1,
@@ -120,9 +121,10 @@ const styles = StyleSheet.create({
     width: '70%',
   },
   label: {
+    marginBottom: 5,
+    alignSelf: 'center',
+    color: '#000',
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
   },
   pickers: {
     flexDirection: 'row',

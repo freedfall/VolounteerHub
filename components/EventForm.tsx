@@ -1,10 +1,40 @@
+// components/EventForm.tsx
 import React from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import LocationPicker from './LocationPicker';
 import DateTimePickerWrapper from './DateTimePickerWrapper';
 import DurationPicker from './DurationPicker';
+import ImagePicker from './ImagePicker'; // Импортируем ImagePicker
 
-const EventForm = ({
+interface EventFormProps {
+  title: string;
+  setTitle: (title: string) => void;
+  setCity: (city: string) => void;
+  setAddress: (address: string) => void;
+  date: Date;
+  setDate: (date: Date) => void;
+  startTime: Date;
+  setStartTime: (time: Date) => void;
+  duration: { hours: number; minutes: number };
+  handleDurationChange: (duration: { hours: number; minutes: number }) => void;
+  maxPeople: string;
+  setMaxPeople: (max: string) => void;
+  description: string;
+  setDescription: (desc: string) => void;
+  addressFieldHeight: number;
+  cityLocation: any; // Замените `any` на соответствующий тип
+  cityBounds: any; // Замените `any` на соответствующий тип
+  handleCreateEvent: () => void;
+  hasError: boolean;
+  setShowDatePicker: (show: boolean) => void;
+  setShowStartTimePicker: (show: boolean) => void;
+  showDatePicker: boolean;
+  showStartTimePicker: boolean;
+  imageUri: string | null; // Добавляем пропс для imageUri
+  setImageUri: (uri: string | null) => void; // Добавляем пропс для setImageUri
+}
+
+const EventForm: React.FC<EventFormProps> = ({
   title,
   setTitle,
   setCity,
@@ -28,6 +58,8 @@ const EventForm = ({
   setShowStartTimePicker,
   showDatePicker,
   showStartTimePicker,
+  imageUri, // Принимаем imageUri
+  setImageUri, // Принимаем setImageUri
 }) => {
   const formFields = [
     {
@@ -49,7 +81,6 @@ const EventForm = ({
         <LocationPicker
           onCitySelect={(cityName, location) => {
             setCity(cityName);
-            cityLocation = location;
           }}
           onAddressSelect={setAddress}
           addressFieldHeight={addressFieldHeight}
@@ -59,49 +90,59 @@ const EventForm = ({
       ),
     },
     {
-      key: 'datePicker',
+      key: 'dateTimeDuration',
       label: '',
       component: (
-        <DateTimePickerWrapper
-          label="Date"
-          value={date}
-          showPicker={showDatePicker}
-          setShowPicker={setShowDatePicker}
-          onChange={setDate}
-          mode="date"
-        />
+        <View style={styles.rowContainer}>
+          <DateTimePickerWrapper
+            label="Date"
+            value={date}
+            showPicker={showDatePicker}
+            setShowPicker={setShowDatePicker}
+            onChange={setDate}
+            mode="date"
+            containerStyle={styles.pickerContainer}
+          />
+          <DateTimePickerWrapper
+            label="Start Time"
+            value={startTime}
+            showPicker={showStartTimePicker}
+            setShowPicker={setShowStartTimePicker}
+            onChange={setStartTime}
+            mode="time"
+            containerStyle={styles.pickerContainer}
+          />
+          <DurationPicker
+            hours={duration.hours}
+            minutes={duration.minutes}
+            onChange={handleDurationChange}
+            containerStyle={styles.pickerContainer}
+          />
+        </View>
       ),
     },
     {
-      key: 'timePicker',
+      key: 'maxPeopleImagePicker',
       label: '',
       component: (
-        <DateTimePickerWrapper
-          label="Start Time"
-          value={startTime}
-          showPicker={showStartTimePicker}
-          setShowPicker={setShowStartTimePicker}
-          onChange={setStartTime}
-          mode="time"
-        />
-      ),
-    },
-    {
-      key: 'durationPicker',
-      label: '',
-      component: <DurationPicker hours={duration.hours} minutes={duration.minutes} onChange={handleDurationChange} />,
-    },
-    {
-      key: 'maxPeople',
-      label: 'Max People',
-      component: (
-        <TextInput
-          style={[styles.input, (parseInt(maxPeople) <= 0 || parseInt(maxPeople) > 100) && styles.inputError]}
-          value={maxPeople}
-          onChangeText={setMaxPeople}
-          keyboardType="numeric"
-          placeholder="Enter max number of people"
-        />
+        <View style={styles.rowContainer}>
+          <View style={styles.pickerWrapper}>
+            <Text style={styles.label}>Max People</Text>
+            <TextInput
+              style={[
+                styles.maxPeople,
+                (parseInt(maxPeople) <= 0 || parseInt(maxPeople) > 100) && styles.inputError,
+              ]}
+              value={maxPeople}
+              onChangeText={setMaxPeople}
+              keyboardType="numeric"
+              placeholder="0-100"
+            />
+          </View>
+          <View style={styles.imagePickerWrapper}>
+            <ImagePicker imageUri={imageUri} setImageUri={setImageUri} />
+          </View>
+        </View>
       ),
     },
     {
@@ -152,7 +193,6 @@ const EventForm = ({
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    gap: 5,
   },
   formField: {
     marginBottom: 15,
@@ -161,15 +201,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 5,
     color: '#000',
-    alignSelf: 'center',
+    paddingHorizontal: 20,
   },
   input: {
-    height: 50,
-    borderColor: '#ccc',
+    height: 48,
+    borderColor: '#013B14',
     borderWidth: 1,
     paddingHorizontal: 20,
     color: '#000',
-    borderRadius: 25,
+    borderRadius: 40,
+    fontSize: 18,
+  },
+  maxPeople: {
+    height: 48,
+    borderColor: '#013B14',
+    borderWidth: 1,
+    paddingHorizontal: 20,
+    color: '#000',
+    borderRadius: 40,
+    fontSize: 18,
+    width: 100,
   },
   inputError: {
     borderColor: 'red',
@@ -180,11 +231,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 25,
     paddingHorizontal: 20,
+    textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#013B14',
+    width: 212,
+    alignSelf: 'center',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 40,
     alignItems: 'center',
   },
   buttonDisabled: {
@@ -192,7 +246,33 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  pickerContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  durationPickerContainer: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  pickerWrapper: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginRight: 10,
+  },
+  imagePickerWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  label: {
+    marginTop: 5,
+    fontSize: 14,
+    color: '#333',
   },
 });
 

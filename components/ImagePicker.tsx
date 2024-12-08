@@ -1,7 +1,5 @@
-// components/ImagePickerComponent.tsx
-
 import React from 'react';
-import { View, Button, Image, StyleSheet, Alert, Platform } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet, Alert, Platform, Text } from 'react-native';
 import { launchImageLibrary, launchCamera, Asset } from 'react-native-image-picker';
 
 interface ImagePickerProps {
@@ -70,15 +68,18 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ imageUri, setImageUri }) => {
   return (
     <View style={styles.container}>
       {imageUri ? (
-        <Image source={{ uri: imageUri }} style={styles.image} />
-      ) : (
-        <View style={styles.placeholder}>
-          <Button title="Select image" onPress={selectImage} />
-          <Button title="Take picture" onPress={takePhoto} />
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: imageUri }} style={styles.image} />
+          <TouchableOpacity style={styles.deleteButton} onPress={() => setImageUri(null)}>
+            <Text style={styles.deleteButtonText}>×</Text>
+          </TouchableOpacity>
         </View>
-      )}
-      {imageUri && (
-        <Button title="Delete image" onPress={() => setImageUri(null)} />
+      ) : (
+        <View>
+          <TouchableOpacity style={styles.button} onPress={selectImage}>
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -86,18 +87,47 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ imageUri, setImageUri }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
+    // Adjusted styles for compact display
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  placeholder: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '80%',
+  button: {
+    paddingVertical: 6,
+    paddingHorizontal: 15,
+    borderRadius: 40,
+    borderColor: '#013B14',
+    borderWidth: 1,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#838383',
+    fontSize: 20,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: 60,
+    height: 60,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: '100%',
+    height: '100%',
+    borderRadius: 5,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
     borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    lineHeight: 14,
   },
 });
 

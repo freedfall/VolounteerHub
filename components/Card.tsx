@@ -62,12 +62,12 @@ const styles = StyleSheet.create({
   imageContainer: {
     marginRight: 15,
     marginTop: -45,
+    borderRadius: 45,
   },
   image: {
     width: 100,
     height: 100,
-    flex: 1,
-    borderRadius: 15,
+    borderRadius: 45,
   },
   textContainer: {
     flex: 1,
