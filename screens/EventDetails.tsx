@@ -7,7 +7,6 @@ import EventRegistrationStatus from '../components/EventRegistrationStatus';
 import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails } from '../utils/api';
 import UserCard from '../components/UserCard';
 import { useNavigation } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -335,8 +334,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-      textAlign: 'center',
-    },
+
 });
 
 export default EventDetails;
