@@ -1,5 +1,3 @@
-// screens/MapScreen.tsx
-
 import React, { useEffect, useState, useRef } from 'react';
 import { View, PermissionsAndroid, Platform, Alert, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Region } from 'react-native-maps';

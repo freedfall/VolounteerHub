@@ -1,8 +1,8 @@
 // screens/QRScannerScreen.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, Platform, PermissionsAndroid } from 'react-native';
-import { CameraKitCameraScreen } from 'react-native-camera-kit';
+import { Camera } from 'react-native-camera-kit';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { confirmUserAttendance } from '../utils/api';
 
@@ -13,7 +13,6 @@ const QRScannerScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean>(false);
 
-  // Запрос разрешения на камеру (для Android)
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -39,12 +38,11 @@ const QRScannerScreen: React.FC = () => {
         navigation.goBack();
       }
     } else {
-      // Для iOS разрешения обрабатываются автоматически
       setHasCameraPermission(true);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     requestCameraPermission();
   }, []);
 
@@ -94,19 +92,16 @@ const QRScannerScreen: React.FC = () => {
           <Text>Updating status...</Text>
         </View>
       )}
-      <CameraKitCameraScreen
+      <Camera
+        style={styles.container}
         showFrame={true}
         scanBarcode={true}
-        laserColor={'#FF3D00'}
         frameColor={'#00C853'}
-        colorForScannerFrame={'black'}
         onReadCode={onReadCode}
         hideControls={false}
-        offsetForScannerFrame={30}
-        heightForScannerFrame={300}
         cameraOptions={{
-          flashMode: 'auto', // Можно установить 'on' или 'off'
-          focusMode: 'on', // Включить автофокус
+          flashMode: 'off',
+          focusMode: 'on',
         }}
       />
       <View style={styles.instructionsContainer}>
@@ -123,13 +118,15 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     bottom: 50,
-    width: '100%',
+    width: '80%',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   instructionText: {
     fontSize: 16,
-    color: '#777',
+    color: 'white',
     textAlign: 'center',
     marginVertical: 4,
   },
