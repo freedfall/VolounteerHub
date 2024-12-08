@@ -42,6 +42,7 @@ useEffect(() => {
   if (isFocused) {
     console.log('ProfileScreen is focused, reloading data');
     setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
+    loadUserData();
     loadEvents(selectedCategory);
     if (isAdmin) {
       loadAdminData();
@@ -100,7 +101,6 @@ useEffect(() => {
     };
 
   const handleUserUpdated = () => {
-      // Перезагружаем список пользователей после обновления одного из них
       if (isAdmin && selectedCategory === 'allUsers') {
         loadEvents('allUsers');
       }

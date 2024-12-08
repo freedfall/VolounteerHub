@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert, Activ
 import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userProfileIcon from '../images/userProfileIcon.jpg';
+import { useNavigation } from '@react-navigation/native';
 import { handleDateTime } from '../utils/dateUtils';
 import { fetchAdminUserCreatedEvents, fetchUserAttendedEvents, adminUpdateUserDetails } from '../utils/api';
 
@@ -13,7 +14,6 @@ type UserType = {
   name: string;
   surname: string;
   points: number;
-  pointsAsCreator: number;
 };
 
 type EventType = {
@@ -38,7 +38,6 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<EventType[]>([]);
 
-  // Локальные стейты для редактирования данных пользователя
   const [userName, setUserName] = useState(user.name);
   const [userSurname, setUserSurname] = useState(user.surname);
   const [userPoints, setUserPoints] = useState<number>(user.points);
@@ -92,7 +91,13 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
   };
 
   const renderEvent = ({ item }: { item: EventType }) => (
-    <TouchableOpacity style={styles.eventItem} onPress={() => navigation.navigate('EventDetails', { ...item })}>
+    <TouchableOpacity
+        style={styles.eventItem}
+        onPress={() => {
+            onClose();
+            navigation.navigate('EventDetails', { ...item });
+            }}
+        >
       <Text style={styles.eventName}>{item.name}</Text>
       <Text style={styles.eventDetails}>{handleDateTime(item.startDateTime)}</Text>
       <Text style={styles.eventDetails}>{item.city}, {item.address}</Text>
@@ -114,7 +119,6 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
           style={styles.modalAvatar}
         />
 
-        {/* Редактирование данных пользователя */}
         <TextInput
           style={styles.input}
           placeholder="Name"
@@ -145,21 +149,18 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
           keyboardType="numeric"
         />
 
-        {/* Edit Button */}
         {!isEditable && (
           <TouchableOpacity style={styles.editButton} onPress={handleEditClick}>
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
         )}
 
-        {/* Save Button */}
         {isEditable && (
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
         )}
 
-        {/* Переключение между созданными и посещёнными событиями */}
         <View style={styles.modalSwitchContainer}>
           <TouchableOpacity
             style={[

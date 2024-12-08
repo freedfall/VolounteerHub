@@ -80,7 +80,7 @@ const EventDetails: React.FC = ({ route }) => {
 
   const handleDeleteEvent = async (eventId) => {
       try {
-        if(!isAdmin){
+        if(isAdmin){
             await adminDeleteEvent(eventId);
         } else {
             await deleteEvent(eventId);
@@ -96,16 +96,15 @@ const EventDetails: React.FC = ({ route }) => {
       try {
         const newEventDetails = { ...editedEventDetails };
 
-        if(!isAdmin){
+        if(isAdmin){
             await adminUpdateEventDetails(id, newEventDetails);
         } else {
             await updateEventDetails(id, newEventDetails);
         }
-        await updateEventDetails(id, newEventDetails);
 
         setEventDetails({...eventDetails, ...newEventDetails });
 
-        setIsModalVisible(false); // Close modal
+        setIsModalVisible(false);
         Alert.alert('Success', 'Event details updated successfully');
       } catch (error) {
         console.error('Error updating event details:', error);
