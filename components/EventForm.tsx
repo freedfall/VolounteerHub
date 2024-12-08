@@ -60,6 +60,7 @@ const EventForm: React.FC<EventFormProps> = ({
   showStartTimePicker,
   imageUri, // Принимаем imageUri
   setImageUri, // Принимаем setImageUri
+  buttonText,
 }) => {
   const formFields = [
     {
@@ -161,18 +162,18 @@ const EventForm: React.FC<EventFormProps> = ({
     },
     {
       key: 'createButton',
-      label: '',
-      component: (
-        <TouchableOpacity
-          style={[styles.button, hasError && styles.buttonDisabled]}
-          onPress={handleCreateEvent}
-          disabled={hasError}
-        >
-          <Text style={styles.buttonText}>Create</Text>
-        </TouchableOpacity>
-      ),
-    },
-  ];
+        label: '',
+        component: (
+          <TouchableOpacity
+            style={[styles.button, hasError && styles.buttonDisabled]}
+            onPress={handleCreateEvent}
+            disabled={hasError}
+          >
+            <Text style={styles.buttonText}>{buttonText}</Text>
+          </TouchableOpacity>
+        ),
+      },
+    ];
 
   return (
     <FlatList
