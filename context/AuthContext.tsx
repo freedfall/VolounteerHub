@@ -1,5 +1,5 @@
 // context/AuthContext.tsx
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type User = {
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     checkUserData();
   }, []);
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
       const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/user/me', {
         method: 'GET',
@@ -80,7 +80,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     } catch (error) {
       console.error('Ошибка сети при получении данных пользователя:', error);
     }
-  };
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {

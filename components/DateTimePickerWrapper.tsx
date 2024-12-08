@@ -5,9 +5,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 const formatDisplayValue = (value, mode) => {
   if (mode === 'date') {
-    return value.toLocaleDateString(); // Форматируем только дату
+    return value.toLocaleDateString();
   } else if (mode === 'time') {
-    return value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // Форматируем только время
+    return value.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   return value.toString();
 };
@@ -22,7 +22,7 @@ const DateTimePickerWrapper = ({ label, value, showPicker, setShowPicker, onChan
       {showPicker && (
         <DateTimePicker
           value={value}
-          mode={mode} // Передаем режим выбора (date или time)
+          mode={mode}
           display="default"
           onChange={(event, selectedDate) => {
             setShowPicker(false);

@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl} from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
@@ -8,8 +8,11 @@ import { fetchUserCreatedEvents, fetchUserParticipationEvents, fetchEvents, fetc
 import { handleDateTime } from '../utils/dateUtils';
 import Card from '../components/Card';
 import QRCodeGenerator from '../components/QRCodeGenerator';
+import PointsToStars from '../components/PointsToStars';
 import userProfileIcon from '../images/userProfileIcon.jpg';
 import AdminUserModal from '../components/AdminUserModal';
+import PointsIcon from '../images/icons/points.png';
+import SettingsIcon from '../images/icons/settings.png';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
@@ -33,24 +36,27 @@ const ProfileScreen: React.FC = () => {
     } else {
       loadEvents(selectedCategory);
       if (isAdmin) {
-          loadAdminData();
+        loadAdminData();
       }
     }
   }, [loadEvents, loadUserData, selectedCategory, user, isAdmin]);
 
-useEffect(() => {
-  if (isFocused) {
-    console.log('ProfileScreen is focused, reloading data');
-    setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
-    loadUserData();
-    loadEvents(selectedCategory);
-    if (isAdmin) {
-      loadAdminData();
-    }
-  }
-}, [isFocused, selectedCategory, isAdmin]);
 
-  const loadEvents = async (category: 'createdEvents' | 'participationEvents' | 'allEvents' | 'allUsers') => {
+  useEffect(() => {
+    if (isFocused) {
+        console.log('ProfileScreen is focused, reloading data');
+        setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
+        loadUserData();
+        loadEvents(selectedCategory);
+        if (isAdmin) {
+          loadAdminData();
+        }
+      }
+    }, [isFocused, selectedCategory, isAdmin, loadUserData, loadEvents, loadAdminData]);
+
+
+  const loadEvents = useCallback(async (category) => {
+    console.log('Loading events:', category);
     try {
       if (category === 'createdEvents' && !isLoaded.created && !isAdmin) {
         const eventsData = await fetchUserCreatedEvents();
@@ -73,12 +79,21 @@ useEffect(() => {
     } catch (error) {
       Alert.alert('Error', `Failed to load ${category === 'createdEvents' ? 'created' : 'participated'} events.`);
     }
-  };
+  }, [isLoaded, isAdmin]);
 
-  const loadAdminData = async () => {
-    await loadEvents('allEvents');
-    await loadEvents('allUsers');
-  };
+  const loadAdminData = useCallback(async () => {
+    try {
+      const eventsData = await fetchAllEvents();
+      setAllEvents(eventsData || []);
+      setIsLoaded((prev) => ({ ...prev, allEvents: true }));
+
+      const usersData = await fetchAllUsers();
+      setAllUsers(usersData || []);
+      setIsLoaded((prev) => ({ ...prev, allUsers: true }));
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load admin data.');
+    }
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -118,25 +133,23 @@ useEffect(() => {
           source={user?.avatarUrl ? { uri: user.avatarUrl } : userProfileIcon}
           style={styles.profileImage}
         />
-        <Text style={styles.userName}>{user?.name} {user?.surname}</Text>
         <TouchableOpacity style={styles.editButton}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
+            <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.infoSection}>
-        <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
+          <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
+      <Text style={styles.userName}>{user?.name} {user?.surname}</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.infoTitle}>Email: </Text>
+            <PointsToStars points={user?.pointsAsCreator} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 5}}>
+            <Text style={styles.infoPoints}>{user?.points}</Text>
+            <Image source={PointsIcon} style={{ width: 20, height: 26 }} />
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
             <Text style={styles.infoText}>{user?.email}</Text>
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.infoTitle}>Points: </Text>
-            <Text style={styles.infoText}>{user?.points}</Text>
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.infoTitle}>As creator: </Text>
-            <Text style={styles.infoText}>{user?.pointsAsCreator}</Text>
           </View>
         </View>
         <QRCodeGenerator email={user?.id.toString()} />
@@ -155,7 +168,7 @@ useEffect(() => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[
-              styles.switchButton,
+              styles.participationButton,
               selectedCategory === 'participationEvents' && styles.selectedSwitchButton,
             ]}
             onPress={() => setSelectedCategory('participationEvents')}
@@ -200,6 +213,7 @@ useEffect(() => {
                 address={event.address}
                 occupiedQuantity={event.occupiedQuantity}
                 points={event.price}
+                imageURL={event.imageURL}
                 onPress={() => navigation.navigate('EventDetails', { ...event })}
               />
             ))
@@ -241,6 +255,7 @@ useEffect(() => {
                 address={event.address}
                 occupiedQuantity={event.occupiedQuantity}
                 points={event.price}
+                imageURL={event.imageURL}
                 onPress={() => navigation.navigate('EventDetails', { ...event })}
               />
             ))
@@ -287,50 +302,56 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   editButton: {
-    marginTop: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    backgroundColor: '#4CAF50',
-    borderRadius: 20,
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
   infoSection: {
     marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  infoTitle: {
-    fontSize: 16,
-    color: '#666',
-  },
   infoText: {
     fontSize: 18,
     color: '#333',
     fontWeight: '500',
   },
+  infoPoints: {
+    fontSize: 24,
+    color: '#333',
+    fontWeight: '500',
+  },
   switchContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 10,
   },
   switchButton: {
+    width: 170,
     paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    borderRadius: 40,
     backgroundColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedSwitchButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#69B67E',
   },
   switchButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 19,
+  },
+  participationButton: {
+    width: 190,
+    borderRadius: 40,
+    backgroundColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   eventHistory: {
-    marginVertical: 20,
+      marginTop: 10,
+    marginBottom: 20,
   },
   historyTitle: {
     fontSize: 20,
@@ -345,7 +366,7 @@ const styles = StyleSheet.create({
   signOutButton: {
     marginTop: 20,
     paddingVertical: 12,
-    backgroundColor: '#FF6347',
+    backgroundColor: '#013B14',
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 100,

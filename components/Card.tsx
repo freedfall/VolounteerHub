@@ -2,6 +2,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import hospital from '../images/hospital.jpg';
+import PointsIcon from '../images/icons/points.png';
+import SearchIcon from '../images/components/searchIcon.png';
 
 interface CardProps {
   title: string;
@@ -13,18 +15,31 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imageURL }) => {
+  const isPast = new Date(time) < new Date();
+
+  const getShortAddress = (fullAddress: string): string => {
+      if (!fullAddress) return '';
+      const parts = fullAddress.split(',');
+      return parts[0].trim();
+    };
+
+  const shortAddress = getShortAddress(address);
   return (
     <TouchableOpacity onPress={onPress}>
-      <View style={styles.cardContainer}>
+      <View style={[styles.cardContainer, isPast && styles.pastCardContainer]}>
         <Text style={styles.imageContainer}>
             <Image source={imageURL ? { uri: imageURL } : hospital}  style={styles.image} resizeMode="cover" />
         </Text>
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.details}>{time}</Text>
-          <Text style={styles.details}>{address}</Text>
-          <Text style={styles.points}>{points}</Text>
+          <Text style={styles.details}>{shortAddress}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.points}>{points}</Text>
+                <Image source={PointsIcon} style={{ width: 16, height: 19, marginRight: 5 }} />
+            </View>
         </View>
+        <Image source={SearchIcon} style={{ width: 29, height: 31, alignSelf: 'center', marginRight: 10 }} />
       </View>
     </TouchableOpacity>
   );
@@ -41,6 +56,9 @@ const styles = StyleSheet.create({
     height: 130,
     alignSelf: 'center',
   },
+  pastCardContainer: {
+    backgroundColor: '#D9D9D9',
+  },
   imageContainer: {
     marginRight: 15,
     marginTop: -45,
@@ -55,19 +73,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 2,
     color: 'black',
   },
   details: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
-    marginBottom: 3,
   },
   points: {
-    fontSize: 14,
-    color: '#28a745',
+    fontSize: 18,
+    color: '#838383',
+    marginRight: 5,
   },
 });
 

@@ -152,6 +152,7 @@ const EventDetails: React.FC = ({ route }) => {
           </TouchableOpacity>
           <Text style={styles.participantsTitle}>Participants</Text>
           <View style={styles.participantsContainer}>
+          {participants.length === 0 && <Text style={styles.details}>No participants yet</Text>}
           {participants.map((participant) => (
             <UserCard
               key={participant.id}
@@ -166,12 +167,15 @@ const EventDetails: React.FC = ({ route }) => {
             />
           ))}
           </View>
-          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
-              <Text style={styles.deleteButtonText}>Delete Event</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.updateButton} onPress={() => setIsModalVisible(true)}>
-              <Text style={styles.updateButtonText}>Update Event Details</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonsContainer}>
+              <TouchableOpacity style={styles.updateButton} onPress={() => setIsModalVisible(true)}>
+                <Text style={styles.updateButtonText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
+                  <Text style={styles.deleteButtonText}>Delete Event</Text>
+              </TouchableOpacity>
+
+          </View>
         </View>
       ) : (
           <View style={styles.userList}>
@@ -331,17 +335,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: 'gray',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 5,
-    marginBottom: 40,
   },
   deleteButtonText: {
     color: '#fff',
@@ -364,17 +361,11 @@ const styles = StyleSheet.create({
       textAlign: 'center',
     },
   updateButton: {
-      backgroundColor: '#FAA302',
+      width: 200,
+      backgroundColor: '#013B14',
       paddingVertical: 12,
       paddingHorizontal: 25,
       borderRadius: 25,
-      marginTop: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 3.84,
-      elevation: 5,
-      marginBottom: 40,
     },
     updateButtonText: {
       color: '#fff',
@@ -426,6 +417,12 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#fff',
     textAlign: 'center',
+  },
+  buttonsContainer: {
+    marginTop: 40,
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 
