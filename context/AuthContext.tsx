@@ -9,6 +9,7 @@ type User = {
   phone: string;
   points: number;
   avatarUrl?: string;
+  role: string;
 };
 
 type AuthContextType = {

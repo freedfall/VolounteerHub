@@ -64,7 +64,7 @@ const LeaderBoardScreen = () => {
 
   // Filter users based on search input
   const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchText.toLowerCase())
+    user.name?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const openUserModal = (user) => {
