@@ -57,8 +57,8 @@ const LocationPicker = ({ onCitySelect, onAddressSelect }) => {
               key: GOOGLE_PLACES_API_KEY,
               language: 'en',
               types: 'address',
-              location: `${cityLocation.lat},${cityLocation.lng}`, // Координаты выбранного города
-              radius: 20000, // Радиус поиска в метрах (например, 20 км)
+              location: `${cityLocation.lat},${cityLocation.lng}`,
+              radius: 20000,
               components: 'country:CZ',
             }}
             styles={{

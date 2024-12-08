@@ -13,7 +13,9 @@ type Props = {
 const CategorySection: React.FC<Props> = ({ title, events }) => {
   const navigation = useNavigation();
 
-  if (events.length < 5) return null;
+  if (events.length < 5){
+      return null;
+  }
 
   return (
     <View style={styles.categoryContainer}>

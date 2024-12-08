@@ -11,7 +11,7 @@ export async function geocodeAddress(fullAddress) {
 }
 
 export const parseCoordinates = (coordinates: string) => {
-    if (!coordinates) return null;
+    if (!coordinates) {return null;}
   const [latitude, longitude] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
   return { latitude, longitude };
 };

@@ -179,7 +179,7 @@ export const rejectUserRegistration = async (eventId, userId) => {
  */
 export const confirmUserAttendance = async (eventId, userId) => {
     try {
-        const response = await fetch(`${BASE_URL}/event/attendance-confirm/` + eventId + '/' + userId, {
+        const response = await fetch(`${BASE_URL}/event/status-attended/` + eventId + '/' + userId, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

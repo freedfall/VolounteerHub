@@ -56,7 +56,7 @@ const LeaderBoardScreen = () => {
   const loadSearchHistory = async () => {
     try {
       const history = await AsyncStorage.getItem('searchHistory');
-      if (history) setSearchHistory(JSON.parse(history));
+      if (history) {setSearchHistory(JSON.parse(history));}
     } catch (error) {
       console.error('Error loading search history:', error);
     }
@@ -72,7 +72,7 @@ const LeaderBoardScreen = () => {
     setModalVisible(true);
   };
 
-  const renderUser = ({ item, index }) => (
+  const renderUser = ({ item }) => (
     <TouchableOpacity style={styles.card} onPress={() => openUserModal(item)}>
       <Text style={styles.rank}>{item.rank}</Text>
       <Image source={item.avatarUrl ? { uri: item.avatarUrl } : userIcon} style={styles.avatar} />

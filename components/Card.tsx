@@ -1,21 +1,18 @@
 // components/Card.tsx
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { WebView } from 'react-native-webview';
 import hospital from '../images/hospital.jpg';
-import { useNavigation } from '@react-navigation/native';
 
 interface CardProps {
   title: string;
   time: string;
-  city: string;
   address: string;
   points: number;
   imageURL?: string;
   onPress: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ title, time, city, address, points, onPress, imageURL }) => {
+const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imageURL }) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.cardContainer}>
@@ -47,11 +44,11 @@ const styles = StyleSheet.create({
   imageContainer: {
     marginRight: 15,
     marginTop: -45,
-    borderRadius: 15,
   },
   image: {
     width: 100,
     height: 100,
+    flex: 1,
     borderRadius: 15,
   },
   textContainer: {

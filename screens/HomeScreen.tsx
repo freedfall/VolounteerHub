@@ -41,18 +41,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const saveSearchHistory = async (history: string[]) => {
-    try {
-      await AsyncStorage.setItem('searchHistory', JSON.stringify(history));
-    } catch (error) {
-      console.error('Error saving search history:', error);
-    }
-  };
-
   const loadSearchHistory = async () => {
     try {
       const history = await AsyncStorage.getItem('searchHistory');
-      if (history) setSearchHistory(JSON.parse(history));
+      if (history) {setSearchHistory(JSON.parse(history));}
     } catch (error) {
       console.error('Error loading search history:', error);
     }

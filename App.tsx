@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text, TextInput, TextProps, Image, View, Modal } from 'react-native';
-import CreateEventModal from './screens/CreateEventModal';
+import { Image, View, Modal } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
 import EventDetails from './screens/EventDetails';
 import LoginScreen from './screens/LoginScreen';
@@ -22,11 +21,11 @@ import LeaderBoardIcon from './images/icons/LeaderBoardIcon.png';
 import MapIcon from './images/icons/MapIcon.png';
 import ProfileIcon from './images/icons/ProfileIcon.png';
 import CreateEventIcon from './images/icons/CreateEventIcon.png';
+import QRScannerScreen from './screens/QRScannerScreen';
 
 import { setCustomText } from 'react-native-global-props';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 const StartScreenStack = createStackNavigator();
 
 const RootStack = createStackNavigator();
@@ -45,6 +44,7 @@ const RootStackScreen: React.FC = () => (
     <RootStack.Screen name="MapScreen" component={MapScreen} options={{ headerShown: false }} />
     <RootStack.Screen name="EventDetails" component={EventDetails} options={{ headerShown: false }} />
     <RootStack.Screen name="CategoryDetails" component={CategoryDetailsScreen} options={{ headerShown: false }} />
+    <RootStack.Screen name="QRScanner" component={QRScannerScreen} options={{ headerShown: false }} />
   </RootStack.Navigator>
 );
 
@@ -127,7 +127,7 @@ const App: React.FC = () => (
     <EventProvider>
       <NavigationContainer>
         <AuthContext.Consumer>
-          {({ isSignedIn, user }) => (
+          {({ isSignedIn }) => (
             isSignedIn ? <RootStackScreen /> : <StartScreenStackScreen />
           )}
         </AuthContext.Consumer>

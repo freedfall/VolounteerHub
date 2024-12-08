@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, TextInput, Text } from 'react-native';
+import { View, ScrollView, StyleSheet, Text } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Card from '../components/Card';
 import { handleDateTime } from '../utils/dateUtils';
@@ -47,6 +47,7 @@ const CategoryDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
             city={event.city}
             address={event.address}
             points={event.price}
+            imageURL={event.imageURL}
             onPress={() => navigation.navigate('EventDetails', { ...event })}
           />
         ))}

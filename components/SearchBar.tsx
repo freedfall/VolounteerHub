@@ -26,7 +26,7 @@ const SearchBar: React.FC<Props> = ({ searchText, setSearchText, openModal }) =>
                   }}
         onChangeText={setSearchText}
       />
-      <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Open filters")}>
+      <TouchableOpacity style={styles.filterButton} onPress={() => console.log('Open filters')}>
         <Image source={filterIcon} style={styles.filterIcon} />
       </TouchableOpacity>
     </View>
@@ -40,11 +40,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 40,
     borderColor: 'rgba(1, 59, 20, 1)',
-    borderWidth: 2,
+    borderWidth: 1.5,
     paddingHorizontal: 15,
     height: 48,
     marginBottom: 20,
-    width: '100%',
+    width: '94%',
+    alignSelf: 'center',
   },
   searchIcon: {
     width: 22,
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 20,
     color: 'rgba(131, 131, 131, 1)',
     width: '100%',
   },

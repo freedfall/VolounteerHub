@@ -7,9 +7,7 @@ import DurationPicker from './DurationPicker';
 const EventForm = ({
   title,
   setTitle,
-  city,
   setCity,
-  address,
   setAddress,
   date,
   setDate,

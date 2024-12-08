@@ -3,7 +3,6 @@ import { View, TextInput, Image, TouchableOpacity, Modal, ScrollView, Text, Styl
 import clockIcon from '../images/components/clock.png';
 import searchIcon from '../images/components/searchIcon.png';
 import filterIcon from '../images/components/filterIcon.png';
-import { handleDateTime } from '../utils/dateUtils';
 
 type Props = {
   isVisible: boolean;
@@ -32,7 +31,7 @@ const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSe
               onChangeText={setSearchText}
               autoFocus={true}
             />
-            <TouchableOpacity style={styles.filterButton} onPress={() => console.log("Open filters")}>
+            <TouchableOpacity style={styles.filterButton} onPress={() => console.log('Open filters')}>
               <Image source={filterIcon} style={styles.filterIcon} />
             </TouchableOpacity>
           </View>
@@ -62,13 +61,13 @@ const styles = StyleSheet.create({
   modalContainer: {
       flex: 1,
       backgroundColor: '#fff',
-      justifyContent: 'center'
+      justifyContent: 'center',
   },
   modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       padding: 10,
-      backgroundColor: '#fff'
+      backgroundColor: '#fff',
   },
   searchContainerModal: {
       flexDirection: 'row',
@@ -103,7 +102,7 @@ const styles = StyleSheet.create({
       fontSize: 18,
       paddingVertical: 10,
       fontWeight: 'bold',
-      color: 'black'
+      color: 'black',
   },
   historyContainer: {
       alignSelf: 'center',
@@ -112,7 +111,7 @@ const styles = StyleSheet.create({
   historyItem: {
       flexDirection: 'row',
       padding: 10,
-      alignItems: 'center'
+      alignItems: 'center',
   },
   historyIcon: {
       width: 20,

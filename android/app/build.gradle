@@ -112,6 +112,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'com.google.android.exoplayer:exoplayer:2.15.1'
     implementation("com.facebook.react:react-android")
+    implementation 'androidx.core:core:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

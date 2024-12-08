@@ -53,7 +53,7 @@ export const AuthProvider: React.FC = ({ children }) => {
         } catch (error) {
             console.error('Ошибка загрузки данных пользователя:', error);
         }
-    }
+    };
     checkToken();
     checkUserData();
   }, []);

@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Alert, Animated, Platform } from 'react-native';
-import { useEventContext } from '../context/EventContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventForm from '../components/EventForm';
 import ImagePicker from '../components/ImagePicker';
 import { geocodeAddress } from '../utils/geocode';
 
 const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { addEvent } = useEventContext();
   const [title, setTitle] = useState('');
   const [city, setCity] = useState('');
   const [address, setAddress] = useState('');
@@ -20,8 +18,8 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [description, setDescription] = useState('');
   const [hasError, setHasError] = useState(false);
   const [addressFieldHeight] = useState(new Animated.Value(0));
-  const [cityLocation, setCityLocation] = useState<{ lat: number, lng: number } | null>(null);
-  const [cityBounds, setCityBounds] = useState<any>(null);
+  const [cityLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [cityBounds] = useState<any>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,9 +30,9 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const currentDateTime = new Date();
     let errors = false;
 
-    if (date < currentDateTime) errors = true;
-    if (!title.trim() || !city.trim() || !address.trim()) errors = true;
-    if (isNaN(parseInt(maxPeople)) || parseInt(maxPeople) <= 0 || parseInt(maxPeople) > 100) errors = true;
+    if (date < currentDateTime) {errors = true;}
+    if (!title.trim() || !city.trim() || !address.trim()) {errors = true;}
+    if (isNaN(parseInt(maxPeople)) || parseInt(maxPeople) <= 0 || parseInt(maxPeople) > 100) {errors = true;}
 
     setHasError(errors);
   }, [date, title, city, address, maxPeople]);
@@ -118,9 +116,9 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         body: JSON.stringify(newEvent),
       });
 
-      console.log("First Response Status:", response.status);
+      console.log('First Response Status:', response.status);
       const firstResponseBody = await response.text();
-      console.log("First Response Body:", firstResponseBody);
+      console.log('First Response Body:', firstResponseBody);
 
       if (response.ok) {
         const eventId = firstResponseBody;
@@ -146,9 +144,9 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             body: formData,
           });
 
-          console.log("Image Upload Response Status:", uploadResponse.status);
+          console.log('Image Upload Response Status:', uploadResponse.status);
           const uploadResponseBody = await uploadResponse.text();
-          console.log("Image Upload Response Body:", uploadResponseBody);
+          console.log('Image Upload Response Body:', uploadResponseBody);
 
           if (uploadResponse.ok) {
             console.log('Image uploaded successfully');

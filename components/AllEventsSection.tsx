@@ -2,10 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Card from './Card';
 import { handleDateTime } from '../utils/dateUtils';
-import { useNavigation } from '@react-navigation/native';
 
 const AllEventsSection: React.FC<Props> = ({ events, onPressEvent }) => {
-  const navigation = useNavigation();
   return (
     <View style={styles.allEventsContainer}>
       {events.length > 0 && (
@@ -32,14 +30,15 @@ const AllEventsSection: React.FC<Props> = ({ events, onPressEvent }) => {
 
 const styles = StyleSheet.create({
   allEventsContainer: {
-          marginBottom: 20,
+      marginBottom: 20,
   },
   allEventsTitle: {
       fontSize: 20,
       fontWeight: 'bold',
+      fontFamily: 'Gilroy-Regular',
       color: 'black',
       marginBottom: 10,
-      alignSelf: 'center',
+      marginLeft: 15,
   },
 });
 

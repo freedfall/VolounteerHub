@@ -25,7 +25,7 @@ const ProfileScreen: React.FC = () => {
     } else {
       loadEvents(selectedCategory);
     }
-  }, [user, selectedCategory]);
+  }, [loadEvents, loadUserData, selectedCategory, user]);
 
   const loadEvents = async (category: 'createdEvents' | 'participationEvents') => {
     try {
@@ -88,7 +88,7 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.infoText}>{user?.pointsAsCreator}</Text>
           </View>
         </View>
-        <QRCodeGenerator email={user?.email} />
+        <QRCodeGenerator email={user?.id.toString()} />
       </View>
 
       <View style={styles.switchContainer}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import EventForm from '../components/EventForm';
 
 const CreateEventModal: React.FC<{ visible: boolean; onClose: () => void; }> = ({ visible, onClose }) => {

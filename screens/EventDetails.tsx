@@ -62,11 +62,15 @@ const EventDetails: React.FC = ({ route }) => {
     } catch (error) {
       Alert.alert('Error', 'Failed to delete event.');
     }
-  }
+  };
+
+  const handleScanPress = () => {
+    navigation.navigate('QRScanner', { eventId: id });
+  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} />
+      <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} resizeMode="cover"/>
       <View style={styles.detailsContainer}>
           <Text style={styles.title}>{name}</Text>
           <View style={styles.timeContainer}>
@@ -88,21 +92,12 @@ const EventDetails: React.FC = ({ route }) => {
           <Text style={styles.details}>Capacity: {occupiedQuantity}/{capacity}</Text>
           <Text style={styles.description}>{description}</Text>
       </View>
-      <View style={styles.userList}>
-          <Text style={styles.participantsTitle}>Event creator</Text>
-          <View style={styles.participantsContainer}>
-              <UserCard
-                name={creator.name}
-                points={creator.points}
-                avatarUrl={creator.avatarUrl}
-                email={creator.email}
-                id={creator.id}
-                eventId={id}
-              />
-          </View>
-      </View>
+
       {isCreator ? (
         <View style={styles.userList}>
+          <TouchableOpacity style={styles.scanButton} onPress={handleScanPress}>
+            <Text style={styles.scanButtonText}>Scan</Text>
+          </TouchableOpacity>
           <Text style={styles.participantsTitle}>Participants</Text>
           <View style={styles.participantsContainer}>
           {participants.map((participant) => (
@@ -120,10 +115,22 @@ const EventDetails: React.FC = ({ route }) => {
           ))}
           </View>
           <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
-              <Text style={styles.deleteButtonText}>Delete Event</Text>
-            </TouchableOpacity>
+            <Text style={styles.deleteButtonText}>Delete Event</Text>
+          </TouchableOpacity>
         </View>
       ) : (
+          <View style={styles.userList}>
+            <Text style={styles.participantsTitle}>Event creator</Text>
+            <View style={styles.participantsContainer}>
+                <UserCard
+                  name={creator.name}
+                  points={creator.points}
+                  avatarUrl={creator.avatarUrl}
+                  email={creator.email}
+                  id={creator.id}
+                  eventId={id}
+                />
+            </View>
         <EventRegistrationStatus
           eventId={id}
           isRegistered={isRegistered}
@@ -133,6 +140,7 @@ const EventDetails: React.FC = ({ route }) => {
             setIsConfirmed(confirmation);
           }}
         />
+      </View>
       )}
     </ScrollView>
   );
@@ -224,6 +232,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
+  scanButton: {
+      width: '25%',
+      backgroundColor: '#4CAF50',
+      paddingVertical: 12,
+      paddingHorizontal: 5,
+      borderRadius: 25,
+      marginTop: 10,
+      marginBottom: 40,
+      alignSelf: 'center',
+    },
+    scanButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      textAlign: 'center',
+    },
 });
 
 export default EventDetails;

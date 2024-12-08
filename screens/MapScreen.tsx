@@ -1,21 +1,12 @@
 // screens/MapScreen.tsx
 
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  View,
-  PermissionsAndroid,
-  Platform,
-  Alert,
-  Text,
-  StyleSheet,
-  ActivityIndicator
-} from 'react-native';
+import { View, PermissionsAndroid, Platform, Alert, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Region } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import { useEventContext } from '../context/EventContext';
 import { parseCoordinates } from '../utils/geocode';
 import haversine from 'haversine';
-import LoadingBar from '../components/LoadingBar';
 import Card from '../components/Card';
 import { useNavigation } from '@react-navigation/native';
 import { handleDateTime } from '../utils/dateUtils';
@@ -30,12 +21,7 @@ type Event = {
   description: string;
   creator: string;
   imageURL?: string;
-  coordinates: string; // "latitude, longitude"
-};
-
-type UserLocation = {
-  latitude: number;
-  longitude: number;
+  coordinates: string;
 };
 
 const MapScreen = () => {
@@ -82,12 +68,14 @@ const MapScreen = () => {
       Geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+
           setLocation({
             latitude,
             longitude,
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           });
+          console.log('Location:', position);
           setLoading(false);
         },
         (error) => {
@@ -143,10 +131,18 @@ const MapScreen = () => {
     }
   }, [nearestEvent]);
 
-  if (loading || !location) {
+  if (loading) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size="large" color="#4caf50" />
+      </View>
+    );
+  }
+
+  if (!location) {
+    return (
+      <View style={styles.loader}>
+        <Text>Unable to get location</Text>
       </View>
     );
   }
@@ -170,7 +166,7 @@ const MapScreen = () => {
               description={event.description}
               pinColor="#69B67E"
             >
-              <Callout tooltip onPress={() => { navigation.navigate('EventDetails', { ...event }) }}>
+              <Callout tooltip onPress={() => { navigation.navigate('EventDetails', { ...event }); }}>
                 <View style={styles.calloutContainer}>
                   <Card
                       key={event.id}
