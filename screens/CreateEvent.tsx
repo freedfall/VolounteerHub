@@ -7,11 +7,11 @@ import { geocodeAddress } from '../utils/geocode';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { adminUpdateEventDetails } from '../utils/api';
 
-const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const CreateEventScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  const event = route.params?.event; // если undefined, значит создаем новый
+  const event = route.params?.event;
   const isUpdateMode = !!event;
 
   const [title, setTitle] = useState('');
@@ -28,7 +28,7 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [addressFieldHeight] = useState(new Animated.Value(0));
   const [cityLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [cityBounds] = useState<any>(null);
-  const [imageUri, setImageUri] = useState<string | null>(null); // Сохраняем imageUri здесь
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
     if (isUpdateMode && event) {
@@ -221,7 +221,6 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       Alert.alert('Error', 'Network error occurred');
     }
 
-    // Очистка полей формы после создания ивента
     setTitle('');
     setCity('');
     setAddress('');
@@ -233,8 +232,11 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setImageUri(null);
   };
 
-  const handleUpdateEvent = async () => {
+  const onClose = () => {
+    navigation.goBack();
+  }
 
+  const handleUpdateEvent = async () => {
     const updatedEventData = prepareEventData();
 
     try {
@@ -245,6 +247,8 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       console.error('Network error:', error);
       Alert.alert('Error', 'Network error occurred');
     }
+
+    onClose();
   };
 
 
@@ -282,10 +286,11 @@ const CreateEventScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setShowStartTimePicker={setShowStartTimePicker}
         showDatePicker={showDatePicker}
         showStartTimePicker={showStartTimePicker}
-        imageUri={imageUri} // Передаём imageUri
-        setImageUri={setImageUri} // Передаём setImageUri
-          handleCreateEvent={isUpdateMode ? handleUpdateEvent : handleCreateEvent} // выбираем нужный обработчик
-          buttonText={isUpdateMode ? 'Update' : 'Create'}
+        imageUri={imageUri}
+        setImageUri={setImageUri}
+        isUpdateMode={isUpdateMode}
+        handleCreateEvent={isUpdateMode ? handleUpdateEvent : handleCreateEvent}
+        buttonText={isUpdateMode ? 'Update' : 'Create'}
       />
     </View>
   );
@@ -298,8 +303,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 20,
-    right: 20,
+    top: 0,
+    right: 10,
     zIndex: 10,
     width: 30,
     height: 30,
@@ -307,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
-    fontSize: 24,
+    fontSize: 30,
     color: '#000',
   },
 });

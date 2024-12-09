@@ -104,13 +104,8 @@ const MainTabs: React.FC = () => {
         <Tab.Screen name="Leaderboard" component={LeaderBoardScreen} options={{ headerShown: false }} />
         <Tab.Screen
           name="CreateEvent"
-          component={HomeScreen}
-          listeners={{
-            tabPress: (e) => {
-              e.preventDefault();
-              setCreateEventModalVisible(true);
-            },
-          }}
+          component={CreateEvent}
+          options={{headerShown: false}}
         />
         <Tab.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
         <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />

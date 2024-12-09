@@ -51,7 +51,6 @@ const DurationPicker = ({ label, hours, minutes, onChange }) => {
                 </ScrollView>
               </View>
 
-              {/* Скролл для минут */}
               <View style={styles.picker}>
                 <Text style={styles.pickerLabel}>Minutes</Text>
                 <ScrollView

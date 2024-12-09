@@ -4,7 +4,7 @@ import { View, TextInput, Text, TouchableOpacity, StyleSheet, FlatList } from 'r
 import LocationPicker from './LocationPicker';
 import DateTimePickerWrapper from './DateTimePickerWrapper';
 import DurationPicker from './DurationPicker';
-import ImagePicker from './ImagePicker'; // Импортируем ImagePicker
+import ImagePicker from './ImagePicker';
 
 interface EventFormProps {
   title: string;
@@ -22,16 +22,17 @@ interface EventFormProps {
   description: string;
   setDescription: (desc: string) => void;
   addressFieldHeight: number;
-  cityLocation: any; // Замените `any` на соответствующий тип
-  cityBounds: any; // Замените `any` на соответствующий тип
+  cityLocation: any;
+  cityBounds: any;
   handleCreateEvent: () => void;
   hasError: boolean;
   setShowDatePicker: (show: boolean) => void;
   setShowStartTimePicker: (show: boolean) => void;
   showDatePicker: boolean;
   showStartTimePicker: boolean;
-  imageUri: string | null; // Добавляем пропс для imageUri
-  setImageUri: (uri: string | null) => void; // Добавляем пропс для setImageUri
+  imageUri: string | null;
+  setImageUri: (uri: string | null) => void;
+  isUpdateMode?: boolean;
 }
 
 const EventForm: React.FC<EventFormProps> = ({
@@ -58,9 +59,10 @@ const EventForm: React.FC<EventFormProps> = ({
   setShowStartTimePicker,
   showDatePicker,
   showStartTimePicker,
-  imageUri, // Принимаем imageUri
-  setImageUri, // Принимаем setImageUri
+  imageUri,
+  setImageUri,
   buttonText,
+  isUpdateMode,
 }) => {
   const formFields = [
     {
@@ -75,21 +77,25 @@ const EventForm: React.FC<EventFormProps> = ({
         />
       ),
     },
-    {
-      key: 'locationPicker',
-      label: '',
-      component: (
-        <LocationPicker
-          onCitySelect={(cityName, location) => {
-            setCity(cityName);
-          }}
-          onAddressSelect={setAddress}
-          addressFieldHeight={addressFieldHeight}
-          cityLocation={cityLocation}
-          cityBounds={cityBounds}
-        />
-      ),
-    },
+    ...(!isUpdateMode
+      ? [
+          {
+            key: 'locationPicker',
+            label: '',
+            component: (
+              <LocationPicker
+                onCitySelect={(cityName, location) => {
+                  setCity(cityName);
+                }}
+                onAddressSelect={setAddress}
+                addressFieldHeight={addressFieldHeight}
+                cityLocation={cityLocation}
+                cityBounds={cityBounds}
+              />
+            ),
+          },
+        ]
+      : []),
     {
       key: 'dateTimeDuration',
       label: '',
@@ -114,6 +120,7 @@ const EventForm: React.FC<EventFormProps> = ({
             containerStyle={styles.pickerContainer}
           />
           <DurationPicker
+            label="Duration"
             hours={duration.hours}
             minutes={duration.minutes}
             onChange={handleDurationChange}
@@ -141,6 +148,7 @@ const EventForm: React.FC<EventFormProps> = ({
             />
           </View>
           <View style={styles.imagePickerWrapper}>
+            <Text style={styles.label}>Event Image</Text>
             <ImagePicker imageUri={imageUri} setImageUri={setImageUri} />
           </View>
         </View>
@@ -217,22 +225,22 @@ const styles = StyleSheet.create({
     height: 48,
     borderColor: '#013B14',
     borderWidth: 1,
-    paddingHorizontal: 20,
-    color: '#000',
+    paddingHorizontal: 15,
+    color: 'black',
     borderRadius: 40,
     fontSize: 18,
-    width: 100,
   },
   inputError: {
     borderColor: 'red',
   },
   textArea: {
-    height: 100,
-    borderColor: '#ccc',
+    height: 165,
+    borderColor: '#013B14',
     borderWidth: 1,
     borderRadius: 25,
     paddingHorizontal: 20,
     textAlignVertical: 'top',
+    fontSize: 18,
   },
   button: {
     backgroundColor: '#013B14',
@@ -263,17 +271,18 @@ const styles = StyleSheet.create({
   },
   pickerWrapper: {
     flexDirection: 'column',
-    alignItems: 'flex-start',
-    marginRight: 10,
+    marginLeft: 60,
   },
   imagePickerWrapper: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   label: {
-    marginTop: 5,
-    fontSize: 14,
-    color: '#333',
+    marginBottom: 5,
+    alignSelf: 'center',
+    fontSize: 18,
+    color: 'black',
   },
 });
 

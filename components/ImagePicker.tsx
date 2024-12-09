@@ -86,18 +86,12 @@ const ImagePicker: React.FC<ImagePickerProps> = ({ imageUri, setImageUri }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    // Adjusted styles for compact display
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   button: {
-    paddingVertical: 6,
-    paddingHorizontal: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
     borderRadius: 40,
     borderColor: '#013B14',
     borderWidth: 1,
-    marginHorizontal: 5,
   },
   buttonText: {
     color: '#838383',
@@ -117,7 +111,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -5,
     right: -5,
-    backgroundColor: 'red',
+    backgroundColor: '#013B14',
     borderRadius: 10,
     width: 20,
     height: 20,
