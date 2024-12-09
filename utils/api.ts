@@ -375,3 +375,27 @@ export const adminUpdateUserDetails = async (userId, data) => {
     console.error('Error updating user details:', error);
   }
 };
+
+/**
+ * Create new feedback
+ * @param {number} eventId - Event ID
+ * @param {string} text - Feedback text
+ * @param {number} rating - Feedback rating
+ * @returns {Promise<boolean>} - Success status
+ */
+export const createFeedback = async (eventId, text, rating) => {
+  try {
+    const response = await fetch(`${BASE_URL}/feedback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+      },
+      body: JSON.stringify({ eventId, text, rating }),
+    });
+    console.log('Feedback:', response);
+  } catch (error) {
+    console.error('Error creating feedback:', error);
+  }
+
+};

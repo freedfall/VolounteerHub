@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerUserForEvent, cancelUserRegistration } from '../utils/api';
+import FeedbackModal from './FeedbackModal';
 
 type EventRegistrationStatusProps = {
   eventId: string;
   isRegistered: boolean;
   isConfirmed: boolean;
+  isPast: boolean;
   onStatusChange: (newStatus: boolean, confirmation: boolean) => void;
 };
 
@@ -15,7 +17,10 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
   isRegistered,
   isConfirmed,
   onStatusChange,
+  isPast,
 }) => {
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
+
   const registerForEvent = async () => {
     try {
       const response = await registerUserForEvent(eventId);
@@ -47,6 +52,24 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
     }
   };
 
+  const handleLeaveFeedback = () => {
+    setFeedbackModalVisible(true);
+  };
+
+  if (isPast) {
+    return (
+        <View style={styles.container}>
+        <TouchableOpacity style={styles.joinButton} onPress={handleLeaveFeedback}>
+            <Text style={styles.joinButtonText}>Leave Feedback</Text>
+        </TouchableOpacity>
+        <FeedbackModal
+            visible={feedbackModalVisible}
+            onClose={() => setFeedbackModalVisible(false)}
+            eventId={eventId}
+          />
+        </View>
+    );
+  }
   return (
     <View style={styles.container}>
       {isRegistered ? (
@@ -69,15 +92,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   joinButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#69B67E',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   joinButtonText: {
     color: '#fff',
@@ -85,15 +103,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   cancelButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: '#FF6A6A',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
   cancelButtonText: {
     color: '#fff',

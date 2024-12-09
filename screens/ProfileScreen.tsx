@@ -1,5 +1,6 @@
+// ProfileScreen.tsx
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
@@ -25,7 +26,7 @@ const ProfileScreen: React.FC = () => {
   const [participationEvents, setParticipationEvents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
-  const [isLoaded, setIsLoaded] = useState({ created: false, participation: false });
+  const [isLoaded, setIsLoaded] = useState({ created: false, participation: false, allEvents: false, allUsers: false });
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -41,19 +42,17 @@ const ProfileScreen: React.FC = () => {
     }
   }, [loadEvents, loadUserData, selectedCategory, user, isAdmin]);
 
-
   useEffect(() => {
     if (isFocused) {
-        console.log('ProfileScreen is focused, reloading data');
-        setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
-        loadUserData();
-        loadEvents(selectedCategory);
-        if (isAdmin) {
-          loadAdminData();
-        }
+      console.log('ProfileScreen is focused, reloading data');
+      setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
+      loadUserData();
+      loadEvents(selectedCategory);
+      if (isAdmin) {
+        loadAdminData();
       }
-    }, [isFocused, selectedCategory, isAdmin, loadUserData, loadEvents, loadAdminData]);
-
+    }
+  }, [isFocused, selectedCategory, isAdmin, loadUserData, loadEvents, loadAdminData]);
 
   const loadEvents = useCallback(async (category) => {
     console.log('Loading events:', category);
@@ -106,20 +105,34 @@ const ProfileScreen: React.FC = () => {
                          selectedCategory === 'participationEvents' ? participationEvents :
                          selectedCategory === 'allEvents' ? allEvents : [])
     .slice()
-    .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+    .sort((a, b) => {
+      const now = new Date();
+      const aDate = new Date(a.startDateTime);
+      const bDate = new Date(b.startDateTime);
+
+      const aIsPast = aDate < now;
+      const bIsPast = bDate < now;
+
+      if (aIsPast && !bIsPast) return 1; // a - прошедшее, b - предстоящее
+      if (!aIsPast && bIsPast) return -1; // a - предстоящее, b - прошедшее
+      // Если оба события предстоящие или оба прошедшие, сортируем по времени
+      return aDate.getTime() - bDate.getTime();
+    });
 
   const currentUsers = selectedCategory === 'allUsers' ? allUsers : [];
 
   const openUserModal = (user) => {
-      setSelectedUser(user);
-      setModalVisible(true);
-    };
+    setSelectedUser(user);
+    setModalVisible(true);
+  };
 
   const handleUserUpdated = () => {
-      if (isAdmin && selectedCategory === 'allUsers') {
-        loadEvents('allUsers');
-      }
-    };
+    if (isAdmin && selectedCategory === 'allUsers') {
+      loadEvents('allUsers');
+    }
+  };
+
+  const isEventInPast = (event) => new Date(event.startDateTime) < new Date();
 
   return (
     <ScrollView
@@ -133,14 +146,14 @@ const ProfileScreen: React.FC = () => {
           source={user?.avatarUrl ? { uri: user.avatarUrl } : userProfileIcon}
           style={styles.profileImage}
         />
-        <TouchableOpacity style={styles.editButton}>
-            <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
+        <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
+          <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.infoSection}>
-          <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
-      <Text style={styles.userName}>{user?.name} {user?.surname}</Text>
+        <View style={{ flexDirection: 'column', justifyContent: 'space-between'}}>
+          <Text style={styles.userName}>{user?.name} {user?.surname}</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
             <PointsToStars points={user?.pointsAsCreator} />
           </View>
@@ -209,11 +222,10 @@ const ProfileScreen: React.FC = () => {
                 key={index}
                 title={event.name}
                 time={handleDateTime(event.startDateTime)}
-                city={event.city}
                 address={event.address}
-                occupiedQuantity={event.occupiedQuantity}
                 points={event.price}
                 imageURL={event.imageURL}
+                isPast={isEventInPast(event)}
                 onPress={() => navigation.navigate('EventDetails', { ...event })}
               />
             ))
@@ -251,11 +263,10 @@ const ProfileScreen: React.FC = () => {
                 key={index}
                 title={event.name}
                 time={handleDateTime(event.startDateTime)}
-                city={event.city}
                 address={event.address}
-                occupiedQuantity={event.occupiedQuantity}
                 points={event.price}
                 imageURL={event.imageURL}
+                isPast={isEventInPast(event)} // Добавлено свойство isPast
                 onPress={() => navigation.navigate('EventDetails', { ...event })}
               />
             ))
@@ -266,16 +277,17 @@ const ProfileScreen: React.FC = () => {
       )}
 
       <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-        <Text style={styles.signOutButtonText}>Sign Out</Text>
+        <Text style={styles.signOutButtonText}>Log out</Text>
       </TouchableOpacity>
+
       {isAdmin && selectedUser && (
-              <AdminUserModal
-                visible={modalVisible}
-                user={selectedUser}
-                onClose={() => setModalVisible(false)}
-                navigation={navigation}
-              />
-            )}
+        <AdminUserModal
+          visible={modalVisible}
+          user={selectedUser}
+          onClose={() => setModalVisible(false)}
+          navigation={navigation}
+        />
+      )}
     </ScrollView>
   );
 };
@@ -350,7 +362,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   eventHistory: {
-      marginTop: 10,
+    marginTop: 10,
     marginBottom: 20,
   },
   historyTitle: {
@@ -375,7 +387,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
-  // Внутри StyleSheet.create({...})
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -411,7 +422,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
-
 });
 
 export default ProfileScreen;

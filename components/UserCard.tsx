@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import userProfileIcon from '../images/userProfileIcon.jpg';
 import { confirmUserRegistration } from '../utils/api';
+import PointsIcon from '../images/icons/points.png';
 
 type UserCardProps = {
   name: string;
@@ -28,7 +29,10 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
         />
         <View style={styles.info}>
           <Text style={styles.name}>{name}</Text>
-          <Text style={styles.points}>Points: {points}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.points}>{points}</Text>
+              <Image source={PointsIcon} style={{ width: 16, height: 19, marginLeft: 5 }} />
+            </View>
         </View>
       </TouchableOpacity>
 
@@ -45,7 +49,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
         >
           <TouchableOpacity
             style={styles.modalContent}
-            activeOpacity={1} // Отключаем закрытие по нажатию на содержимое модального окна
+            activeOpacity={1}
           >
             <TouchableOpacity
               style={styles.closeIcon}
@@ -58,8 +62,15 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
               style={styles.modalAvatar}
             />
             <Text style={styles.modalName}>{name}</Text>
-            <Text style={styles.modalPoints}>Points: {points}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.modalPoints}>{points}</Text>
+              <Image source={PointsIcon} style={{ width: 16, height: 19, marginLeft: 5 }} />
+            </View>
             {email && <Text style={styles.modalText}>Email: {email}</Text>}
+
+            <TouchableOpacity style={styles.confirmButton}>
+              <Text style={styles.confirmButtonText}>Contact</Text>
+            </TouchableOpacity>
 
             {showActions && (
               <View style={styles.actionsContainer}>
@@ -172,7 +183,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 15,
   },
   actionsContainer: {
     flexDirection: 'column',
@@ -181,10 +192,12 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: '#69B67E',
+    width: 220,
     padding: 7,
     paddingHorizontal: 30,
     borderRadius: 40,
     textAlign: 'center',
+    alignItems: 'center',
   },
   confirmButtonText: {
     color: '#FFF',
@@ -195,6 +208,7 @@ const styles = StyleSheet.create({
     padding: 7,
     borderRadius: 40,
     alignItems: 'center',
+    width: 220,
   },
   rejectButtonText: {
     color: '#FFF',

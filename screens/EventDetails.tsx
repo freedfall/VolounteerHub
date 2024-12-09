@@ -89,6 +89,8 @@ const EventDetails: React.FC = ({ route }) => {
       }
     }
 
+  const isPast = new Date(eventDetails.startDateTime) < new Date();
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} resizeMode="cover"/>
@@ -125,7 +127,7 @@ const EventDetails: React.FC = ({ route }) => {
           {participants.map((participant) => (
             <UserCard
               key={participant.id}
-              name={participant.name}
+              name={participant.name + ' ' + participant.surname}
               points={participant.points}
               avatarUrl={participant.avatarUrl}
               email={participant.email}
@@ -159,15 +161,16 @@ const EventDetails: React.FC = ({ route }) => {
                   eventId={id}
                 />
             </View>
-        <EventRegistrationStatus
-          eventId={id}
-          isRegistered={isRegistered}
-          isConfirmed={isConfirmed}
-          onStatusChange={(newStatus, confirmation) => {
-            setIsRegistered(newStatus);
-            setIsConfirmed(confirmation);
-          }}
-        />
+          <EventRegistrationStatus
+              eventId={id}
+              isRegistered={isRegistered}
+              isConfirmed={isConfirmed}
+              isPast={isPast}
+              onStatusChange={(newStatus, confirmation) => {
+                setIsRegistered(newStatus);
+                setIsConfirmed(confirmation);
+              }}
+          />
       </View>
       )}
 

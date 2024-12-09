@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
 import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
+import PointsIcon from '../images/icons/points.png';
 
 const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
@@ -78,7 +79,10 @@ const LeaderBoardScreen = () => {
       <Image source={item.avatarUrl ? { uri: item.avatarUrl } : userIcon} style={styles.avatar} />
       <View style={styles.userInfo}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.points}>{item.points} 💎</Text>
+        <View style={styles.pointsInfo}>
+          <Text style={styles.points}>{item.points}</Text>
+          <Image source={PointsIcon} style={{ width: 19, height: 24 }} />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -119,7 +123,10 @@ const LeaderBoardScreen = () => {
                 />
                 <View style={styles.userInfo}>
                   <Text style={styles.name}>{user.name}</Text>
-                  <Text style={styles.points}>{user.points} 💎</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.points}>{user.points}</Text>
+                    <Image source={PointsIcon} style={{ width: 16, height: 20 }} />
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>
@@ -160,9 +167,10 @@ const LeaderBoardScreen = () => {
                   style={styles.modalAvatar}
                 />
                 <Text style={styles.modalName}>{selectedUser.name}</Text>
-                <Text style={styles.modalPoints}>
-                  Points: {selectedUser.points}
-                </Text>
+                <View style={styles.pointsInfo}>
+                    <Text style={styles.modalPoints}>{selectedUser.points}</Text>
+                    <Image source={PointsIcon} style={{ width: 16, height: 20 }} />
+                </View>
                 {selectedUser.email && (
                   <Text style={styles.modalText}>
                     Email: {selectedUser.email}
@@ -212,23 +220,29 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 72,
+    height: 72,
+    borderRadius: 50,
     marginRight: 15,
   },
   userInfo: {
     flex: 1,
   },
   name: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '500',
     color: '#333',
   },
   points: {
-    fontSize: 14,
-    color: '#006400',
+    fontSize: 18,
+    color: '#838383',
   },
+  pointsInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 5,
+    },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -239,13 +253,13 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 20,
     backgroundColor: '#FFF',
-    borderRadius: 10,
+    borderRadius: 15,
     alignItems: 'center',
   },
   modalAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 109,
+    height: 109,
+    borderRadius: 50,
     marginBottom: 10,
   },
   modalName: {
@@ -256,19 +270,17 @@ const styles = StyleSheet.create({
   },
   modalPoints: {
     fontSize: 18,
-    color: '#666',
-    marginBottom: 10,
+    color: 'black',
   },
   modalText: {
     fontSize: 16,
     color: '#333',
-    marginBottom: 5,
   },
   closeButton: {
     marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#FF6347',
+    backgroundColor: '#FF6A6A',
     borderRadius: 5,
   },
   closeButtonText: {

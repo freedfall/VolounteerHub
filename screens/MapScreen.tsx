@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calloutContainer: {
+    width: 350,
     marginBottom: 10,
     backgroundColor: 'white',
     borderRadius: 15,

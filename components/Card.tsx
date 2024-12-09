@@ -12,10 +12,10 @@ interface CardProps {
   points: number;
   imageURL?: string;
   onPress: () => void;
+  isPast?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imageURL }) => {
-  const isPast = new Date(time) < new Date();
+const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imageURL, isPast }) => {
 
   const getShortAddress = (fullAddress: string): string => {
       if (!fullAddress) return '';
@@ -36,10 +36,14 @@ const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imag
           <Text style={styles.details}>{shortAddress}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={styles.points}>{points}</Text>
-                <Image source={PointsIcon} style={{ width: 16, height: 19, marginRight: 5 }} />
+                <Text style={styles.pointsWrapper}>
+                  <Image source={PointsIcon} style={{ width: 16, height: 19, marginRight: 5 }} resizeMode="cover" />
+                </Text>
             </View>
         </View>
-        <Image source={SearchIcon} style={{ width: 29, height: 31, alignSelf: 'center', marginRight: 10 }} />
+        <Text style={styles.iconContainer}>
+          <Image source={SearchIcon} style={{ width: 29, height: 31, alignSelf: 'center', marginRight: 10 }} />
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -64,6 +68,10 @@ const styles = StyleSheet.create({
     marginTop: -45,
     borderRadius: 45,
   },
+  iconContainer: {
+    marginTop: 20,
+    height: 130,
+  },
   image: {
     width: 100,
     height: 100,
@@ -86,6 +94,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#838383',
     marginRight: 5,
+  },
+  pointsWrapper: {
+    marginTop: 0,
+    height: 30,
   },
 });
 
