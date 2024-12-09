@@ -22,6 +22,8 @@ import MapIcon from './images/icons/MapIcon.png';
 import ProfileIcon from './images/icons/ProfileIcon.png';
 import CreateEventIcon from './images/icons/CreateEventIcon.png';
 import QRScannerScreen from './screens/QRScannerScreen';
+import ChatListScreen from './screens/ChatListScreen';
+import ChatScreen from './screens/ChatScreen'
 
 import { setCustomText } from 'react-native-global-props';
 
@@ -46,6 +48,8 @@ const RootStackScreen: React.FC = () => (
     <RootStack.Screen name="CategoryDetails" component={CategoryDetailsScreen} options={{ headerShown: false }} />
     <RootStack.Screen name="QRScanner" component={QRScannerScreen} options={{ headerShown: false }} />
     <RootStack.Screen name="CreateEvent" component={CreateEvent} options={{ headerShown: false }} />
+    <RootStack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} />
+    <RootStack.Screen name="ChatListScreen" component={ChatListScreen} options={{ headerShown: false }} />
   </RootStack.Navigator>
 );
 

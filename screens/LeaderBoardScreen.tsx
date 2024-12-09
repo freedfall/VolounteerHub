@@ -5,6 +5,7 @@ import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
 import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
 import PointsIcon from '../images/icons/points.png';
+import { useNavigation } from '@react-navigation/native';
 
 const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
@@ -16,6 +17,8 @@ const LeaderBoardScreen = () => {
   const [modalVisible, setModalVisible] = useState(false); // For user modal
   const [isModalVisible, setModalSearchVisible] = useState(false); // For search modal
   const [searchHistory, setSearchHistory] = useState([]);
+
+  const navigation = useNavigation();
 
   // Fetch users
   const fetchUsers = async () => {
@@ -177,6 +180,16 @@ const LeaderBoardScreen = () => {
                   </Text>
                 )}
                 <TouchableOpacity
+                  style={styles.contactButton}
+                  onPress={() => {
+                    setModalVisible(false);
+                    // Тут navigation это ваш навигатор. Допустим, вы используете useNavigation:
+                    navigation.navigate('ChatScreen', { recipientId: selectedUser.id });
+                  }}
+                >
+                  <Text style={styles.contactButtonText}>Contact</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setModalVisible(false)}
                 >
@@ -286,6 +299,21 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#FFF',
     fontSize: 16,
+  },
+  contactButton: {
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#006400', // Зеленый цвет для кнопки
+    borderRadius: 5,
+    marginBottom: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  contactButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

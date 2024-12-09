@@ -14,6 +14,7 @@ import userProfileIcon from '../images/userProfileIcon.jpg';
 import AdminUserModal from '../components/AdminUserModal';
 import PointsIcon from '../images/icons/points.png';
 import SettingsIcon from '../images/icons/settings.png';
+import ChatIcon from '../images/icons/LeaderBoardIcon.png';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
@@ -148,6 +149,9 @@ const ProfileScreen: React.FC = () => {
         />
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
           <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('ChatListScreen')}>
+          <Image source={ChatIcon} style={{ width: 34, height: 34 }} />
         </TouchableOpacity>
       </View>
 
@@ -301,6 +305,7 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     marginBottom: 20,
+    position: 'relative',
   },
   profileImage: {
     width: 120,
@@ -316,8 +321,13 @@ const styles = StyleSheet.create({
   editButton: {
     position: 'absolute',
     top: 0,
-    right: 0,
+    right: 50,
   },
+  chatButton: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+    },
   infoSection: {
     marginBottom: 15,
     flexDirection: 'row',
