@@ -473,3 +473,20 @@ export const deleteFeedback = async (feedbackId) => {
         throw error;
     }
 };
+
+export const fetchFeedbacksForCreator = async (targetId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/feedback/target/${targetId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        });
+        console.log('Feedback:', response);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching feedbacks:', error);
+    }
+};

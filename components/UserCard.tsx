@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import userProfileIcon from '../images/userProfileIcon.jpg';
 import { confirmUserRegistration } from '../utils/api';
 import PointsIcon from '../images/icons/points.png';
+import CreatorFeedbacks from './CreatorFeedbacks';
 
 type UserCardProps = {
   name: string;
@@ -95,6 +96,9 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
                 )}
               </View>
             )}
+            <View style={styles.feedbackContainer}>
+              <CreatorFeedbacks creatorId={id} />
+            </View>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
@@ -214,6 +218,12 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 20,
   },
+    feedbackContainer: {
+        marginTop: 20,
+        width: '100%',
+        height: 200,
+        overflow: 'hidden',
+    },
 });
 
 export default UserCard;
