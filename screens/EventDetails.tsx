@@ -7,6 +7,7 @@ import EventRegistrationStatus from '../components/EventRegistrationStatus';
 import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails } from '../utils/api';
 import UserCard from '../components/UserCard';
 import { useNavigation } from '@react-navigation/native';
+import UserFeedbacks from '../components/UserFeedbacks';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -161,6 +162,10 @@ const EventDetails: React.FC = ({ route }) => {
                   eventId={id}
                 />
             </View>
+
+          {isPast && (
+            <UserFeedbacks eventId={id} /> // Добавляем компонент UserFeedbacks
+          )}
           <EventRegistrationStatus
               eventId={id}
               isRegistered={isRegistered}
@@ -171,6 +176,7 @@ const EventDetails: React.FC = ({ route }) => {
                 setIsConfirmed(confirmation);
               }}
           />
+
       </View>
       )}
 

@@ -10,9 +10,10 @@ interface FeedbackModalProps {
   visible: boolean;
   onClose: () => void;
   eventId: string;
+  onCreateFeedback: () => void;
 }
 
-const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId }) => {
+const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId, onCreateFeedback }) => {
   const [rating, setRating] = useState<number>(0);
   const [text, setText] = useState<string>('');
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -34,6 +35,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
       onClose();
       setRating(0);
       setText('');
+      onCreateFeedback();
     } catch (error) {
       Alert.alert('Error', 'Failed to send feedback. Please try again later.');
     } finally {

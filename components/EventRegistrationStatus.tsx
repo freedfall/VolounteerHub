@@ -10,6 +10,7 @@ type EventRegistrationStatusProps = {
   isConfirmed: boolean;
   isPast: boolean;
   onStatusChange: (newStatus: boolean, confirmation: boolean) => void;
+  onCreateFeedback: () => void;
 };
 
 const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
@@ -18,6 +19,7 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
   isConfirmed,
   onStatusChange,
   isPast,
+  onCreateFeedback,
 }) => {
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
 
@@ -55,21 +57,10 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
   const handleLeaveFeedback = () => {
     setFeedbackModalVisible(true);
   };
+  if (isPast){
+      return null;
+  };
 
-  if (isPast) {
-    return (
-        <View style={styles.container}>
-        <TouchableOpacity style={styles.joinButton} onPress={handleLeaveFeedback}>
-            <Text style={styles.joinButtonText}>Leave Feedback</Text>
-        </TouchableOpacity>
-        <FeedbackModal
-            visible={feedbackModalVisible}
-            onClose={() => setFeedbackModalVisible(false)}
-            eventId={eventId}
-          />
-        </View>
-    );
-  }
   return (
     <View style={styles.container}>
       {isRegistered ? (
@@ -90,6 +81,7 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
+    marginBottom: 20,
   },
   joinButton: {
     backgroundColor: '#69B67E',

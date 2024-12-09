@@ -397,5 +397,79 @@ export const createFeedback = async (eventId, text, rating) => {
   } catch (error) {
     console.error('Error creating feedback:', error);
   }
+};
 
+/**
+ * Fetch all user's feedbacks for an event
+ * @param {number} eventId - Event ID
+ * @returns {Promise<Array>} - Array of feedbacks
+ */
+export const fetchUserFeedbacksForEvent = async (eventId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/feedback/my/${eventId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+    });
+    const data = await response.json();
+    console.log(data);
+    return data;
+    } catch (error) {
+    console.error('Error fetching feedbacks:', error);
+    }
+};
+
+/**
+ * Delete feedback
+ * @param {string} feedbackId - Feedback ID
+ * @returns {Promise<Response>} - Request result
+ */
+export const deleteFeedback = async (feedbackId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/feedback/` + feedbackId, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+      },
+    });
+    console.log('Feedback:', response);
+    if (!response.ok) throw new Error('Failed to delete feedback');
+
+    return response;
+  } catch (error) {
+    console.error('Error deleting feedback:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update feedback
+ * @param {string} feedbackId - Feedback ID
+ * @param {number} eventId - Event ID
+ * @param {string} text - Feedback text
+ * @param {number} rating - Feedback rating
+ * @returns {Promise<Response>} - Request result
+ */
+ export const updateFeedback = async (feedbackId, eventId, text, rating) => {
+    console.log(JSON.stringify({ eventId, text, rating }));
+    try {
+
+      const response = await fetch(`${BASE_URL}/feedback/` + feedbackId, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+        body: JSON.stringify({ eventId, text, rating }),
+        });
+        console.log('Feedback:', response);
+        if (!response.ok) throw new Error('Failed to update feedback');
+        return response;
+    } catch (error) {
+        console.error('Error updating feedback:', error);
+        throw error;
+    }
 };
