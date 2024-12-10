@@ -1,60 +1,168 @@
 // ChatListScreen.tsx
-
-import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image, ActivityIndicator, Alert, RefreshControl, } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
-import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
+import userIcon from '../images/userProfileIcon.jpg';
+import { fetchMessageWriters, fetchSentMessages, fetchReceivedMessages } from '../utils/api';
 
-const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
+interface Message {
+  id: number;
+  senderId: number;
+  recipientId: number;
+  content: string;
+  sentAt: string;
+  isRead: boolean;
+}
+
+interface UserInfo {
+  id: number;
+  name: string;
+  surname: string;
+  email: string;
+  points: number;
+  pointsAsCreator: number;
+  imageURL: string;
+  role: string;
+}
+
+interface ChatItem {
+  userInfo: UserInfo;
+  hasUnread: boolean;
+  lastMessageSenderId: number | null;
+}
 
 const ChatListScreen: React.FC = () => {
   const { user } = useContext(AuthContext);
   const navigation = useNavigation();
-  const [chats, setChats] = useState([]);
+  const isFocused = useIsFocused();
+  const [chats, setChats] = useState<ChatItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchChats = async () => {
+  const fetchChats = useCallback(async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch(`${BASE_URL}/message/${user.id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const users = await fetchMessageWriters();
+      console.log('Fetched Users:', users);
+
+      // Fetch all sent and received messages for each user
+      const allMessagesSent = [];
+      const allMessagesReceived = [];
+
+      const messagesPromises = users.map(async (userInfo) => {
+        const sentMessages = await fetchSentMessages(user.id, userInfo.id);
+        const receivedMessages = await fetchReceivedMessages(user.id, userInfo.id);
+        allMessagesSent.push(...sentMessages);
+        allMessagesReceived.push(...receivedMessages);
+      });
+
+      await Promise.all(messagesPromises);
+
+      const allMessages = [...allMessagesSent, ...allMessagesReceived];
+
+      // Group messages by user
+      const chatMap = {};
+
+      users.forEach((userInfo) => {
+        chatMap[userInfo.id] = { messages: [], userInfo };
+      });
+
+      allMessages.forEach((msg) => {
+        const otherUserId = msg.senderId === user.id ? msg.recipientId : msg.senderId;
+        if (chatMap[otherUserId]) {
+          chatMap[otherUserId].messages.push(msg);
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch chats');
-      }
+      // Create chat items with necessary data
+      const chatItems = Object.values(chatMap).map(({ messages, userInfo }) => {
+        // Determine if there are unread messages
+        const hasUnread = messages.some(
+          (msg) => msg.senderId === userInfo.id && !msg.isRead
+        );
 
-      const data = await response.json();
-      setChats(data);
+        // Determine the sender of the last message
+        const sortedMessages = messages.sort(
+          (a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
+        );
+        const lastMessage = sortedMessages[0];
+        const lastMessageSenderId = lastMessage
+          ? lastMessage.senderId
+          : null;
+
+        return {
+          userInfo,
+          hasUnread,
+          lastMessageSenderId,
+        };
+      });
+
+      setChats(chatItems);
     } catch (error) {
       console.error('Error fetching chats:', error);
       Alert.alert('Error', 'Failed to load chats.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [user.id]);
 
   useEffect(() => {
+    if (isFocused) {
+      setLoading(true);
+      fetchChats();
+    }
+  }, [isFocused, fetchChats]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
     fetchChats();
-  }, []);
+  }, [fetchChats]);
 
-  const renderChat = ({ item }) => (
-    <TouchableOpacity style={styles.chatItem} onPress={() => navigation.navigate('ChatScreen', { recipientId: item.id, recipientName: `${item.name} ${item.surname}` })}>
-      <Image source={item.avatarUrl ? { uri: item.avatarUrl } : userIcon} style={styles.avatar} />
-      <View style={styles.chatInfo}>
-        <Text style={styles.chatName}>{item.name} {item.surname}</Text>
-        <Text style={styles.chatEmail}>{item.email}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderChat = ({ item }: { item: ChatItem }) => {
+    let statusText = '';
+    let chatBackground = '#FFF';
 
-  if (loading) {
+    if (item.hasUnread) {
+      statusText = 'New message!';
+      chatBackground = '#eee';
+    } else {
+      if (item.lastMessageSenderId === user.id) {
+        statusText = 'Sent';
+      } else if (item.lastMessageSenderId !== null) {
+        statusText = 'Answer';
+      }
+    }
+
+    return (
+      <TouchableOpacity
+        style={[styles.chatItem, { backgroundColor: chatBackground }]}
+        onPress={() =>
+          navigation.navigate('ChatScreen', {
+            recipientId: item.userInfo.id,
+            recipientName: `${item.userInfo.name} ${item.userInfo.surname}`,
+          })
+        }
+      >
+        <Image
+          source={item.userInfo.imageURL ? { uri: item.userInfo.imageURL } : userIcon}
+          style={styles.avatar}
+        />
+        <View style={styles.chatInfo}>
+          <View style={styles.nameRow}>
+            <Text style={styles.chatName}>
+              {item.userInfo.name} {item.userInfo.surname}
+            </Text>
+            {item.hasUnread && <View style={styles.unreadIndicator} />}
+          </View>
+          <Text style={styles.statusText}>{statusText}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  if (loading && !refreshing) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#006400" />
@@ -68,8 +176,9 @@ const ChatListScreen: React.FC = () => {
         <FlatList
           data={chats}
           renderItem={renderChat}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.userInfo.id.toString()}
           contentContainerStyle={styles.listContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
       ) : (
         <View style={styles.emptyContainer}>
@@ -95,7 +204,6 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 5,
     borderRadius: 10,
-    backgroundColor: '#FFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -111,14 +219,26 @@ const styles = StyleSheet.create({
   chatInfo: {
     flex: 1,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   chatName: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
   },
-  chatEmail: {
+  unreadIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#FF6347',
+    marginLeft: 8,
+  },
+  statusText: {
     fontSize: 14,
     color: '#555',
+    marginTop: 4,
   },
   loaderContainer: {
     flex: 1,
@@ -126,9 +246,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyContainer: {
-    flex:1,
-    justifyContent:'center',
-    alignItems:'center',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: 18,

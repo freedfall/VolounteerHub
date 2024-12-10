@@ -13,7 +13,7 @@ import userProfileIcon from '../images/userProfileIcon.jpg';
 import AdminUserModal from '../components/AdminUserModal';
 import PointsIcon from '../images/icons/points.png';
 import SettingsIcon from '../images/icons/settings.png';
-import ChatIcon from '../images/icons/LeaderBoardIcon.png';
+import ChatIcon from '../images/icons/chatIcon.png';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
@@ -138,7 +138,7 @@ const ProfileScreen: React.FC = () => {
             <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('ChatListScreen')}>
-          <Image source={ChatIcon} style={{ width: 34, height: 34 }} />
+          <Image source={ChatIcon} style={{ width: 37, height: 34 }} />
         </TouchableOpacity>
       </View>
 
