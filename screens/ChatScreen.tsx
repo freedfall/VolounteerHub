@@ -6,12 +6,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 import { fetchSentMessages, fetchReceivedMessages, sendMessageApi, markMessageAsReadApi } from '../utils/api';
 import SendIcon from '../images/icons/sendIcon.png';
+import userIcon from '../images/userProfileIcon.jpg';
 
 const ChatScreen: React.FC = () => {
   const isFocused = useIsFocused();
   const { user } = useContext(AuthContext);
   const route = useRoute<any>();
-  const { recipientId, recipientName } = route.params;
+  const { recipientId, recipientName, recipientAvatar } = route.params;
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -19,6 +20,8 @@ const ChatScreen: React.FC = () => {
 
   const sendButtonOpacity = useRef(new Animated.Value(0)).current;
   const sendButtonScale = useRef(new Animated.Value(0.8)).current;
+
+  const avatarSource = recipientAvatar ? { uri: recipientAvatar } : userIcon;
 
   useEffect(() => {
       if (newMessage.trim().length > 0) {
@@ -143,6 +146,10 @@ const ChatScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Image source={avatarSource} style={styles.headerAvatar} />
+        <Text style={styles.headerName}>{recipientName}</Text>
+      </View>
       <FlatList
         data={messages}
         renderItem={renderMessage}
@@ -163,7 +170,7 @@ const ChatScreen: React.FC = () => {
         {newMessage.trim().length > 0 && (
           <Animated.View style={{ opacity: sendButtonOpacity, transform: [{ scale: sendButtonScale }] }}>
             <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-              <Image source={SendIcon} style={{ width: 24, height: 24 }} />
+              <Image source={SendIcon} style={{ width: 25, height: 24 }} />
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -177,6 +184,25 @@ const styles = StyleSheet.create({
       flex:1,
       backgroundColor:'#fff'
   },
+  headerContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 10,
+      backgroundColor: '#F9F9F9',
+      borderBottomWidth: 1,
+      borderColor: '#ccc'
+    },
+    headerAvatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      marginRight: 10
+    },
+    headerName: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: '#000000'
+    },
   loaderContainer: {
       flex:1, justifyContent:'center',
       alignItems:'center'
@@ -222,12 +248,14 @@ const styles = StyleSheet.create({
       paddingHorizontal:15
       },
   sendButton: {
-      backgroundColor:'#006400',
+      backgroundColor:'#fff',
       justifyContent:'center',
       alignItems:'center',
       padding:10,
       borderRadius:20,
-      marginLeft:10
+      marginLeft:10,
+      borderWidth: 1,
+      borderColor: '#00ff15'
       },
 unreadIndicator: {
       position: 'absolute',
