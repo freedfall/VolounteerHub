@@ -600,3 +600,25 @@ export const fetchMessageWriters = async () => {
 
   return await response.json();
 };
+
+export const deleteUserFromEvent = async (eventId, userId) => {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await fetch(`${BASE_URL}/event/delete-user`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+              userId: userId,
+              eventId: eventId,
+            }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user from event');
+        console.log(response)
+      }
+
+      return response;
+}

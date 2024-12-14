@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, ScrollView, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
@@ -49,25 +49,28 @@ const EventDetails: React.FC = ({ route }) => {
   const isCreator = creator.id === user.id;
   const isAdmin = user.role === 'ADMIN';
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const loadParticipants = async () => {
-      try {
-        const participantsData = await fetchParticipants(id);
-        setParticipants(participantsData);
+  const loadParticipants = async () => {
+    try {
+      const participantsData = await fetchParticipants(id);
+      setParticipants(participantsData);
 
-        const participant = participantsData.find((p) => p.id === user.id);
-        if (participant) {
-          setIsRegistered(true);
-          setIsConfirmed(participant.status === 'confirmed');
-        } else {
-          setIsRegistered(false);
-        }
-      } catch (error) {
-        Alert.alert('Error', 'Failed to load participants.');
+      const participant = participantsData.find((p) => p.id === user.id);
+      if (participant) {
+        setIsRegistered(true);
+        setIsConfirmed(participant.status === 'confirmed');
+      } else {
+        setIsRegistered(false);
       }
-    };
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load participants.');
+    }
+  };
+
+  useEffect(() => {
 
     loadParticipants();
   }, [id, user.id]);
@@ -77,19 +80,45 @@ const EventDetails: React.FC = ({ route }) => {
     navigation.navigate('QRScanner', { eventId: id });
   };
 
+  const confirmDelete = () => {
+    Alert.alert(
+      'Confirm deletion',
+      'Are you sure you want to delete the event?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => handleDeleteEvent(id),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const handleDeleteEvent = async (eventId) => {
-      try {
-        if(isAdmin){
-            await adminDeleteEvent(eventId);
-        } else {
-            await deleteEvent(eventId);
-        }
-        navigation.goBack();
-        Alert.alert('Success', 'Event deleted successfully.');
-      } catch (error) {
-        Alert.alert('Error', 'Failed to delete event.');
+    setIsDeleting(true);
+    try {
+      if (isAdmin) {
+        await adminDeleteEvent(eventId);
+      } else {
+        await deleteEvent(eventId);
       }
+      Alert.alert('Success', 'Event successfully deleted.', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert('Error', 'Unable to delete event.');
+    } finally {
+        setIsDeleting(false);
     }
+  };
 
   const isPast = new Date(eventDetails.startDateTime) < new Date();
 
@@ -148,6 +177,7 @@ const EventDetails: React.FC = ({ route }) => {
               id={participant.id}
               eventId={id}
               status={participant.status}
+              refreshParticipants={loadParticipants}
             />
           ))}
           </View>
@@ -155,8 +185,16 @@ const EventDetails: React.FC = ({ route }) => {
               <TouchableOpacity style={styles.updateButton} onPress={() => navigation.navigate('CreateEvent', { event: eventDetails })}>
                 <Text style={styles.updateButtonText}>Edit</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
-                  <Text style={styles.deleteButtonText}>Delete Event</Text>
+              <TouchableOpacity
+                  style={[styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
+                  onPress={confirmDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.deleteButtonText}>Delete</Text>
+                  )}
               </TouchableOpacity>
           </View>
         </View>
@@ -186,6 +224,7 @@ const EventDetails: React.FC = ({ route }) => {
               onStatusChange={(newStatus, confirmation) => {
                 setIsRegistered(newStatus);
                 setIsConfirmed(confirmation);
+                loadParticipants();
               }}
           />
 

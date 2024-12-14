@@ -151,7 +151,7 @@ const ProfileScreen: React.FC = () => {
           <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('ChatListScreen')}>
-          <Image source={ChatIcon} style={{ width: 37, height: 34 }} />
+          <Image source={ChatIcon} style={{ width: 32, height: 30, marginTop: 1 }} />
         </TouchableOpacity>
       </View>
 

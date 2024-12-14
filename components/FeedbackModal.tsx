@@ -92,7 +92,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
                 <Text style={styles.buttonText}>Send</Text>
               )}
             </TouchableOpacity>
-
           </View>
         </View>
       </View>

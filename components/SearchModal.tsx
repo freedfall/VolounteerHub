@@ -36,7 +36,7 @@ const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSe
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={closeModal}>
-            <Text style={styles.closeButton}>Close</Text>
+            <Text style={styles.closeButton}>×</Text>
           </TouchableOpacity>
         </View>
         <ScrollView style={styles.historyContainer} showsVerticalScrollIndicator={false}>
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 15,
       height: 48,
       marginBottom: 20,
+      marginHorizontal: 25,
       width: '85%',
   },
   searchInputModal: {
@@ -99,10 +100,11 @@ const styles = StyleSheet.create({
       tintColor: '#888',
   },
   closeButton: {
-      fontSize: 18,
-      paddingVertical: 10,
-      fontWeight: 'bold',
-      color: 'black',
+      position: 'absolute',
+      top: 0,
+      right: 2,
+      fontSize: 35,
+      color: '#010101',
   },
   historyContainer: {
       alignSelf: 'center',

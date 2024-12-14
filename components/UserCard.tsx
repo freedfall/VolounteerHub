@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import userProfileIcon from '../images/userProfileIcon.jpg';
-import { confirmUserRegistration } from '../utils/api';
+import { confirmUserRegistration, deleteUserFromEvent } from '../utils/api';
 import PointsIcon from '../images/icons/points.png';
 import CreatorFeedbacks from './CreatorFeedbacks';
 import PointsToStars from './PointsToStars';
@@ -16,12 +16,99 @@ type UserCardProps = {
   id: string;
   eventId?: string;
   status?: string;
+  refreshParticipants?: () => void;
 };
 
-const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status }) => {
+const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status, refreshParticipants }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const isRegistered = status === 'CONFIRMED';
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  const confirmUserDelete = () => {
+    Alert.alert(
+        'Confirm deletion',
+        'Are you sure you want to delete this user from event?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => handleDeleteUser(),
+          },
+        ],
+        { cancelable: true }
+      );
+  };
+
+  const confirmUserRegister = () => {
+       Alert.alert(
+           'Confirm action',
+           'Are you sure you want to register to event?',
+           [
+             {
+               text: 'Cancel',
+               style: 'cancel',
+             },
+             {
+               text: 'Confirm',
+               style: 'default',
+               onPress: () => handleConfirmUser(),
+             },
+           ],
+           { cancelable: true }
+         );
+   };
+
+   const handleConfirmUser = async () => {
+       setIsConfirming(true);
+       try {
+         await confirmUserRegistration(eventId, id)
+         Alert.alert('Success', 'User successfully registered.', [
+           {
+             text: 'OK',
+             onPress: () => {
+                setModalVisible(false);
+                if (refreshParticipants) refreshParticipants();
+             },
+           },
+         ]);
+       } catch (error) {
+         Alert.alert('Error', 'Unable to delete user.');
+         console.log('Error: ', error);
+         setModalVisible(false);
+         if (refreshParticipants) refreshParticipants();
+       } finally {
+           setIsConfirming(false);
+       }
+     };
+
+    const handleDeleteUser = async () => {
+      setIsDeleting(true);
+      try {
+        await deleteUserFromEvent(eventId, id)
+        Alert.alert('Success', 'User successfully deleted.', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setModalVisible(false);
+              if (refreshParticipants) refreshParticipants();
+            },
+          },
+        ]);
+      } catch (error) {
+        Alert.alert('Error', 'Unable to delete user.');
+        console.log('Error: ', error);
+        setModalVisible(false);
+        if (refreshParticipants) refreshParticipants();
+      } finally {
+          setIsDeleting(false);
+      }
+    };
 
   return (
     <View>
@@ -59,7 +146,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avat
             <PointsToStars points={pointsAsCreator} />
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.modalPoints}>{points}</Text>
-              <Image source={PointsIcon} style={{ width: 16, height: 19, marginLeft: 5 }} />
+              <Image source={PointsIcon} style={{ width: 16, height: 19, marginLeft: 5, marginBottom: 10 }} />
             </View>
 
             {email && <Text style={styles.modalText}>Email: {email}</Text>}
@@ -72,20 +159,41 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avat
               <View style={styles.actionsContainer}>
                 {isRegistered ? (
                   <>
-                    <TouchableOpacity style={styles.confirmButton}>
-                      <Text style={styles.confirmButtonText}>Contact</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.rejectButton}>
-                      <Text style={styles.rejectButtonText}>Delete</Text>
+                    <TouchableOpacity
+                          style={[styles.rejectButton]}
+                          onPress={confirmUserDelete}
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                          ) : (
+                            <Text style={styles.rejectButtonText}>Delete</Text>
+                          )}
                     </TouchableOpacity>
                   </>
                 ) : (
                   <>
-                    <TouchableOpacity style={styles.confirmButton} onPress={() => confirmUserRegistration(eventId, id)}>
-                      <Text style={styles.confirmButtonText}>Confirm Registration</Text>
+                    <TouchableOpacity
+                          style={[styles.confirmButton]}
+                          onPress={confirmUserRegister}
+                          disabled={isConfirming}
+                        >
+                          {isConfirming ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                          ) : (
+                            <Text style={styles.confirmButtonText}>Confirm registration</Text>
+                          )}
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.rejectButton}>
-                      <Text style={styles.rejectButtonText}>Reject Registration</Text>
+                    <TouchableOpacity
+                          style={[styles.rejectButton]}
+                          onPress={confirmUserDelete}
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                          ) : (
+                            <Text style={styles.rejectButtonText}>Reject registration</Text>
+                          )}
                     </TouchableOpacity>
                   </>
                 )}
@@ -174,7 +282,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
   },
   modalPoints: {
     fontSize: 18,
@@ -193,7 +300,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: '#69B67E',
-    width: 220,
+    width: 250,
     padding: 7,
     paddingHorizontal: 30,
     borderRadius: 40,
@@ -209,7 +316,7 @@ const styles = StyleSheet.create({
     padding: 7,
     borderRadius: 40,
     alignItems: 'center',
-    width: 220,
+    width: 250,
   },
   rejectButtonText: {
     color: '#FFF',

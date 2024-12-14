@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { View, PermissionsAndroid, Platform, Alert, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, Callout, Region } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
@@ -7,6 +7,7 @@ import { parseCoordinates } from '../utils/geocode';
 import haversine from 'haversine';
 import Card from '../components/Card';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext';
 import { handleDateTime } from '../utils/dateUtils';
 
 type Event = {
@@ -23,6 +24,7 @@ type Event = {
 };
 
 const MapScreen = () => {
+  const { user } = useContext(AuthContext);
   const { events } = useEventContext();
   const [location, setLocation] = useState<Region | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -156,13 +158,15 @@ const MapScreen = () => {
       >
         {events.map(event => {
           const coords = parseCoordinates(event.coordinates);
+          const isCreator = (event.creator.id == user.id)
+          const color = isCreator ? "aqua" : "#69B67E"
           return (
             <Marker
               key={event.id}
               coordinate={{ latitude: coords.latitude, longitude: coords.longitude }}
               title={event.title}
               description={event.description}
-              pinColor="#69B67E"
+              pinColor={color}
             >
               <Callout tooltip onPress={() => { navigation.navigate('EventDetails', { ...event }); }}>
                 <View style={styles.calloutContainer}>

@@ -37,7 +37,7 @@ const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imag
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={styles.points}>{points}</Text>
                 <Text style={styles.pointsWrapper}>
-                  <Image source={PointsIcon} style={{ width: 16, height: 19, marginRight: 5 }} resizeMode="cover" />
+                  <Image source={PointsIcon} style={{ width: 16, height: 20, marginRight: 5 }} resizeMode="cover" />
                 </Text>
             </View>
         </View>
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 10,
     width: '100%',
-    height: 130,
+    height: 125,
     alignSelf: 'center',
   },
   pastCardContainer: {
@@ -65,16 +65,15 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     marginRight: 15,
-    marginTop: -45,
-    borderRadius: 45,
+    marginTop: -35,
   },
   iconContainer: {
     marginTop: 20,
-    height: 130,
+    height: 120,
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 90,
+    height: 90,
     borderRadius: 45,
   },
   textContainer: {
