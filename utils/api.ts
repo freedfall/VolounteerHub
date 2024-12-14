@@ -490,3 +490,113 @@ export const fetchFeedbacksForCreator = async (targetId) => {
         console.error('Error fetching feedbacks:', error);
     }
 };
+/**
+ * Get all messages sent by the user senderId to the recipient recipientId
+ * @param {number} senderId - sender ID
+ * @param {number} recipientId - recipient ID
+ * @returns {Promise<Array>} Message array
+ */
+export const fetchSentMessages = async (senderId, recipientId) => {
+  const token = await AsyncStorage.getItem('userToken');
+  const response = await fetch(`${BASE_URL}/message/${senderId}/${recipientId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch sent messages');
+  }
+  return await response.json();
+};
+
+/**
+ * Get all messages sent by the recipientId user to the current senderId user
+ * @param {number} senderId - sender ID (current user)
+ * @param {number} recipientId - recipient ID (another user)
+ * @returns {Promise<Array>} Message array
+ */
+export const fetchReceivedMessages = async (senderId, recipientId) => {
+  const token = await AsyncStorage.getItem('userToken');
+  const response = await fetch(`${BASE_URL}/message/${recipientId}/${senderId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch received messages');
+  }
+  return await response.json();
+};
+
+/**
+ * Send a new message from senderId to recipientId
+ * @param {number} senderId - Sender ID (current user)
+ * @param {number} recipientId - recipient ID
+ * @param {string} content - Message Text
+ */
+export const sendMessageApi = async (senderId, recipientId, content) => {
+  const token = await AsyncStorage.getItem('userToken');
+  const response = await fetch(`${BASE_URL}/message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      senderId: senderId,
+      recipientId: recipientId,
+      content: content.trim(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to send message');
+  }
+};
+
+/**
+ * Mark a message as read by its ID.
+ * @param {number} messageId - The ID of the message to mark as read.
+ * @returns {Promise<void>}
+ */
+export const markMessageAsReadApi = async (messageId) => {
+  const token = await AsyncStorage.getItem('userToken');
+  const response = await fetch(`${BASE_URL}/message/${messageId}/read`, {
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to mark message as read');
+  }
+};
+
+/**
+ * Fetch all message writers (users who have sent messages to the current user).
+ * @returns {Promise<Array>} - Array of UserInfo objects.
+ */
+export const fetchMessageWriters = async () => {
+  const token = await AsyncStorage.getItem('userToken');
+  const response = await fetch(`${BASE_URL}/message/writers`, {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch message writers');
+  }
+
+  return await response.json();
+};

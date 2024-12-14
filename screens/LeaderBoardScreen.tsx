@@ -6,6 +6,8 @@ import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
 import PointsIcon from '../images/icons/points.png';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
@@ -19,6 +21,7 @@ const LeaderBoardScreen = () => {
   const [searchHistory, setSearchHistory] = useState([]);
 
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext);
 
   // Fetch users
   const fetchUsers = async () => {
@@ -179,16 +182,17 @@ const LeaderBoardScreen = () => {
                     Email: {selectedUser.email}
                   </Text>
                 )}
-                <TouchableOpacity
-                  style={styles.contactButton}
-                  onPress={() => {
-                    setModalVisible(false);
-                    // Тут navigation это ваш навигатор. Допустим, вы используете useNavigation:
-                    navigation.navigate('ChatScreen', { recipientId: selectedUser.id });
-                  }}
-                >
-                  <Text style={styles.contactButtonText}>Contact</Text>
-                </TouchableOpacity>
+                {selectedUser.id !== user.id && (
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={() => {
+                      setModalVisible(false);
+                      navigation.navigate('ChatScreen', { recipientId: selectedUser.id, recipientName: `${selectedUser.name} ${selectedUser.surname}`, recipientAvatar: selectedUser.avatarUrl });
+                    }}
+                  >
+                    <Text style={styles.contactButtonText}>Contact</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setModalVisible(false)}
