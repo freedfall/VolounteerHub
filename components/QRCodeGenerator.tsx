@@ -23,9 +23,9 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({ email }) => {
       <TouchableOpacity onPress={handleOpenModal}>
         <QRCode
           value={email}
-          size={70}
+          size={89}
           backgroundColor="white"
-          color="black"
+          color="#033b14"
         />
       </TouchableOpacity>
 

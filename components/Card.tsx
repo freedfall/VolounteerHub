@@ -18,10 +18,10 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({ title, time, address, points, onPress, imageURL, isPast }) => {
 
   const getShortAddress = (fullAddress: string): string => {
-      if (!fullAddress) return '';
-      const parts = fullAddress.split(',');
-      return parts[0].trim();
-    };
+    if (!fullAddress) return '';
+    const parts = fullAddress.split(',');
+    return parts[0].trim();
+  };
 
   const shortAddress = getShortAddress(address);
   return (

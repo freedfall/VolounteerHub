@@ -4,10 +4,12 @@ import userProfileIcon from '../images/userProfileIcon.jpg';
 import { confirmUserRegistration } from '../utils/api';
 import PointsIcon from '../images/icons/points.png';
 import CreatorFeedbacks from './CreatorFeedbacks';
+import PointsToStars from './PointsToStars';
 
 type UserCardProps = {
   name: string;
   points: number;
+  pointsAsCreator?: number;
   avatarUrl?: string;
   email?: string;
   showActions?: boolean;
@@ -16,7 +18,7 @@ type UserCardProps = {
   status?: string;
 };
 
-const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, showActions, id, eventId, status }) => {
+const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const isRegistered = status === 'CONFIRMED';
@@ -48,25 +50,18 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
           activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <TouchableOpacity
-            style={styles.modalContent}
-            activeOpacity={1}
-          >
-            <TouchableOpacity
-              style={styles.closeIcon}
-              onPress={() => setModalVisible(false)}
-            >
+          <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
+            <TouchableOpacity style={styles.closeIcon} onPress={() => setModalVisible(false)}>
               <Text style={styles.closeIconText}>×</Text>
             </TouchableOpacity>
-            <Image
-              source={avatarUrl ? { uri: avatarUrl } : userProfileIcon}
-              style={styles.modalAvatar}
-            />
+            <Image source={avatarUrl ? { uri: avatarUrl } : userProfileIcon} style={styles.modalAvatar}/>
             <Text style={styles.modalName}>{name}</Text>
+            <PointsToStars points={pointsAsCreator} />
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.modalPoints}>{points}</Text>
               <Image source={PointsIcon} style={{ width: 16, height: 19, marginLeft: 5 }} />
             </View>
+
             {email && <Text style={styles.modalText}>Email: {email}</Text>}
 
             <TouchableOpacity style={styles.confirmButton}>
@@ -96,9 +91,11 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, avatarUrl, email, sho
                 )}
               </View>
             )}
-            <View style={styles.feedbackContainer}>
-              <CreatorFeedbacks creatorId={id} />
-            </View>
+            {pointsAsCreator > 0 && (
+              <View style={styles.feedbackContainer}>
+                <CreatorFeedbacks creatorId={id} />
+              </View>
+            )}
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
@@ -218,12 +215,12 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 20,
   },
-    feedbackContainer: {
-        marginTop: 20,
-        width: '100%',
-        height: 200,
-        overflow: 'hidden',
-    },
+  feedbackContainer: {
+    marginTop: 20,
+    width: '100%',
+    height: 200,
+    overflow: 'hidden',
+  },
 });
 
 export default UserCard;

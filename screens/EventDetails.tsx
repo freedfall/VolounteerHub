@@ -8,6 +8,7 @@ import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, a
 import UserCard from '../components/UserCard';
 import { useNavigation } from '@react-navigation/native';
 import UserFeedbacks from '../components/UserFeedbacks';
+import PointsIcon from '../images/icons/points.png';
 
 const EventDetails: React.FC = ({ route }) => {
   const {
@@ -92,6 +93,14 @@ const EventDetails: React.FC = ({ route }) => {
 
   const isPast = new Date(eventDetails.startDateTime) < new Date();
 
+  const getShortAddress = (fullAddress: string): string => {
+    if (!fullAddress) return '';
+    const parts = fullAddress.split(',');
+    return parts[0].trim();
+  };
+
+  const shortAddress = getShortAddress(eventDetails.address);
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} resizeMode="cover"/>
@@ -111,8 +120,11 @@ const EventDetails: React.FC = ({ route }) => {
               <Text style={styles.dataBlock}>{eventDetails.city}</Text>
             </View>
           </View>
-          <Text style={styles.details}>Address: {eventDetails.address}</Text>
-          <Text style={styles.details}>Points: {eventDetails.price}</Text>
+          <Text style={styles.details}>Address: {shortAddress}</Text>
+          <View style={styles.pointsInfo}>
+            <Text style={styles.details}>Points: {eventDetails.price}</Text>
+            <Image source={PointsIcon} style={{ width: 20, height: 25, marginBottom: 5 }} />
+          </View>
           <Text style={styles.details}>Capacity: {eventDetails.occupiedQuantity}/{eventDetails.capacity}</Text>
           <Text style={styles.description}>{eventDetails.description}</Text>
       </View>
@@ -146,7 +158,6 @@ const EventDetails: React.FC = ({ route }) => {
               <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteEvent(id)}>
                   <Text style={styles.deleteButtonText}>Delete Event</Text>
               </TouchableOpacity>
-
           </View>
         </View>
       ) : (
@@ -156,6 +167,7 @@ const EventDetails: React.FC = ({ route }) => {
                 <UserCard
                   name={creator.name}
                   points={creator.points}
+                  pointsAsCreator={creator.pointsAsCreator}
                   avatarUrl={creator.avatarUrl}
                   email={creator.email}
                   id={creator.id}
@@ -208,18 +220,23 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 15,
     marginBottom: 20,
   },
-    dataBlock: {
-        width: 115,
-        fontSize: 20,
-        color: '#333',
-        borderRadius: 40,
-        borderColor: '013B14',
-        borderWidth: 1,
-        textAlign: 'center',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: '#ffffff',
-    },
+  dataBlock: {
+    width: 115,
+    fontSize: 20,
+    color: '#333',
+    borderRadius: 40,
+    borderColor: '013B14',
+    borderWidth: 1,
+    textAlign: 'center',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#ffffff',
+  },
+  pointsInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
   title: {
     fontSize: 24,
     fontWeight: '500',

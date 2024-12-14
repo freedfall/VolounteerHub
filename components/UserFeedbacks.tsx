@@ -60,8 +60,17 @@ const UserFeedbacks: React.FC<UserFeedbacksProps> = ({ eventId }) => {
 
   if (feedbacks.length === 0) {
     return (
-      <View style={styles.messageContainer}>
-        <Text style={styles.messageText}>Add your feedback to see it here!</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Add your feedback to see it here!</Text>
+        <TouchableOpacity style={styles.joinButton} onPress={handleLeaveFeedback}>
+            <Text style={styles.joinButtonText}>Leave Feedback</Text>
+        </TouchableOpacity>
+        <FeedbackModal
+            visible={feedbackModalVisible}
+            onClose={() => setFeedbackModalVisible(false)}
+            eventId={eventId}
+            onCreateFeedback={loadFeedbacks}
+          />
       </View>
     );
   }
@@ -95,9 +104,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   container: {
-      marginTop: 20,
-      marginBottom: 20,
-    },
+    marginTop: 20,
+    marginBottom: 20,
+  },
   messageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -111,6 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#000',
+    marginBottom: 10,
   },
   joinButton: {
       backgroundColor: '#69B67E',
