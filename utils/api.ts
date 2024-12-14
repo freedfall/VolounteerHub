@@ -403,7 +403,6 @@ export const uploadUserProfileImage = async (userId, image) => {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        // 'Content-Type': 'multipart/form-data' // Не устанавливайте вручную
       },
       body: formData,
     });
@@ -411,15 +410,12 @@ export const uploadUserProfileImage = async (userId, image) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Error uploading image:', errorData);
-      Alert.alert('Ошибка', errorData.message || 'Не удалось загрузить изображение.');
       return false;
     }
 
-    Alert.alert('Успех', 'Изображение успешно загружено.');
     return true;
   } catch (error) {
     console.error('Network error:', error);
-    Alert.alert('Ошибка', 'Произошла ошибка при загрузке изображения.');
     return false;
   }
 };
