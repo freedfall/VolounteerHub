@@ -144,7 +144,7 @@ const ProfileScreen: React.FC = () => {
     >
       <View style={styles.profileHeader}>
         <Image
-          source={user?.avatarUrl ? { uri: user.avatarUrl } : userProfileIcon}
+          source={user?.imageURL ? { uri: user.imageURL } : userProfileIcon}
           style={styles.profileImage}
         />
         <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
