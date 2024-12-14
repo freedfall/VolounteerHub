@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
@@ -7,7 +7,7 @@ import SearchModal from '../components/SearchModal';
 import PointsIcon from '../images/icons/points.png';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
-import { useContext } from 'react';
+import UserCard from '../components/UserCard';
 
 const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
@@ -15,8 +15,6 @@ const LeaderBoardScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const [selectedUser, setSelectedUser] = useState(null); // Selected user data
-  const [modalVisible, setModalVisible] = useState(false); // For user modal
   const [isModalVisible, setModalSearchVisible] = useState(false); // For search modal
   const [searchHistory, setSearchHistory] = useState([]);
 
@@ -74,23 +72,18 @@ const LeaderBoardScreen = () => {
     user.name?.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const openUserModal = (user) => {
-    setSelectedUser(user);
-    setModalVisible(true);
-  };
-
   const renderUser = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => openUserModal(item)}>
-      <Text style={styles.rank}>{item.rank}</Text>
-      <Image source={item.avatarUrl ? { uri: item.avatarUrl } : userIcon} style={styles.avatar} />
-      <View style={styles.userInfo}>
-        <Text style={styles.name}>{item.name}</Text>
-        <View style={styles.pointsInfo}>
-          <Text style={styles.points}>{item.points}</Text>
-          <Image source={PointsIcon} style={{ width: 19, height: 24 }} />
-        </View>
-      </View>
-    </TouchableOpacity>
+    <UserCard
+      name={item.name}
+      surname={item.surname}
+      points={item.points}
+      avatarUrl={item.avatarUrl}
+      email={item.email}
+      showActions={false}
+      id={item.id}
+      eventId={null}
+      status={item.status}
+    />
   );
 
   return (
@@ -114,28 +107,18 @@ const LeaderBoardScreen = () => {
         searchHistory={searchHistory}
         filteredItems={filteredUsers} // Using this prop for users
         renderItem={(user, index) => (
-            <TouchableOpacity
+            <UserCard
               key={index}
-              onPress={() => {
-                setModalSearchVisible(false);
-                openUserModal(user);
-              }}
-            >
-              <View style={styles.card}>
-                <Text style={styles.rank}>{user.rank}</Text>
-                <Image
-                  source={user.avatarUrl ? { uri: user.avatarUrl } : userIcon}
-                  style={styles.avatar}
-                />
-                <View style={styles.userInfo}>
-                  <Text style={styles.name}>{user.name}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={styles.points}>{user.points}</Text>
-                    <Image source={PointsIcon} style={{ width: 16, height: 20 }} />
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
+              name={user.name}
+              surname={user.surname}
+              points={user.points}
+              avatarUrl={user.avatarUrl}
+              email={user.email}
+              showActions={false} // Или true, если нужно
+              id={user.id}
+              eventId={null} // Если необходимо
+              status={user.status}
+            />
           )}
         />
 
@@ -146,64 +129,10 @@ const LeaderBoardScreen = () => {
         <FlatList
           data={filteredUsers}
           renderItem={renderUser}
-          keyExtractor={(item, index) =>
-            item.id ? item.id.toString() : index.toString()
-          }
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
         />
       )}
-
-      {/* User Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {selectedUser && (
-              <>
-                <Image
-                  source={
-                    selectedUser.avatarUrl
-                      ? { uri: selectedUser.avatarUrl }
-                      : userIcon
-                  }
-                  style={styles.modalAvatar}
-                />
-                <Text style={styles.modalName}>{selectedUser.name}</Text>
-                <View style={styles.pointsInfo}>
-                    <Text style={styles.modalPoints}>{selectedUser.points}</Text>
-                    <Image source={PointsIcon} style={{ width: 16, height: 20 }} />
-                </View>
-                {selectedUser.email && (
-                  <Text style={styles.modalText}>
-                    Email: {selectedUser.email}
-                  </Text>
-                )}
-                {selectedUser.id !== user.id && (
-                  <TouchableOpacity
-                    style={styles.contactButton}
-                    onPress={() => {
-                      setModalVisible(false);
-                      navigation.navigate('ChatScreen', { recipientId: selectedUser.id, recipientName: `${selectedUser.name} ${selectedUser.surname}`, recipientAvatar: selectedUser.avatarUrl });
-                    }}
-                  >
-                    <Text style={styles.contactButtonText}>Contact</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };

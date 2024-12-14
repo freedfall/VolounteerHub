@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import userProfileIcon from '../images/userProfileIcon.jpg';
 import { confirmUserRegistration } from '../utils/api';
 import PointsIcon from '../images/icons/points.png';
 import CreatorFeedbacks from './CreatorFeedbacks';
 import PointsToStars from './PointsToStars';
+import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext';
+import AdminUserModal from './AdminUserModal';
 
 type UserCardProps = {
   name: string;
+  surname: string;
   points: number;
   pointsAsCreator?: number;
   avatarUrl?: string;
@@ -16,22 +20,50 @@ type UserCardProps = {
   id: string;
   eventId?: string;
   status?: string;
+  isAdmin?: boolean;
 };
 
-const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status }) => {
+const UserCard: React.FC<UserCardProps> = ({ name, surname, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status, isAdmin }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [adminModalVisible, setAdminModalVisible] = useState(false);
+  const { user } = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const isRegistered = status === 'CONFIRMED';
+  const isCurrentUser = user?.id === id;
+
+  const handleContactPress = () => {
+      setModalVisible(false);
+      navigation.navigate('ChatScreen', {
+        recipientId: id,
+        recipientName: name,
+        recipientSurname: surname,
+        recipientAvatar: avatarUrl,
+      });
+  };
+
+  const handleAdminAction = () => {
+    setModalVisible(false);
+    setAdminModalVisible(true);
+  };
+
+  const onCardPress = () => {
+      if (isAdmin) {
+        handleAdminAction();
+      } else {
+        setModalVisible(true);
+      }
+    };
 
   return (
     <View>
-      <TouchableOpacity style={styles.card} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity style={styles.card} onPress={onCardPress}>
         <Image
           source={avatarUrl ? { uri: avatarUrl } : userProfileIcon}
           style={styles.avatar}
         />
         <View style={styles.info}>
-          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.name}>{name} {surname}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.points}>{points}</Text>
               <Image source={PointsIcon} style={{ width: 16, height: 19, marginLeft: 5 }} />
@@ -55,7 +87,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avat
               <Text style={styles.closeIconText}>×</Text>
             </TouchableOpacity>
             <Image source={avatarUrl ? { uri: avatarUrl } : userProfileIcon} style={styles.modalAvatar}/>
-            <Text style={styles.modalName}>{name}</Text>
+            <Text style={styles.modalName}>{name} {surname}</Text>
             <PointsToStars points={pointsAsCreator} />
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={styles.modalPoints}>{points}</Text>
@@ -64,9 +96,11 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avat
 
             {email && <Text style={styles.modalText}>Email: {email}</Text>}
 
-            <TouchableOpacity style={styles.confirmButton}>
-              <Text style={styles.confirmButtonText}>Contact</Text>
-            </TouchableOpacity>
+            {!isCurrentUser && (
+                <TouchableOpacity style={styles.confirmButton} onPress={handleContactPress}>
+                  <Text style={styles.confirmButtonText}>Contact</Text>
+                </TouchableOpacity>
+            )}
 
             {showActions && (
               <View style={styles.actionsContainer}>
@@ -99,6 +133,14 @@ const UserCard: React.FC<UserCardProps> = ({ name, points, pointsAsCreator, avat
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+      {isAdmin && (
+        <AdminUserModal
+          visible={adminModalVisible}
+          user={ { id, name, surname, points, pointsAsCreator, avatarUrl, email, status } }
+          onClose={() => setAdminModalVisible(false)}
+          navigation={navigation}
+        />
+      )}
     </View>
   );
 };
