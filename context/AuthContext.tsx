@@ -1,6 +1,7 @@
 // context/AuthContext.tsx
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUser, signInUser, registerUser } from '../utils/api'
 
 type User = {
   name: string;
@@ -29,30 +30,30 @@ export const AuthProvider: React.FC = ({ children }) => {
   useEffect(() => {
     const checkToken = async () => {
       try {
-        console.log('Проверка токена...');
+        console.log('Check token...');
         const token = await AsyncStorage.getItem('userToken');
         if (token) {
-          console.log('Токен найден:', token);
+          console.log('Token found:', token);
           setIsSignedIn(true);
         } else {
-          console.log('Токен не найден');
+          console.log('Token was not found');
         }
       } catch (error) {
-        console.error('Ошибка проверки токена:', error);
+        console.error('Error checking token:', error);
       }
     };
     const checkUserData = async () => {
         try {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
-                console.log('Данные пользователя найдены:', userData);
+                console.log('User data found:', userData);
                 setUser(JSON.parse(userData));
             } else {
                 loadUserData();
             }
 
         } catch (error) {
-            console.error('Ошибка загрузки данных пользователя:', error);
+            console.error('Error finding user data:', error);
         }
     };
     checkToken();
@@ -60,81 +61,58 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const loadUserData = useCallback(async () => {
-    try {
-      const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/user/me', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
-        },
-      });
+      try {
+        const response = await getUser();
 
-      const data = await response.json();
-      if (response.ok) {
-        setUser(data);
-        await AsyncStorage.setItem('userData', JSON.stringify(data));
-        console.log('Данные пользователя загружены:', data);
-      } else {
-        console.error('Ошибка получения данных пользователя:', data.message);
+        const data = await response.json();
+        if (response.ok) {
+          setUser(data);
+          await AsyncStorage.setItem('userData', JSON.stringify(data));
+          console.log('User data:', data);
+        } else {
+          console.error('Error getting user data:', data.message);
+        }
+      } catch (error) {
+        console.error('Network error getting user data:', error);
       }
-    } catch (error) {
-      console.error('Ошибка сети при получении данных пользователя:', error);
-    }
-  }, []);
+    }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('Отправка запроса на авторизацию...');
-      const response = await fetch('https://itu-215076752298.europe-central2.run.app/auth/authenticate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await signInUser(email, password);
 
       const data = await response.json();
-      console.log('Ответ от сервера:', data);
 
       if (response.ok) {
-        console.log('Авторизация успешна');
+        console.log('Authorization complete');
         await AsyncStorage.setItem('userToken', data.token);
         await loadUserData();
         setIsSignedIn(true);
       } else {
-        console.error('Ошибка авторизации:', data.message);
+        console.error('Error:', data.message);
       }
     } catch (error) {
-      console.error('Ошибка сети при авторизации:', error);
+      console.error('Network error:', error);
     }
   };
 
   const register = async (name: string, surname: string, email: string, password: string) => {
     try {
-      console.log('Отправка запроса на регистрацию...');
-      const response = await fetch('https://itu-215076752298.europe-central2.run.app/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, surname, email, password }),
-      });
+      const response = await registerUser(name, surname, email, password);
 
       const data = await response.json();
-      console.log('Ответ от сервера на регистрацию:', data);
 
       if (!response.ok) {
-        console.error(`Ошибка регистрации: ${response.status} - ${response.statusText}`);
-        console.error('Ответ с ошибкой:', data);
+        console.error(`Registration error: ${response.status} - ${response.statusText}`);
         return;
       }
 
-      console.log('Регистрация успешна');
+      console.log('Register succesfull');
       await AsyncStorage.setItem('userToken', data.token);
       await loadUserData();
       setIsSignedIn(true);
     } catch (error) {
-      console.error('Ошибка сети при регистрации:', error);
+      console.error('Network error:', error);
     }
   };
 

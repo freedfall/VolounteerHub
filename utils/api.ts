@@ -2,6 +2,53 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
+export const getUser = async () => {
+    try {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/user/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+        },
+      });
+
+     return response;
+    } catch (error) {
+      console.error('Network error when finding user data:', error);
+    }
+};
+
+export const signInUser = async (email, password) => {
+    try {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/auth/authenticate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Authorization error:', error);
+    }
+};
+
+export const registerUser = async (name: string, surname: string, email: string, password: string) => {
+    try {
+      const response = await fetch('https://itu-215076752298.europe-central2.run.app/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, surname, email, password }),
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Ошибка сети при регистрации:', error);
+    }
+};
 /**
  * Fetch all future events
  * @returns {Promise<Array>} - Array of events

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import hospital from '../images/hospital.jpg'; // Use your own image
+import hospital from '../images/hospital.jpg';
+import PointsIcon from '../images/icons/points.png';
 
 interface SquareCardProps {
   title: string;
@@ -20,7 +21,10 @@ const SquareCard: React.FC<SquareCardProps> = ({ title, time, city, address, poi
         <Text style={styles.title}>{title}</Text>
         <View style={styles.textContainer}>
             <Text style={styles.details}>{time}</Text>
-            <Text style={styles.points}>{points}</Text>
+            <View style={styles.pointsWrapper}>
+                <Text style={styles.points}>{points}</Text>
+                <Image source={PointsIcon} style={{ width: 12, height: 15, marginTop: 1 }} resizeMode="cover" />
+            </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -40,7 +44,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 97,
     borderRadius: 15,
-//     marginBottom: 10,
   },
   title: {
     fontSize: 16,
@@ -64,6 +67,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingRight: 10,
+  },
+  pointsWrapper: {
+    flexDirection: 'row',
+    gap: 5,
   },
 });
 

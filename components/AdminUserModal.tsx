@@ -1,5 +1,3 @@
-// AdminUserModal.tsx
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert, ActivityIndicator, TextInput } from 'react-native';
 import Modal from 'react-native-modal';

@@ -70,7 +70,7 @@ const EventForm: React.FC<EventFormProps> = ({
       label: 'Event Title',
       component: (
         <TextInput
-          style={[styles.input, !title.trim() && styles.inputError]}
+          style={[styles.input]}
           value={title}
           onChangeText={setTitle}
           placeholder="Enter event title"
@@ -147,10 +147,12 @@ const EventForm: React.FC<EventFormProps> = ({
               placeholder="0-100"
             />
           </View>
+          {!isUpdateMode &&
           <View style={styles.imagePickerWrapper}>
             <Text style={styles.label}>Event Image</Text>
             <ImagePicker imageUri={imageUri} setImageUri={setImageUri} />
           </View>
+          }
         </View>
       ),
     },
@@ -225,7 +227,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderColor: '#013B14',
     borderWidth: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: 25,
     color: 'black',
     borderRadius: 40,
     fontSize: 18,
@@ -279,7 +281,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    marginBottom: 5,
+    marginBottom: 0,
     alignSelf: 'center',
     fontSize: 18,
     color: 'black',

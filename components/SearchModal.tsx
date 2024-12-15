@@ -60,19 +60,19 @@ const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSe
 const styles = StyleSheet.create({
   modalContainer: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: '#f5f5f5',
       justifyContent: 'center',
   },
   modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       padding: 10,
-      backgroundColor: '#fff',
+      backgroundColor: '#f5f5f5',
   },
   searchContainerModal: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: '#fff',
+      backgroundColor: '#f5f5f5',
       borderRadius: 40,
       borderColor: 'rgba(1, 59, 20, 1)',
       borderWidth: 2,

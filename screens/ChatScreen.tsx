@@ -208,25 +208,25 @@ const styles = StyleSheet.create({
       alignItems:'center'
       },
   messagesContainer: {
-      padding: 10
-      },
+      padding: 15,
+      borderRadius: 15,
+  },
   messageContainer: {
       marginVertical:5, maxWidth:'80%',
       padding:10,
       borderRadius:10 },
   myMessage: {
       alignSelf:'flex-end',
-      backgroundColor:'#eee'
-
+      backgroundColor:'#D9D9D9',
   },
   theirMessage: {
       alignSelf:'flex-start',
-      backgroundColor:'#DCF8C6'
+      backgroundColor:'#9CD0AA'
   },
   messageText: {
       fontSize:16,
       color: '#000'
-      },
+  },
   messageTime: {
       fontSize:12,
       color:'#999',
@@ -259,12 +259,12 @@ const styles = StyleSheet.create({
       },
 unreadIndicator: {
       position: 'absolute',
-      bottom: 2,
-      right: 3,
+      bottom: 0,
+      right: 0,
       width: 7,
       height: 7,
       borderRadius: 5,
-      backgroundColor: '#FF6347',
+      backgroundColor: '#013B14',
   },
 });
 

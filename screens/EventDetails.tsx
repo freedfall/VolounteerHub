@@ -1,16 +1,43 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, ScrollView, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
-import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails } from '../utils/api';
+import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails, fetchEvents } from '../utils/api';
 import UserCard from '../components/UserCard';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import UserFeedbacks from '../components/UserFeedbacks';
 import PointsIcon from '../images/icons/points.png';
+import { useEventContext } from '../context/EventContext';
 
-const EventDetails: React.FC = ({ route }) => {
+const EventDetails: React.FC = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
+
+  const { id } = route.params as { id: number };
+
+  const { user } = useContext(AuthContext);
+  const { events, setEvents } = useEventContext();
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const currentEvent = events.find((ev) => ev.id === id);
+
+  useEffect(() => {
+      loadParticipants();
+    }, [id, user.id]);
+
+  if (!currentEvent) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="small" color="#69B67E" />
+      </View>
+    );
+  }
+
   const {
     name,
     startDateTime,
@@ -23,35 +50,11 @@ const EventDetails: React.FC = ({ route }) => {
     occupiedQuantity,
     creator,
     imageURL,
-    id,
     coordinates,
-  } = route.params;
+  } = currentEvent;
 
-  const { user } = useContext(AuthContext);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [participants, setParticipants] = useState([]);
-
-  const [eventDetails, setEventDetails] = useState({
-    id,
-    name,
-    startDateTime,
-    endDateTime,
-    city,
-    address,
-    price,
-    description,
-    capacity,
-    occupiedQuantity,
-    coordinates,
-  });
-
-  const isCreator = creator.id === user.id;
+  const isCreator = creator?.id === user.id;
   const isAdmin = user.role === 'ADMIN';
-
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const navigation = useNavigation();
 
   const loadParticipants = async () => {
     try {
@@ -70,10 +73,6 @@ const EventDetails: React.FC = ({ route }) => {
     }
   };
 
-  useEffect(() => {
-
-    loadParticipants();
-  }, [id, user.id]);
 
 
   const handleScanPress = () => {
@@ -116,11 +115,21 @@ const EventDetails: React.FC = ({ route }) => {
     } catch (error) {
       Alert.alert('Error', 'Unable to delete event.');
     } finally {
-        setIsDeleting(false);
+      setIsDeleting(false);
+      await reloadEvents();
     }
   };
 
-  const isPast = new Date(eventDetails.startDateTime) < new Date();
+  const reloadEvents = async () => {
+      try {
+        const data = await fetchEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error('Failed to reload events:', error);
+      }
+    };
+
+  const isPast = new Date(startDateTime) < new Date();
 
   const getShortAddress = (fullAddress: string): string => {
     if (!fullAddress) return '';
@@ -128,37 +137,37 @@ const EventDetails: React.FC = ({ route }) => {
     return parts[0].trim();
   };
 
-  const shortAddress = getShortAddress(eventDetails.address);
+  const shortAddress = getShortAddress(address);
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={imageURL ? { uri: imageURL } : hospital} style={styles.image} resizeMode="cover"/>
       <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{eventDetails.name}</Text>
+          <Text style={styles.title}>{name}</Text>
           <View style={styles.timeContainer}>
             <View style={styles.dataContainer}>
               <Text style={styles.details}>Start Time</Text>
-              <Text style={styles.dataBlock}>{handleDateTimeWithoutDate(eventDetails.startDateTime)}</Text>
+              <Text style={styles.dataBlock}>{handleDateTimeWithoutDate(startDateTime)}</Text>
             </View>
             <View style={styles.dataContainer}>
               <Text style={styles.details}>End Time</Text>
-              <Text style={styles.dataBlock}>{handleDateTimeWithoutDate(eventDetails.endDateTime)}</Text>
+              <Text style={styles.dataBlock}>{handleDateTimeWithoutDate(endDateTime)}</Text>
             </View>
             <View style={styles.dataContainer}>
               <Text style={styles.details}>City</Text>
-              <Text style={styles.dataBlock}>{eventDetails.city}</Text>
+              <Text style={styles.dataBlock}>{city}</Text>
             </View>
           </View>
           <Text style={styles.details}>Address: {shortAddress}</Text>
           <View style={styles.pointsInfo}>
-            <Text style={styles.details}>Points: {eventDetails.price}</Text>
+            <Text style={styles.details}>Points: {price}</Text>
             <Image source={PointsIcon} style={{ width: 20, height: 25, marginBottom: 5 }} />
           </View>
-          <Text style={styles.details}>Capacity: {eventDetails.occupiedQuantity}/{eventDetails.capacity}</Text>
-          <Text style={styles.description}>{eventDetails.description}</Text>
+          <Text style={styles.details}>Capacity: {occupiedQuantity}/{capacity}</Text>
+          <Text style={styles.description}>{description}</Text>
       </View>
 
-      {isCreator || isAdmin ? (
+      { (isCreator || isAdmin) ? (
         <View style={styles.userList}>
           <TouchableOpacity style={styles.scanButton} onPress={handleScanPress}>
             <Text style={styles.scanButtonText}>Scan</Text>
@@ -182,7 +191,7 @@ const EventDetails: React.FC = ({ route }) => {
           ))}
           </View>
           <View style={styles.buttonsContainer}>
-              <TouchableOpacity style={styles.updateButton} onPress={() => navigation.navigate('CreateEvent', { event: eventDetails })}>
+              <TouchableOpacity style={styles.updateButton} onPress={() => navigation.navigate('CreateEvent', { event: currentEvent })}>
                 <Text style={styles.updateButtonText}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity

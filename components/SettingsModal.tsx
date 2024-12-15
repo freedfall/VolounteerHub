@@ -64,7 +64,32 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }) => {
       avoidKeyboard={true}
     >
       <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>Settings</Text>
+        <Text style={styles.modalTitle}>Change profile</Text>
+
+        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelButtonText}>×</Text>
+        </TouchableOpacity>
+
+        <View style={styles.imagePickerWrapper}>
+            <ImagePickerComponent
+              imageUri={imageUri}
+              setImageUri={(uri) => {
+                setImageUri(uri);
+                if (uri) {
+                  const filename = uri.split('/').pop();
+                  const match = /\.(\w+)$/.exec(filename || '');
+                  const type = match ? `image/${match[1].toLowerCase()}` : `image`;
+                  setImageFile({
+                    uri: uri,
+                    name: filename || 'profile.jpg',
+                    type: type,
+                  });
+                } else {
+                  setImageFile(null);
+                }
+              }}
+            />
+        </View>
 
         <TextInput
           style={styles.input}
@@ -79,24 +104,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }) => {
           onChangeText={setSurname}
         />
 
-        <ImagePickerComponent
-          imageUri={imageUri}
-          setImageUri={(uri) => {
-            setImageUri(uri);
-            if (uri) {
-              const filename = uri.split('/').pop();
-              const match = /\.(\w+)$/.exec(filename || '');
-              const type = match ? `image/${match[1].toLowerCase()}` : `image`;
-              setImageFile({
-                uri: uri,
-                name: filename || 'profile.jpg',
-                type: type,
-              });
-            } else {
-              setImageFile(null);
-            }
-          }}
-        />
 
         {loading ? (
           <ActivityIndicator size="large" color="#007BFF" />
@@ -106,9 +113,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose }) => {
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-          <Text style={styles.cancelButtonText}>Close</Text>
-        </TouchableOpacity>
       </View>
     </Modal>
   );
@@ -125,6 +129,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'stretch',
   },
+  imagePickerWrapper:{
+      alignSelf: 'center',
+      marginBottom: 10,
+  },
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -136,18 +144,20 @@ const styles = StyleSheet.create({
     height: 50,
     borderColor: '#CCC',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 40,
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 15,
     color: '#333',
   },
   saveButton: {
-    backgroundColor: '#28a745',
-    paddingVertical: 15,
-    borderRadius: 8,
+    backgroundColor: '#69B67E',
+    paddingVertical: 10,
+    borderRadius: 40,
     alignItems: 'center',
     marginBottom: 10,
+    width: '60%',
+    alignSelf: 'center',
   },
   saveButtonText: {
     color: '#FFF',
@@ -155,14 +165,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   cancelButton: {
-    backgroundColor: '#dc3545',
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+    position: 'absolute',
+    top: 5,
+    right: 20,
   },
   cancelButtonText: {
-    color: '#FFF',
-    fontSize: 18,
+    color: 'black',
+    fontSize: 26,
     fontWeight: '600',
   },
 });

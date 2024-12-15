@@ -6,10 +6,13 @@ import filterIcon from '../images/components/filterIcon.png';
 type Props = {
   searchText: string;
   setSearchText: (text: string) => void;
-  openModal: () => void;
+  openFiltersModal: () => void;
+  openSearchModal: () => void;
+  hasActiveFilters: boolean;
+  isSearchingEvents: boolean;
 };
 
-const SearchBar: React.FC<Props> = ({ searchText, setSearchText, openModal }) => {
+const SearchBar: React.FC<Props> = ({ searchText, setSearchText, openFiltersModal, openSearchModal, hasActiveFilters, isSearchingEvents }) => {
   const searchInputRef = useRef<TextInput>(null);
 
   return (
@@ -20,15 +23,18 @@ const SearchBar: React.FC<Props> = ({ searchText, setSearchText, openModal }) =>
         style={styles.searchInput}
         placeholder="Search..."
         value={searchText}
-        onPressIn={openModal}
-         onFocus={() => {
-                    searchInputRef.current?.blur();
-                  }}
+        onPressIn={openSearchModal}
+        onFocus={() => {
+          searchInputRef.current?.blur();
+        }}
         onChangeText={setSearchText}
       />
-      <TouchableOpacity style={styles.filterButton} onPress={() => console.log('Open filters')}>
-        <Image source={filterIcon} style={styles.filterIcon} />
-      </TouchableOpacity>
+      {isSearchingEvents &&
+          <TouchableOpacity style={styles.filterButton} onPress={openFiltersModal}>
+            <Image source={filterIcon} style={styles.filterIcon} />
+            {hasActiveFilters && <View style={styles.activeIndicator}/>}
+          </TouchableOpacity>
+      }
     </View>
   );
 };
@@ -61,12 +67,22 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     padding: 8,
+    position: 'relative',
   },
   filterIcon: {
     width: 24,
     height: 24,
     tintColor: '#888',
   },
+  activeIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 12,
+    height: 12,
+    borderRadius: 50,
+    backgroundColor: '#69B67E',
+  }
 });
 
 export default SearchBar;

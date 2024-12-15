@@ -131,7 +131,7 @@ const ChatListScreen: React.FC = () => {
       if (item.lastMessageSenderId === user.id) {
         statusText = 'Sent';
       } else if (item.lastMessageSenderId !== null) {
-        statusText = 'Answer';
+        statusText = 'Seen';
       }
     }
 

@@ -8,7 +8,6 @@ import PointsIcon from '../images/icons/points.png';
 import UserCard from '../components/UserCard';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
-import UserCard from '../components/UserCard';
 
 const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 
@@ -74,17 +73,22 @@ const LeaderBoardScreen = () => {
   );
 
   const renderUser = ({ item }) => (
-    <UserCard
-      name={item.name}
-      surname={item.surname}
-      points={item.points}
-      avatarUrl={item.avatarUrl}
-      email={item.email}
-      showActions={false}
-      id={item.id}
-      eventId={null}
-      status={item.status}
-    />
+    <View style={styles.userContainer}>
+      <Text style={styles.rank}>
+        {item.rank}
+      </Text>
+      <UserCard
+        name={item.name}
+        surname={item.surname}
+        points={item.points}
+        avatarUrl={item.avatarUrl}
+        email={item.email}
+        showActions={false}
+        id={item.id}
+        eventId={null}
+        status={item.status}
+      />
+     </View>
   );
 
   return (
@@ -93,7 +97,7 @@ const LeaderBoardScreen = () => {
       <SearchBar
         searchText={searchText}
         setSearchText={setSearchText}
-        openModal={() => setModalSearchVisible(true)}
+        openSearchModal={() => setModalSearchVisible(true)}
       />
 
       {/* Search Modal */}
@@ -115,9 +119,9 @@ const LeaderBoardScreen = () => {
               points={user.points}
               avatarUrl={user.avatarUrl}
               email={user.email}
-              showActions={false} // Или true, если нужно
+              showActions={false}
               id={user.id}
-              eventId={null} // Если необходимо
+              eventId={null}
               status={user.status}
             />
           )}
@@ -143,6 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: '#F9F9F9',
+    marginBottom: 70,
   },
   userContainer: {
       flexDirection: 'row',
@@ -165,9 +170,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   rank: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 15,
+    fontSize: 22,
+    marginRight: 10,
     color: '#333',
   },
   avatar: {
@@ -242,7 +246,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#006400', // Зеленый цвет для кнопки
+    backgroundColor: '#006400',
     borderRadius: 5,
     marginBottom: 10,
     width: '80%',

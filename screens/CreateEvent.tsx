@@ -5,11 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventForm from '../components/EventForm';
 import { geocodeAddress } from '../utils/geocode';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { adminUpdateEventDetails } from '../utils/api';
+import { adminUpdateEventDetails, fetchEvents } from '../utils/api';
+import { useEventContext } from '../context/EventContext';
 
 const CreateEventScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const { setEvents } = useEventContext();
 
   const event = route.params?.event;
   const isUpdateMode = !!event;
@@ -55,11 +57,33 @@ const CreateEventScreen: React.FC = () => {
     validateForm();
   }, [date, startTime, maxPeople, title, city, address]);
 
+  const reloadEvents = async () => {
+      try {
+        const data = await fetchEvents();
+        if (data) {
+          setEvents(data);
+        }
+      } catch (error) {
+        console.error('Failed to reload events:', error);
+      }
+    };
+
   const validateForm = useCallback(() => {
     const currentDateTime = new Date();
     let errors = false;
 
-    if (date < currentDateTime) {errors = true;}
+    const startDateTime = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      startTime.getHours(),
+      startTime.getMinutes()
+    );
+
+    if (startDateTime < currentDateTime) {
+      errors = true;
+    }
+
     if (!title.trim() || !city.trim() || !address.trim()) {errors = true;}
     if (isNaN(parseInt(maxPeople)) || parseInt(maxPeople) <= 0 || parseInt(maxPeople) > 100) {errors = true;}
 
@@ -112,11 +136,6 @@ const CreateEventScreen: React.FC = () => {
   };
 
   const handleCreateEvent = async () => {
-    const currentDateTime = new Date();
-    if (date < currentDateTime) {
-      Alert.alert('Invalid Date', 'The event date cannot be in the past.');
-      return;
-    }
 
     if (!city || !address) {
       Alert.alert('Invalid Location', 'You must provide a valid city and address.');
@@ -210,7 +229,7 @@ const CreateEventScreen: React.FC = () => {
             console.error('Error uploading image:', uploadResponseBody);
           }
         }
-
+        await reloadEvents();
         onClose();
       } else {
         console.error('Error creating event:', firstResponseBody);
@@ -241,7 +260,7 @@ const CreateEventScreen: React.FC = () => {
 
     try {
       await adminUpdateEventDetails(event.id, updatedEventData);
-
+      await reloadEvents();
       Alert.alert('Success', 'Event details updated successfully');
     } catch (error) {
       console.error('Network error:', error);
