@@ -5,6 +5,7 @@ import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
 import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
 import PointsIcon from '../images/icons/points.png';
+import UserCard from '../components/UserCard';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { useContext } from 'react';
@@ -80,17 +81,17 @@ const LeaderBoardScreen = () => {
   };
 
   const renderUser = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => openUserModal(item)}>
+  <View style={styles.userContainer}>
       <Text style={styles.rank}>{item.rank}</Text>
-      <Image source={item.avatarUrl ? { uri: item.avatarUrl } : userIcon} style={styles.avatar} />
-      <View style={styles.userInfo}>
-        <Text style={styles.name}>{item.name}</Text>
-        <View style={styles.pointsInfo}>
-          <Text style={styles.points}>{item.points}</Text>
-          <Image source={PointsIcon} style={{ width: 19, height: 24 }} />
-        </View>
-      </View>
-    </TouchableOpacity>
+      <UserCard
+        key={item.id}
+        name={item.name + ' ' + item.surname}
+        points={item.points}
+        avatarUrl={item.avatarUrl}
+        email={item.email}
+        id={item.id}
+      />
+  </View>
   );
 
   return (
@@ -152,58 +153,6 @@ const LeaderBoardScreen = () => {
           contentContainerStyle={styles.listContainer}
         />
       )}
-
-      {/* User Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {selectedUser && (
-              <>
-                <Image
-                  source={
-                    selectedUser.avatarUrl
-                      ? { uri: selectedUser.avatarUrl }
-                      : userIcon
-                  }
-                  style={styles.modalAvatar}
-                />
-                <Text style={styles.modalName}>{selectedUser.name}</Text>
-                <View style={styles.pointsInfo}>
-                    <Text style={styles.modalPoints}>{selectedUser.points}</Text>
-                    <Image source={PointsIcon} style={{ width: 16, height: 20 }} />
-                </View>
-                {selectedUser.email && (
-                  <Text style={styles.modalText}>
-                    Email: {selectedUser.email}
-                  </Text>
-                )}
-                {selectedUser.id !== user.id && (
-                  <TouchableOpacity
-                    style={styles.contactButton}
-                    onPress={() => {
-                      setModalVisible(false);
-                      navigation.navigate('ChatScreen', { recipientId: selectedUser.id, recipientName: `${selectedUser.name} ${selectedUser.surname}`, recipientAvatar: selectedUser.avatarUrl });
-                    }}
-                  >
-                    <Text style={styles.contactButtonText}>Contact</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -213,6 +162,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: '#F9F9F9',
+  },
+  userContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
   },
   listContainer: {
     paddingHorizontal: 10,
