@@ -355,6 +355,76 @@ export const fetchAdminUserCreatedEvents = async (userId) => { // Добавле
 };
 
 /**
+ * Update user details as User
+ * @param {number} userId - User ID
+ * @param {object} data - User data to update
+ * @returns {Promise<boolean>} - Success status
+ */
+export const updateUserDetails = async (userId, data) => {
+  try {
+    console.log('DATA:', data);
+    const response = await fetch(`${BASE_URL}/user/${userId}/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await AsyncStorage.getItem('userToken')}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error updating user details:', errorData);
+      Alert.alert('Ошибка', errorData.message || 'Не удалось обновить данные пользователя.');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error updating user details:', error);
+  }
+};
+
+/**
+ * Upload user profile image
+ * @param {number} userId - User ID
+ * @param {object} image - Image file with properties: uri, name, type
+ * @returns {Promise<boolean>} - Success status
+ */
+export const uploadUserProfileImage = async (userId, image) => {
+  try {
+    const token = await AsyncStorage.getItem('userToken');
+    const formData = new FormData();
+    formData.append('image', {
+      uri: image.uri,
+      name: image.name || 'profile.jpg',
+      type: image.type || 'image/jpeg',
+    });
+
+    const response = await fetch(`${BASE_URL}/api/user/${userId}/upload-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // 'Content-Type': 'multipart/form-data' // Не устанавливайте вручную
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error uploading image:', errorData);
+      Alert.alert('Ошибка', errorData.message || 'Не удалось загрузить изображение.');
+      return false;
+    }
+
+    Alert.alert('Успех', 'Изображение успешно загружено.');
+    return true;
+  } catch (error) {
+    console.error('Network error:', error);
+    Alert.alert('Ошибка', 'Произошла ошибка при загрузке изображения.');
+    return false;
+  }
+};
+
+/**
  * Update user details as Admin
  * @param {number} userId - User ID
  * @param {object} data - User data to update
@@ -363,7 +433,7 @@ export const fetchAdminUserCreatedEvents = async (userId) => { // Добавле
 export const adminUpdateUserDetails = async (userId, data) => {
   try {
     console.log('DATA:', data);
-    const response = await fetch(`${BASE_URL}/admin/user/${userId}`, { // Новая функция для обновления пользователя через /admin/user/{userId}
+    const response = await fetch(`${BASE_URL}/admin/user/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

@@ -15,6 +15,8 @@ import AdminUserModal from '../components/AdminUserModal';
 import PointsIcon from '../images/icons/points.png';
 import SettingsIcon from '../images/icons/settings.png';
 import ChatIcon from '../images/icons/chatIcon.png';
+import UserCard from '../components/UserCard';
+import SettingsModal from '../components/SettingsModal';
 
 const ProfileScreen: React.FC = () => {
   const { user, signOut, loadUserData } = useContext(AuthContext);
@@ -31,6 +33,7 @@ const ProfileScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -147,7 +150,7 @@ const ProfileScreen: React.FC = () => {
           source={user?.imageURL ? { uri: user.imageURL } : userProfileIcon}
           style={styles.profileImage}
         />
-        <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('Settings')}>
+        <TouchableOpacity style={styles.editButton} onPress={() => setSettingsModalVisible(true)}>
           <Image source={SettingsIcon} style={{ width: 34, height: 34 }} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('ChatListScreen')}>
@@ -244,19 +247,19 @@ const ProfileScreen: React.FC = () => {
           {selectedCategory === 'allUsers' ? (
             currentUsers.length > 0 ? (
               currentUsers.map((user, index) => (
-                <TouchableOpacity key={index} onPress={() => openUserModal(user)}>
-                  <View style={styles.userCard}>
-                    <Image
-                      source={user.imageURL ? { uri: user.imageURL } : userProfileIcon}
-                      style={styles.userAvatar}
-                    />
-                    <View style={styles.userInfo}>
-                      <Text style={styles.userNameText}>{user.name} {user.surname}</Text>
-                      <Text style={styles.userEmail}>{user.email}</Text>
-                      <Text style={styles.userPoints}>Points: {user.points}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                <UserCard
+                  key={user.id}
+                  name={user.name}
+                  surname={user.surname}
+                  points={user.points}
+                  avatarUrl={user.avatarUrl}
+                  email={user.email}
+                  showActions={false}
+                  id={user.id}
+                  eventId={null}
+                  status={user.status}
+                  isAdmin={isAdmin}
+                />
               ))
             ) : (
               <Text style={styles.noEventsText}>No users found.</Text>
@@ -270,7 +273,7 @@ const ProfileScreen: React.FC = () => {
                 address={event.address}
                 points={event.price}
                 imageURL={event.imageURL}
-                isPast={isEventInPast(event)} // Добавлено свойство isPast
+                isPast={isEventInPast(event)}
                 onPress={() => navigation.navigate('EventDetails', { ...event })}
               />
             ))
@@ -283,15 +286,10 @@ const ProfileScreen: React.FC = () => {
       <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
         <Text style={styles.signOutButtonText}>Log out</Text>
       </TouchableOpacity>
-
-      {isAdmin && selectedUser && (
-        <AdminUserModal
-          visible={modalVisible}
-          user={selectedUser}
-          onClose={() => setModalVisible(false)}
-          navigation={navigation}
-        />
-      )}
+        <SettingsModal
+                visible={settingsModalVisible}
+                onClose={() => setSettingsModalVisible(false)}
+              />
     </ScrollView>
   );
 };
