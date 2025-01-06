@@ -34,7 +34,7 @@ interface FeedbackCardProps {
     };
     createdAt: string;
   };
-  onFeedbackUpdated: () => void; // Callback для обновления списка отзывов
+  onFeedbackUpdated: () => void;
 }
 
 const FeedbackCard: React.FC<FeedbackCardProps> = ({ feedback, onFeedbackUpdated }) => {
@@ -42,33 +42,6 @@ const FeedbackCard: React.FC<FeedbackCardProps> = ({ feedback, onFeedbackUpdated
 
   const handleEdit = () => {
     setModalVisible(true);
-  };
-
-  const handleDelete = () => {
-    Alert.alert(
-      'Удалить отзыв',
-      'Вы уверены, что хотите удалить этот отзыв?',
-      [
-        { text: 'Отмена', style: 'cancel' },
-        { text: 'Удалить', style: 'destructive', onPress: confirmDelete },
-      ]
-    );
-  };
-
-  const confirmDelete = async () => {
-    try {
-      // Вызовите функцию удаления отзыва из utils/api
-      const response = await deleteFeedback(feedback.id);
-      if (response.ok) {
-        Alert.alert('Успех', 'Отзыв успешно удален.');
-        onFeedbackUpdated();
-      } else {
-        Alert.alert('Ошибка', 'Не удалось удалить отзыв.');
-      }
-    } catch (error) {
-      console.error('Ошибка при удалении отзыва:', error);
-      Alert.alert('Ошибка', 'Произошла ошибка при удалении отзыва.');
-    }
   };
 
   return (

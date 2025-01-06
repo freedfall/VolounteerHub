@@ -1,6 +1,6 @@
 // ProfileScreen.tsx
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl, ActivityIndicator } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { useIsFocused } from '@react-navigation/native';
@@ -34,32 +34,26 @@ const ProfileScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
+      // загружаем пользователя
       loadUserData();
-    } else {
-      loadEvents(selectedCategory);
-      if (isAdmin) {
-        loadAdminData();
-      }
     }
-  }, [loadEvents, loadUserData, selectedCategory, user, isAdmin]);
-
-  useEffect(() => {
-    if (isFocused) {
-      console.log('ProfileScreen is focused, reloading data');
+    // когда пользователь уже есть, при фокусе или смене категории
+    if (user && isFocused) {
       setIsLoaded({ created: false, participation: false, allEvents: false, allUsers: false });
-      loadUserData();
       loadEvents(selectedCategory);
       if (isAdmin) {
         loadAdminData();
       }
     }
-  }, [isFocused, selectedCategory, isAdmin, loadUserData, loadEvents, loadAdminData]);
+  }, [isFocused, selectedCategory, user, isAdmin]);
 
   const loadEvents = useCallback(async (category) => {
     console.log('Loading events:', category);
+    setIsLoading(true);
     try {
       if (category === 'createdEvents' && !isLoaded.created && !isAdmin) {
         const eventsData = await fetchUserCreatedEvents();
@@ -82,9 +76,11 @@ const ProfileScreen: React.FC = () => {
     } catch (error) {
       Alert.alert('Error', `Failed to load ${category === 'createdEvents' ? 'created' : 'participated'} events.`);
     }
+  setIsLoading(false);
   }, [isLoaded, isAdmin]);
 
   const loadAdminData = useCallback(async () => {
+    setIsLoading(true);''
     try {
       const eventsData = await fetchAllEvents();
       setAllEvents(eventsData || []);
@@ -96,6 +92,7 @@ const ProfileScreen: React.FC = () => {
     } catch (error) {
       Alert.alert('Error', 'Failed to load admin data.');
     }
+    setIsLoading(false);
   }, []);
 
   const onRefresh = async () => {
@@ -117,9 +114,8 @@ const ProfileScreen: React.FC = () => {
       const aIsPast = aDate < now;
       const bIsPast = bDate < now;
 
-      if (aIsPast && !bIsPast) return 1; // a - прошедшее, b - предстоящее
-      if (!aIsPast && bIsPast) return -1; // a - предстоящее, b - прошедшее
-      // Если оба события предстоящие или оба прошедшие, сортируем по времени
+      if (aIsPast && !bIsPast) return 1;
+      if (!aIsPast && bIsPast) return -1;
       return aDate.getTime() - bDate.getTime();
     });
 
@@ -184,7 +180,11 @@ const ProfileScreen: React.FC = () => {
             ]}
             onPress={() => setSelectedCategory('createdEvents')}
           >
-            <Text style={styles.switchButtonText}>Created Events</Text>
+            {isLoading && selectedCategory === 'createdEvents' ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.switchButtonText}>Created Events</Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -193,7 +193,11 @@ const ProfileScreen: React.FC = () => {
             ]}
             onPress={() => setSelectedCategory('participationEvents')}
           >
-            <Text style={styles.switchButtonText}>Participation Events</Text>
+            {isLoading && selectedCategory === 'participationEvents' ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.switchButtonText}>Participation Events</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -207,7 +211,11 @@ const ProfileScreen: React.FC = () => {
             ]}
             onPress={() => setSelectedCategory('allEvents')}
           >
-            <Text style={styles.switchButtonText}>All Events</Text>
+            {isLoading && selectedCategory === 'allEvents' ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.switchButtonText}>All Events</Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -216,7 +224,11 @@ const ProfileScreen: React.FC = () => {
             ]}
             onPress={() => setSelectedCategory('allUsers')}
           >
-            <Text style={styles.switchButtonText}>All Users</Text>
+            {isLoading && selectedCategory === 'allUsers' ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.switchButtonText}>All Users</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -259,6 +271,7 @@ const ProfileScreen: React.FC = () => {
                   eventId={null}
                   status={user.status}
                   isAdmin={isAdmin}
+                  onUpdateAdminData={loadAdminData}
                 />
               ))
             ) : (
@@ -287,9 +300,9 @@ const ProfileScreen: React.FC = () => {
         <Text style={styles.signOutButtonText}>Log out</Text>
       </TouchableOpacity>
         <SettingsModal
-                visible={settingsModalVisible}
-                onClose={() => setSettingsModalVisible(false)}
-              />
+            visible={settingsModalVisible}
+            onClose={() => setSettingsModalVisible(false)}
+          />
     </ScrollView>
   );
 };

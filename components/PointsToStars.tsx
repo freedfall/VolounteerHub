@@ -16,8 +16,8 @@ const PointsToStars: React.FC<PointsToStarsProps> = ({
   maxPoints = 5,
   starSize = 24,
 }) => {
-  const filledStars = points;
-  const emptyStars = 5 - filledStars;
+  const filledStars = Math.trunc(points);
+  const emptyStars = Math.round(5 - filledStars);
 
   const stars = [];
 

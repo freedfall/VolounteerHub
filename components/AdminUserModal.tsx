@@ -29,9 +29,10 @@ interface AdminUserModalProps {
   user: UserType;
   onClose: () => void;
   navigation: any;
+  onUpdateAdminData?: () => void;
 }
 
-const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose, navigation }) => {
+const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose, navigation, onUpdateAdminData }) => {
   const [selectedCategory, setSelectedCategory] = useState<'createdEvents' | 'attendedEvents'>('createdEvents');
   const [loading, setLoading] = useState(false);
   const [events, setEvents] = useState<EventType[]>([]);
@@ -78,7 +79,7 @@ const AdminUserModal: React.FC<AdminUserModalProps> = ({ visible, user, onClose,
       console.log('Updated Data:', updatedData);
       await adminUpdateUserDetails(user.id, updatedData);
       setIsEditable(false);
-      onClose();
+      onUpdateAdminData();
     } catch (error: any) {
         Alert.alert('Error', error.message || 'Failed to update user data');
     }

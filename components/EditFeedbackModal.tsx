@@ -1,10 +1,14 @@
-// components/EditFeedbackModal.tsx
+// File: EditFeedbackModal.tsx
+// Author: john doe
+// Description: Modal component for editing or deleting existing feedback. After successful update or deletion
+// of the feedback, it reloads the events in the global event context.
 
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, TextInput, Alert, ActivityIndicator, Image } from 'react-native';
-import { updateFeedback, deleteFeedback } from '../utils/api';
+import { updateFeedback, deleteFeedback, fetchAllEvents } from '../utils/api';
 import filledStar from '../images/icons/filledStar.png';
 import emptyStar from '../images/icons/emptyStar.png';
+import { useEventContext } from '../context/EventContext';
 
 interface EditFeedbackModalProps {
   visible: boolean;
@@ -45,6 +49,21 @@ const EditFeedbackModal: React.FC<EditFeedbackModalProps> = ({ visible, onClose,
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
 
+  // Get the event context to update events after changes
+  const { setEvents } = useEventContext();
+
+  // Helper function to reload events
+  const reloadEvents = async () => {
+    try {
+      const updatedData = await fetchAllEvents();
+      if (updatedData) {
+        setEvents(updatedData);
+      }
+    } catch (error) {
+      console.error('Error reloading events:', error);
+    }
+  };
+
   const handleUpdate = async () => {
     if (rating < 1 || rating > 5) {
       Alert.alert('Wrong rating', 'Please, select a rating from 1 to 5.');
@@ -61,6 +80,9 @@ const EditFeedbackModal: React.FC<EditFeedbackModalProps> = ({ visible, onClose,
       Alert.alert('Success', 'Feedback updated successfully.');
       onFeedbackUpdated();
       onClose();
+
+      // Reload events after successful update
+      await reloadEvents();
     } catch (error) {
       Alert.alert('Error', 'Failed to update feedback. Please try again later.');
     } finally {
@@ -86,6 +108,9 @@ const EditFeedbackModal: React.FC<EditFeedbackModalProps> = ({ visible, onClose,
       Alert.alert('Success', 'Feedback has been deleted successfully.');
       onFeedbackUpdated();
       onClose();
+
+      // Reload events after successful deletion
+      await reloadEvents();
     } catch (error) {
       Alert.alert('Error', 'Failed to delete feedback. Please try again later.');
     } finally {
@@ -97,13 +122,13 @@ const EditFeedbackModal: React.FC<EditFeedbackModalProps> = ({ visible, onClose,
     let stars = [];
     for(let i = 0; i < 5; i++){
       stars.push(
-        <TouchableOpacity key={i} onPress={() => setRating(i)}>
+        <TouchableOpacity key={i} onPress={() => setRating(i+1)}>
           <Image
-            source={i <= rating ? filledStar : emptyStar}
+            source={i < rating ? filledStar : emptyStar}
             style={styles.star}
           />
         </TouchableOpacity>
-      )
+      );
     }
     return stars;
   };

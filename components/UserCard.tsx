@@ -22,9 +22,10 @@ type UserCardProps = {
   status?: string;
   refreshParticipants?: () => void;
   isAdmin?: boolean;
+  onUpdateAdminData?: () => void;
 };
 
-const UserCard: React.FC<UserCardProps> = ({ name, surname, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status, refreshParticipants, isAdmin }) => {
+const UserCard: React.FC<UserCardProps> = ({ name, surname, points, pointsAsCreator, avatarUrl, email, showActions, id, eventId, status, refreshParticipants, isAdmin, onUpdateAdminData }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [adminModalVisible, setAdminModalVisible] = useState(false);
   const { user } = useContext(AuthContext);
@@ -247,6 +248,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, surname, points, pointsAsCrea
           user={ { id, name, surname, points, pointsAsCreator, avatarUrl, email, status } }
           onClose={() => setAdminModalVisible(false)}
           navigation={navigation}
+          onUpdateAdminData={onUpdateAdminData}
         />
       )}
     </View>

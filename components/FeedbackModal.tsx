@@ -1,10 +1,9 @@
-// components/FeedbackModal.tsx
-
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, TextInput, Alert, ActivityIndicator, Image } from 'react-native';
-import { createFeedback } from '../utils/api';
+import { createFeedback, fetchAllEvents } from '../utils/api';
 import filledStar from '../images/icons/filledStar.png';
 import emptyStar from '../images/icons/emptyStar.png';
+import { useEventContext } from '../context/EventContext';
 
 interface FeedbackModalProps {
   visible: boolean;
@@ -17,6 +16,21 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
   const [rating, setRating] = useState<number>(0);
   const [text, setText] = useState<string>('');
   const [submitting, setSubmitting] = useState<boolean>(false);
+
+  // Access the event context to update events after feedback creation
+  const { setEvents } = useEventContext();
+
+  // Function to reload events from the server and update context
+  const reloadEvents = async () => {
+    try {
+      const updatedData = await fetchAllEvents();
+      if (updatedData) {
+        setEvents(updatedData);
+      }
+    } catch (error) {
+      console.error('Error reloading events:', error);
+    }
+  };
 
   const handleSubmit = async () => {
     if (rating < 0 || rating > 5) {
@@ -31,11 +45,15 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
     setSubmitting(true);
     try {
       await createFeedback(eventId, text, rating);
+      console.log(eventId, text, rating);
       Alert.alert('Great!', 'Thanks for your feedback!');
       onClose();
       setRating(0);
       setText('');
       onCreateFeedback();
+
+      // Reload events after creating feedback
+      await reloadEvents();
     } catch (error) {
       Alert.alert('Error', 'Failed to send feedback. Please try again later.');
     } finally {
@@ -54,7 +72,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
             resizeMode="contain"
           />
         </TouchableOpacity>
-      )
+      );
     }
     return stars;
   };
@@ -66,35 +84,35 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
       animationType="slide"
       onRequestClose={onClose}
     >
-    <TouchableOpacity onPress={onClose} style={styles.modalOverlay}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelButtonText}>×</Text>
-          </TouchableOpacity>
-          <Text style={styles.modalTitle}>Your feedback</Text>
-          <View style={styles.starsContainer}>
-            {renderStars()}
-          </View>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Write your thoughts here"
-            value={text}
-            onChangeText={setText}
-            maxLength={150}
-            multiline
-          />
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.sendButton} onPress={handleSubmit} disabled={submitting}>
-              {submitting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Send</Text>
-              )}
+      <TouchableOpacity onPress={onClose} style={styles.modalOverlay}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelButtonText}>×</Text>
             </TouchableOpacity>
+            <Text style={styles.modalTitle}>Your feedback</Text>
+            <View style={styles.starsContainer}>
+              {renderStars()}
+            </View>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Write your thoughts here"
+              value={text}
+              onChangeText={setText}
+              maxLength={150}
+              multiline
+            />
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity style={styles.sendButton} onPress={handleSubmit} disabled={submitting}>
+                {submitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Send</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
       </TouchableOpacity>
     </Modal>
   );
@@ -103,12 +121,12 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, onClose, eventId
 
 const styles = StyleSheet.create({
   modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.2)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%',
-    },
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
 
   modalContainer: {
     width: '85%',

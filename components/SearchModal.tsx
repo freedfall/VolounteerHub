@@ -12,9 +12,11 @@ type Props = {
   searchHistory: string[];
   filteredItems: any[];
   renderItem: (item: any, index: number) => React.ReactNode;
+  openFiltersModal: () => void;
+  isSearchingEvents: boolean;
 };
 
-const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSearchText, searchHistory, filteredItems, renderItem }) => {
+const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSearchText, searchHistory, filteredItems, renderItem, openFiltersModal, isSearchingEvents }) => {
   const modalSearchInputRef = useRef<TextInput>(null);
 
   return (
@@ -31,9 +33,11 @@ const SearchModal: React.FC<Props> = ({ isVisible, closeModal, searchText, setSe
               onChangeText={setSearchText}
               autoFocus={true}
             />
-            <TouchableOpacity style={styles.filterButton} onPress={() => console.log('Open filters')}>
-              <Image source={filterIcon} style={styles.filterIcon} />
-            </TouchableOpacity>
+            {isSearchingEvents &&
+                <TouchableOpacity style={styles.filterButton} onPress={() => openFiltersModal()}>
+                  <Image source={filterIcon} style={styles.filterIcon} />
+                </TouchableOpacity>
+            }
           </View>
           <TouchableOpacity onPress={closeModal}>
             <Text style={styles.closeButton}>×</Text>
@@ -66,7 +70,8 @@ const styles = StyleSheet.create({
   modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 10,
       backgroundColor: '#f5f5f5',
   },
   searchContainerModal: {
@@ -81,10 +86,11 @@ const styles = StyleSheet.create({
       marginBottom: 20,
       marginHorizontal: 25,
       width: '85%',
+      backgroundColor: '#fff',
   },
   searchInputModal: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 20,
     color: 'rgba(131, 131, 131, 1)',
     width: '100%',
   },

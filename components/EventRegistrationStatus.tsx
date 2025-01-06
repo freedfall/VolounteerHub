@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerUserForEvent, cancelUserRegistration } from '../utils/api';
 import FeedbackModal from './FeedbackModal';
@@ -22,34 +22,43 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
   onCreateFeedback,
 }) => {
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const registerForEvent = async () => {
     try {
+      setIsLoading(true);
       const response = await registerUserForEvent(eventId);
       if (response.ok) {
         onStatusChange(true, false);
-        Alert.alert('Success', 'Registration pending confirmation.');
+        setIsLoading(false);
+        Alert.alert('Success', 'Send request for registration.');
       } else {
+        setIsLoading(false);
         Alert.alert('Error', 'Failed to register for the event.');
       }
     } catch (error) {
+      setIsLoading(false);
       console.error('Error registering for event:', error);
     }
   };
 
   const cancelRegistration = async () => {
     try {
+      setIsLoading(true);
       const userData = await AsyncStorage.getItem('userData');
       const { id: userId } = JSON.parse(userData);
 
       const response = await cancelUserRegistration(eventId, userId);
       if (response.ok) {
         onStatusChange(false, false);
+        setIsLoading(false);
         Alert.alert('Success', 'You have successfully canceled your registration.');
       } else {
+        setIsLoading(false);
         Alert.alert('Error', 'Failed to cancel registration.');
       }
     } catch (error) {
+      setIsLoading(false);
       console.error('Error canceling registration:', error);
     }
   };
@@ -57,11 +66,20 @@ const EventRegistrationStatus: React.FC<EventRegistrationStatusProps> = ({
   const handleLeaveFeedback = () => {
     setFeedbackModalVisible(true);
   };
-  if (isPast){
+
+  if (isPast) {
       return null;
-  };
+    }
+
+  if (isLoading){
+    return (
+           <View style={styles.loadingOverlay}>
+             <ActivityIndicator size="large" color="#69B67E" />
+           </View>
+  )}
 
   return (
+
     <View style={styles.container}>
       {isRegistered ? (
         <TouchableOpacity style={styles.cancelButton} onPress={cancelRegistration}>

@@ -83,9 +83,6 @@ const UserFeedbacks: React.FC<UserFeedbacksProps> = ({ eventId }) => {
         <FeedbackCard key={feedback.id} feedback={feedback} onFeedbackUpdated={loadFeedbacks} />
       ))}
       <View style={styles.container}>
-        <TouchableOpacity style={styles.joinButton} onPress={handleLeaveFeedback}>
-            <Text style={styles.joinButtonText}>Leave Feedback</Text>
-        </TouchableOpacity>
         <FeedbackModal
             visible={feedbackModalVisible}
             onClose={() => setFeedbackModalVisible(false)}

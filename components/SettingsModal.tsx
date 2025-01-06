@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import Modal from 'react-native-modal';
 import { AuthContext } from '../context/AuthContext';
-import { updateUserDetails } from '../utils/api';
+import { updateUserDetails, uploadUserProfileImage } from '../utils/api';
 import ImagePickerComponent from './ImagePicker';
 
 interface SettingsModalProps {

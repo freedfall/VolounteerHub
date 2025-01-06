@@ -80,7 +80,9 @@ const DurationPicker = ({ label, hours, minutes, onChange }) => {
               </View>
             </View>
 
-            <Button title="Confirm" onPress={handleConfirm} style={styles.confirmButton}/>
+            <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
+                <Text style={styles.confirmButtonText}>Confirm</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -157,13 +159,22 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   selectedItem: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#69B67E',
   },
   selectedItemText: {
     color: '#FFF',
   },
   confirmButton: {
     width: 100,
+    borderRadius: 40,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#69B67E',
+  },
+  confirmButtonText: {
+    color: 'white',
+    alignSelf: 'center',
+    fontSize: 18,
   },
 });
 

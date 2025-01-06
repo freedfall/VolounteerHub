@@ -9,6 +9,7 @@ import Card from '../components/Card';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { handleDateTime } from '../utils/dateUtils';
+import { filterAndSortEvents } from '../utils/filterEvents';
 
 type Event = {
   id: string;
@@ -29,8 +30,11 @@ const MapScreen = () => {
   const [location, setLocation] = useState<Region | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [nearestEvent, setNearestEvent] = useState<Event | null>(null);
+  const [activeFilters, setActiveFilters] = useState<any>({});
   const mapRef = useRef<MapView>(null);
   const navigation = useNavigation();
+
+  const filteredEvents = filterAndSortEvents(events, activeFilters, 'date', '');
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -97,11 +101,11 @@ const MapScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (location && events.length > 0) {
+    if (location && filteredEvents.length > 0) {
       let minDistance = Infinity;
       let closestEvent: Event | null = null;
 
-      events.forEach(event => {
+      filteredEvents.forEach(event => {
         const eventCoords = parseCoordinates(event.coordinates);
         const distance = haversine(
           { latitude: location.latitude, longitude: location.longitude },
@@ -117,7 +121,7 @@ const MapScreen = () => {
 
       setNearestEvent(closestEvent);
     }
-  }, [location, events]);
+  }, [location, filteredEvents]);
 
   useEffect(() => {
     if (nearestEvent && mapRef.current) {
@@ -156,7 +160,7 @@ const MapScreen = () => {
         initialRegion={location}
         showsUserLocation={true}
       >
-        {events.map(event => {
+        {filteredEvents.map(event => {
           const coords = parseCoordinates(event.coordinates);
           const isCreator = (event.creator.id == user.id)
           const color = isCreator ? "aqua" : "#69B67E"

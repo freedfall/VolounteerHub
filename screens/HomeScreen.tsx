@@ -1,10 +1,14 @@
+// File: HomeScreen.tsx
+// Author: Kininbayev Timur (xkinin00)
+// Description: Main screen showing all events, with filtering, sorting, and searching.
+// Uses filterAndSortEvents utility to avoid code duplication.
+
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { fetchEvents } from '../utils/api';
-import {handleDateTime} from '../utils/dateUtils';
+import { fetchEvents, fetchAllEvents } from '../utils/api';
+import { handleDateTime } from '../utils/dateUtils';
 import { useEventContext } from '../context/EventContext';
 import CategorySection from '../components/CategorySection';
 import AllEventsSection from '../components/AllEventsSection';
@@ -12,6 +16,7 @@ import SearchBar from '../components/SearchBar';
 import FiltersModal from '../components/FiltersModal';
 import SearchModal from '../components/SearchModal';
 import Card from '../components/Card';
+import { filterAndSortEvents } from '../utils/filterEvents';
 
 type RootStackParamList = {
   Home: undefined;
@@ -34,7 +39,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const loadEvents = async () => {
     setRefreshing(true);
     try {
-      const data = await fetchEvents();
+      const data = await fetchAllEvents();
       if (data) {
         setEvents(data);
       }
@@ -58,68 +63,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setSortingMethod('rating');
   };
 
-  const filteredEvents = events
-    .filter((event) => {
-      // city filters
-      if (activeFilters.city && activeFilters.city.length > 0 && !activeFilters.city.includes(event.city)) return false;
-
-      // rating filters
-      if (activeFilters.rating && event.creator.pointsAsCreator !== null) {
-        if (event.creator.pointsAsCreator < activeFilters.rating) return false;
-      }
-
-      // duration filters
-      if (activeFilters.duration) {
-        const durationInMinutes =
-          (new Date(event.endDateTime).getTime() - new Date(event.startDateTime).getTime()) / 60000;
-
-        // if duration preset is picked
-        if (activeFilters.duration.preset) {
-          switch (activeFilters.duration.preset) {
-            case 'less2h':
-              if (durationInMinutes >= 120) return false;
-              break;
-            case 'more3h':
-              if (durationInMinutes <= 180) return false;
-              break;
-            case 'more30min':
-              if (durationInMinutes <= 30) return false;
-              break;
-          }
-        }
-
-        if (activeFilters.duration.custom) {
-          const { min, max } = activeFilters.duration.custom;
-          if (durationInMinutes < min || durationInMinutes > max) return false;
-        }
-      }
-
-      return true;
-    })
-    .filter((event) => {
-        if (!searchText.trim()) return true;
-        return event.name.toLowerCase().includes(searchText.toLowerCase());
-      })
-    .sort((a, b) => {
-      if (sortingMethod === 'rating') {
-        const aVal = a.creator.pointsAsCreator !== null ? a.creator.pointsAsCreator : 0;
-        const bVal = b.creator.pointsAsCreator !== null ? b.creator.pointsAsCreator : 0;
-        return bVal - aVal;
-      }
-      if (sortingMethod === 'date') {
-        return new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime();
-      }
-      if (sortingMethod === 'points') {
-        return b.price - a.price;
-      }
-      return 0;
-    });
+  // Use the utility function to filter and sort events
+  const filteredEvents = filterAndSortEvents(events, activeFilters, sortingMethod, searchText);
 
   const eventsHighPoints = filteredEvents.filter((event) => event.price >= 60);
-
   const eventsFewPlaces = filteredEvents.filter((event) => {
     const freePlaces = event.capacity - event.occupiedQuantity;
-    return freePlaces <= 5;
+    return freePlaces <= 20;
   });
 
   const now = new Date().getTime();
@@ -141,10 +91,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       />
       <SearchModal
           isVisible={isSearchModalVisible}
+          isSearchingEvents = {true}
           closeModal={() => {
               setSearchModalVisible(false);
               setSearchText('');
             }}
+          openFiltersModal={() => setFiltersModalVisible(true)}
           searchText={searchText}
           setSearchText={setSearchText}
           searchHistory={searchHistory}
@@ -172,13 +124,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         onClear={clearFilters}
         currentFilters={activeFilters}
         currentSorting={sortingMethod}
-        events={events}
+        events={filteredEvents}
       />
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadEvents} />}
         showsVerticalScrollIndicator={false}
       >
-        <CategorySection title="Filtered Events" events={filteredEvents} />
+        <CategorySection title="Popular" events={filteredEvents} />
         <CategorySection title="A lot of points" events={eventsHighPoints} />
         <CategorySection title="Few Free Places" events={eventsFewPlaces} />
         <CategorySection title="Starting Soon" events={eventsSoon} />

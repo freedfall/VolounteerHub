@@ -4,7 +4,7 @@ import { handleDateTimeWithoutDate } from '../utils/dateUtils';
 import { AuthContext } from '../context/AuthContext';
 import hospital from '../images/hospital.jpg';
 import EventRegistrationStatus from '../components/EventRegistrationStatus';
-import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails, fetchEvents } from '../utils/api';
+import { fetchParticipants, deleteEvent, adminDeleteEvent, updateEventDetails, adminUpdateEventDetails, fetchAllEvents } from '../utils/api';
 import UserCard from '../components/UserCard';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import UserFeedbacks from '../components/UserFeedbacks';
@@ -29,14 +29,6 @@ const EventDetails: React.FC = () => {
   useEffect(() => {
       loadParticipants();
     }, [id, user.id]);
-
-  if (!currentEvent) {
-    return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="small" color="#69B67E" />
-      </View>
-    );
-  }
 
   const {
     name,
@@ -73,8 +65,6 @@ const EventDetails: React.FC = () => {
     }
   };
 
-
-
   const handleScanPress = () => {
     navigation.navigate('QRScanner', { eventId: id });
   };
@@ -106,23 +96,24 @@ const EventDetails: React.FC = () => {
       } else {
         await deleteEvent(eventId);
       }
+      navigation.goBack();
       Alert.alert('Success', 'Event successfully deleted.', [
         {
           text: 'OK',
-          onPress: () => navigation.goBack(),
+//           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error) {
       Alert.alert('Error', 'Unable to delete event.');
     } finally {
-      setIsDeleting(false);
       await reloadEvents();
+      setIsDeleting(false);
     }
   };
 
   const reloadEvents = async () => {
       try {
-        const data = await fetchEvents();
+        const data = await fetchAllEvents();
         setEvents(data);
       } catch (error) {
         console.error('Failed to reload events:', error);
@@ -138,6 +129,14 @@ const EventDetails: React.FC = () => {
   };
 
   const shortAddress = getShortAddress(address);
+
+  if (!currentEvent) {
+      return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="small" color="#69B67E" />
+        </View>
+      );
+    }
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -223,7 +222,7 @@ const EventDetails: React.FC = () => {
             </View>
 
           {isPast && (
-            <UserFeedbacks eventId={id} /> // Добавляем компонент UserFeedbacks
+            <UserFeedbacks eventId={id} />
           )}
           <EventRegistrationStatus
               eventId={id}

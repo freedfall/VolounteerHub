@@ -51,17 +51,14 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
     onClear();
   };
 
-  // Обработка клика по городу (multi-select)
   const toggleCity = (city) => {
     const currentCities = filters.city || [];
     if (currentCities.includes(city)) {
-      // Удаляем город
       setFilters({
         ...filters,
         city: currentCities.filter(c => c !== city)
       });
     } else {
-      // Добавляем город
       setFilters({
         ...filters,
         city: [...currentCities, city]
@@ -69,21 +66,16 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
     }
   };
 
-  // Обработка клика по рейтингу (single-select)
   const toggleRating = (r) => {
     if (filters.rating === r) {
-      // Если нажали на тот же рейтинг — снимаем
       setFilters({ ...filters, rating: null });
     } else {
-      // Выбираем новый рейтинг
       setFilters({ ...filters, rating: r });
     }
   };
 
-  // Обработка клика по длительности (single-select)
   const toggleDurationPreset = (key) => {
     if (filters.duration?.preset === key) {
-      // Снимаем тот же самый пресет
       setFilters({
         ...filters,
         duration: {}
@@ -96,10 +88,8 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
     }
   };
 
-  // Обработка клика по кастомному диапазону
   const toggleCustomDuration = () => {
     if (filters.duration?.preset === 'select') {
-      // Снимаем кастомный выбор
       setFilters({
         ...filters,
         duration: {}
@@ -130,7 +120,6 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
         </View>
         <ScrollView>
 
-          {/* Сортировка чекбоксами */}
           <View style={styles.sortingContainer}>
             <Text style={styles.sectionTitle}>Sort by</Text>
             {['rating', 'date', 'points'].map((method) => (
@@ -145,7 +134,6 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
             ))}
           </View>
 
-          {/* City как чипы */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>City</Text>
             <View style={styles.chipsContainer}>
@@ -161,7 +149,6 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
             </View>
           </View>
 
-          {/* Rating как чипы single-select */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>Rating</Text>
             <View style={styles.chipsContainer}>
@@ -179,7 +166,6 @@ const FiltersModal = ({ isVisible, onClose, onApply, onClear, currentFilters, cu
             </View>
           </View>
 
-          {/* Duration как чипы single-select + кастомный выбор */}
           <View style={styles.categoryContainer}>
             <Text style={styles.categoryTitle}>Duration</Text>
             <View style={styles.chipsContainer}>

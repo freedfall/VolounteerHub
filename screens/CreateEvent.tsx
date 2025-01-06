@@ -1,11 +1,11 @@
 // screens/CreateEventScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert, Platform, Animated } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert, Platform, Animated, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventForm from '../components/EventForm';
 import { geocodeAddress } from '../utils/geocode';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { adminUpdateEventDetails, fetchEvents } from '../utils/api';
+import { adminUpdateEventDetails, fetchAllEvents } from '../utils/api';
 import { useEventContext } from '../context/EventContext';
 
 const CreateEventScreen: React.FC = () => {
@@ -30,6 +30,7 @@ const CreateEventScreen: React.FC = () => {
   const [addressFieldHeight] = useState(new Animated.Value(0));
   const [cityLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [cityBounds] = useState<any>(null);
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,7 +46,7 @@ const CreateEventScreen: React.FC = () => {
       setDate(start);
       setStartTime(start);
 
-      const diffMs = end - start;
+      const diffMs = end.getTime() - start.getTime();
       const diffMins = diffMs / 60000;
       const hours = Math.floor(diffMins / 60);
       const minutes = diffMins % 60;
@@ -58,15 +59,15 @@ const CreateEventScreen: React.FC = () => {
   }, [date, startTime, maxPeople, title, city, address]);
 
   const reloadEvents = async () => {
-      try {
-        const data = await fetchEvents();
-        if (data) {
-          setEvents(data);
-        }
-      } catch (error) {
-        console.error('Failed to reload events:', error);
+    try {
+      const data = await fetchAllEvents();
+      if (data) {
+        setEvents(data);
       }
-    };
+    } catch (error) {
+      console.error('Failed to reload events:', error);
+    }
+  };
 
   const validateForm = useCallback(() => {
     const currentDateTime = new Date();
@@ -84,11 +85,20 @@ const CreateEventScreen: React.FC = () => {
       errors = true;
     }
 
-    if (!title.trim() || !city.trim() || !address.trim()) {errors = true;}
-    if (isNaN(parseInt(maxPeople)) || parseInt(maxPeople) <= 0 || parseInt(maxPeople) > 100) {errors = true;}
+    if (!title.trim() || !city.trim() || !address.trim()) {
+      errors = true;
+    }
+
+    if (
+      isNaN(parseInt(maxPeople)) ||
+      parseInt(maxPeople) <= 0 ||
+      parseInt(maxPeople) > 100
+    ) {
+      errors = true;
+    }
 
     setHasError(errors);
-  }, [date, title, city, address, maxPeople]);
+  }, [date, title, city, address, maxPeople, startTime]);
 
   const formatLocalTime = (time: Date): string => {
     const year = time.getFullYear();
@@ -136,9 +146,11 @@ const CreateEventScreen: React.FC = () => {
   };
 
   const handleCreateEvent = async () => {
+    setIsCreatingEvent(true);
 
     if (!city || !address) {
       Alert.alert('Invalid Location', 'You must provide a valid city and address.');
+      setIsCreatingEvent(false);
       return;
     }
 
@@ -151,7 +163,6 @@ const CreateEventScreen: React.FC = () => {
     );
 
     const totalDuration = duration.hours * 60 + duration.minutes;
-
     const eventEndTime = new Date(startDateTime);
     eventEndTime.setMinutes(eventEndTime.getMinutes() + totalDuration);
 
@@ -163,6 +174,7 @@ const CreateEventScreen: React.FC = () => {
 
     if (!coords) {
       Alert.alert('Invalid Location', 'The provided address could not be geocoded.');
+      setIsCreatingEvent(false);
       return;
     }
 
@@ -181,15 +193,17 @@ const CreateEventScreen: React.FC = () => {
 
     try {
       const token = await AsyncStorage.getItem('userToken');
-
-      const response = await fetch('https://itu-215076752298.europe-central2.run.app/api/event', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(newEvent),
-      });
+      const response = await fetch(
+        'https://itu-215076752298.europe-central2.run.app/api/event',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(newEvent),
+        }
+      );
 
       console.log('First Response Status:', response.status);
       const firstResponseBody = await response.text();
@@ -197,9 +211,6 @@ const CreateEventScreen: React.FC = () => {
 
       if (response.ok) {
         const eventId = firstResponseBody;
-
-        Alert.alert('Success', 'Event created successfully');
-
         if (imageUri) {
           const formData = new FormData();
           const uriParts = imageUri.split('.');
@@ -209,15 +220,18 @@ const CreateEventScreen: React.FC = () => {
             uri: getImageUri(imageUri),
             name: `image.${fileType}`,
             type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
-          });
+          } as any);
 
-          const uploadResponse = await fetch(`https://itu-215076752298.europe-central2.run.app/api/event/${eventId}/upload-image`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-            body: formData,
-          });
+          const uploadResponse = await fetch(
+            `https://itu-215076752298.europe-central2.run.app/api/event/${eventId}/upload-image`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+              body: formData,
+            }
+          );
 
           console.log('Image Upload Response Status:', uploadResponse.status);
           const uploadResponseBody = await uploadResponse.text();
@@ -228,7 +242,10 @@ const CreateEventScreen: React.FC = () => {
           } else {
             console.error('Error uploading image:', uploadResponseBody);
           }
+
+          Alert.alert('Success', 'Event created successfully');
         }
+
         await reloadEvents();
         onClose();
       } else {
@@ -249,11 +266,12 @@ const CreateEventScreen: React.FC = () => {
     setMaxPeople('');
     setDescription('');
     setImageUri(null);
+    setIsCreatingEvent(false);
   };
 
   const onClose = () => {
     navigation.goBack();
-  }
+  };
 
   const handleUpdateEvent = async () => {
     const updatedEventData = prepareEventData();
@@ -270,12 +288,17 @@ const CreateEventScreen: React.FC = () => {
     onClose();
   };
 
-
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.closeButton} onPress={onClose}>
         <Text style={styles.closeButtonText}>×</Text>
       </TouchableOpacity>
+
+      {isCreatingEvent && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#69B67E" />
+        </View>
+      )}
 
       <EventForm
         title={title}
@@ -289,9 +312,9 @@ const CreateEventScreen: React.FC = () => {
         startTime={startTime}
         setStartTime={setStartTime}
         duration={duration}
-        handleDurationChange={(value, type) => {
-          setDuration((prevState) => ({ ...prevState, [type]: value }));
-        }}
+        handleDurationChange={(value, type) =>
+          setDuration((prevState) => ({ ...prevState, [type]: value }))
+        }
         maxPeople={maxPeople}
         setMaxPeople={setMaxPeople}
         description={description}
@@ -299,7 +322,6 @@ const CreateEventScreen: React.FC = () => {
         addressFieldHeight={addressFieldHeight}
         cityLocation={cityLocation}
         cityBounds={cityBounds}
-        handleCreateEvent={handleCreateEvent}
         hasError={hasError}
         setShowDatePicker={setShowDatePicker}
         setShowStartTimePicker={setShowStartTimePicker}
@@ -333,6 +355,14 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 30,
     color: '#000',
+  },
+
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
   },
 });
 

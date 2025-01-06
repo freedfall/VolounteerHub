@@ -44,6 +44,7 @@ const ChatListScreen: React.FC = () => {
   const fetchChats = useCallback(async () => {
     try {
       const users = await fetchMessageWriters();
+
       console.log('Fetched Users:', users);
 
       // Fetch all sent and received messages for each user
@@ -142,6 +143,7 @@ const ChatListScreen: React.FC = () => {
           navigation.navigate('ChatScreen', {
             recipientId: item.userInfo.id,
             recipientName: `${item.userInfo.name} ${item.userInfo.surname}`,
+            recipientAvatar: item.userInfo.imageURL,
           })
         }
       >
