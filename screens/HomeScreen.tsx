@@ -60,7 +60,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const clearFilters = () => {
     setActiveFilters({});
-    setSortingMethod('rating');
+    setSortingMethod('date');
   };
 
   // Use the utility function to filter and sort events
@@ -69,7 +69,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const eventsHighPoints = filteredEvents.filter((event) => event.price >= 60);
   const eventsFewPlaces = filteredEvents.filter((event) => {
     const freePlaces = event.capacity - event.occupiedQuantity;
-    return freePlaces <= 20;
+    return freePlaces <= 10;
   });
 
   const now = new Date().getTime();

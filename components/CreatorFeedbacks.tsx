@@ -8,9 +8,10 @@ import FeedbackModal from './FeedbackModal';
 
 interface CreatorFeedbacksProps {
   creatorId: string;
+  onUpdateFeedback?: () => void;
 }
 
-const CreatorFeedbacks: React.FC<CreatorFeedbacksProps> = ({ creatorId }) => {
+const CreatorFeedbacks: React.FC<CreatorFeedbacksProps> = ({ creatorId, onUpdateFeedback }) => {
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -35,7 +36,7 @@ const CreatorFeedbacks: React.FC<CreatorFeedbacksProps> = ({ creatorId }) => {
   }, [loadFeedbacks]);
 
   const renderItem = ({ item }: { item: any }) => (
-    <FeedbackCard key={item.id} feedback={item} onFeedbackUpdated={loadFeedbacks} />
+    <FeedbackCard key={item.id} feedback={item} onFeedbackUpdated={loadFeedbacks, onUpdateFeedback} />
   );
 
   if (loading) {

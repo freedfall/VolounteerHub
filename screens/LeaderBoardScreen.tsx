@@ -1,7 +1,17 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  RefreshControl,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import userIcon from '../images/userProfileIcon.jpg'; // Placeholder icon
+import userIcon from '../images/userProfileIcon.jpg';
 import SearchBar from '../components/SearchBar';
 import SearchModal from '../components/SearchModal';
 import PointsIcon from '../images/icons/points.png';
@@ -14,15 +24,23 @@ const BASE_URL = 'https://itu-215076752298.europe-central2.run.app/api';
 const LeaderBoardScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [refreshing, setRefreshing] = useState(false);
+
   const [searchText, setSearchText] = useState('');
-  const [isModalVisible, setModalSearchVisible] = useState(false); // For search modal
+  const [isModalVisible, setModalSearchVisible] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
 
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
 
-  // Fetch users
-  const fetchUsers = async () => {
+  const fetchUsers = async (isRefresh = false) => {
+    if (!isRefresh) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
+
     try {
       const token = await AsyncStorage.getItem('userToken');
       const response = await fetch(`${BASE_URL}/user/top100`, {
@@ -40,15 +58,19 @@ const LeaderBoardScreen = () => {
       const data = await response.json();
 
       const usersWithRank = data.map((user, index) => ({
-            ...user,
-            rank: index + 1,
-          }));
+        ...user,
+        rank: index + 1,
+      }));
 
       setUsers(usersWithRank);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
@@ -57,17 +79,17 @@ const LeaderBoardScreen = () => {
     loadSearchHistory();
   }, []);
 
-  // Load search history
   const loadSearchHistory = async () => {
     try {
       const history = await AsyncStorage.getItem('searchHistory');
-      if (history) {setSearchHistory(JSON.parse(history));}
+      if (history) {
+        setSearchHistory(JSON.parse(history));
+      }
     } catch (error) {
       console.error('Error loading search history:', error);
     }
   };
 
-  // Filter users based on search input
   const filteredUsers = users.filter((user) =>
     user.name?.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -81,61 +103,69 @@ const LeaderBoardScreen = () => {
         name={item.name}
         surname={item.surname}
         points={item.points}
+        pointsAsCreator={item.pointsAsCreator}
         avatarUrl={item.avatarUrl}
         email={item.email}
         showActions={false}
         id={item.id}
         eventId={null}
         status={item.status}
+        refreshParticipants={fetchUsers}
       />
-     </View>
+    </View>
   );
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
       <SearchBar
         searchText={searchText}
         setSearchText={setSearchText}
         openSearchModal={() => setModalSearchVisible(true)}
       />
 
-      {/* Search Modal */}
       <SearchModal
         isVisible={isModalVisible}
         closeModal={() => {
-            setModalSearchVisible(false);
-            setSearchText('');
-          }}
+          setModalSearchVisible(false);
+          setSearchText('');
+        }}
         searchText={searchText}
         setSearchText={setSearchText}
         searchHistory={searchHistory}
-        filteredItems={filteredUsers} // Using this prop for users
+        filteredItems={filteredUsers}
         renderItem={(user, index) => (
-            <UserCard
-              key={index}
-              name={user.name}
-              surname={user.surname}
-              points={user.points}
-              avatarUrl={user.avatarUrl}
-              email={user.email}
-              showActions={false}
-              id={user.id}
-              eventId={null}
-              status={user.status}
-            />
-          )}
-        />
+          <UserCard
+            key={index}
+            name={user.name}
+            surname={user.surname}
+            points={user.points}
+            pointsAsCreator={user.pointsAsCreator}
+            avatarUrl={user.avatarUrl}
+            email={user.email}
+            showActions={false}
+            id={user.id}
+            eventId={null}
+            status={user.status}
+            refreshParticipants={fetchUsers}
+          />
+        )}
+      />
 
-      {/* Loader or User List */}
       {loading ? (
-        <ActivityIndicator size="large" color="#006400" />
+        <ActivityIndicator size="large" color="#69b67e" />
       ) : (
         <FlatList
           data={filteredUsers}
           renderItem={renderUser}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => fetchUsers(true)}
+            />
+          }
         />
       )}
     </View>

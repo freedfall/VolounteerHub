@@ -1,10 +1,11 @@
 // components/FeedbackCard.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Alert } from 'react-native';
 import filledStar from '../images/icons/filledStar.png';
 import emptyStar from '../images/icons/emptyStar.png';
 import EditFeedbackModal from './EditFeedbackModal';
+import { AuthContext } from '../context/AuthContext';
 
 interface FeedbackCardProps {
   feedback: {
@@ -39,14 +40,16 @@ interface FeedbackCardProps {
 
 const FeedbackCard: React.FC<FeedbackCardProps> = ({ feedback, onFeedbackUpdated }) => {
   const [modalVisible, setModalVisible] = useState(false);
-
+  const { user } = useContext(AuthContext);
   const handleEdit = () => {
-    setModalVisible(true);
+      if (user.id === feedback.creator.id){
+        setModalVisible(true);
+      }
   };
 
   return (
     <>
-      <TouchableOpacity style={styles.cardContainer} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity style={styles.cardContainer} onPress={() => handleEdit()}>
         <View style={styles.header}>
           <Image
             source={feedback.creator.imageURL ? { uri: feedback.creator.imageURL } : require('../images/userProfileIcon.jpg')}

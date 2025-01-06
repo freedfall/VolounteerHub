@@ -42,7 +42,9 @@ const PointsToStars: React.FC<PointsToStarsProps> = ({
       />
     );
   }
-
+  if (filledStars === 0){
+      return <></>;
+  }
   return <View style={styles.container}>{stars}</View>;
 };
 

@@ -236,7 +236,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, surname, points, pointsAsCrea
             )}
             {pointsAsCreator > 0 && (
               <View style={styles.feedbackContainer}>
-                <CreatorFeedbacks creatorId={id} />
+                <CreatorFeedbacks creatorId={id} onUpdateFeedback={refreshParticipants}/>
               </View>
             )}
           </TouchableOpacity>
