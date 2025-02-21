@@ -21,3 +21,5 @@ events, but it also encourages community building and improves connections betwe
 individuals and organisations. The app contributes to active engagement
 young people in society and reinforces the values of cooperation, solidarity and
 responsibility.
+
+![appMenu](preview1.png)
