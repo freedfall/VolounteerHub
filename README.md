@@ -1,4 +1,4 @@
-# VolounteerHub
+# VolounteerHub - An Android application was created with React Native to assist volunteers in finding and participating in different events.
 
 ## Introduction
 
