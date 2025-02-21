@@ -22,4 +22,4 @@ individuals and organisations. The app contributes to active engagement
 young people in society and reinforces the values of cooperation, solidarity and
 responsibility.
 
-![appMenu](preview1.png)
+<img src="preview1.png" alt="drawing" width="200"/>
